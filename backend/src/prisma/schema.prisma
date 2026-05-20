@@ -1,0 +1,90 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+model User {
+    id         String     @id @default(cuid())
+    name       String
+    roles      Role[]     @default([Customer])
+    bookings   Booking[]
+    businesses Business[] @relation("UserBusinesses")
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @updatedAt
+}
+
+model Business {
+    id           String         @id @default(cuid())
+    name         String
+    hours        Json
+    timeZone     String
+    description  String?
+    location     String?
+    phone        String?
+    bannerImages String[]       @default([])
+    status       BusinessStatus @default(Active)
+    createdAt    DateTime       @default(now())
+    updatedAt    DateTime       @updatedAt
+
+    ownerId  String
+    services Service[]
+    owner    User      @relation("UserBusinesses", fields: [ownerId], references: [id])
+
+    @@unique([ownerId, name])
+}
+
+model Service {
+    id                String   @id @default(cuid())
+    name              String
+    durationInMinutes Int
+    price             Float
+    thumbnail         String?
+    category          String?  @default("Other")
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+
+    businessId String
+    bookings   Booking[]
+    business   Business  @relation(fields: [businessId], references: [id])
+
+    @@unique([businessId, name])
+}
+
+model Booking {
+    id        String        @id @default(cuid())
+    name      String
+    phone     String
+    startsAt  DateTime
+    status    BookingStatus @default(Pending)
+    createdAt DateTime      @default(now())
+    updatedAt DateTime      @updatedAt
+
+    serviceId String
+    userId    String
+    user      User    @relation(fields: [userId], references: [id])
+    service   Service @relation(fields: [serviceId], references: [id])
+
+    @@unique([serviceId, startsAt])
+}
+
+enum Role {
+    Customer
+    Business
+    Admin
+}
+
+enum BookingStatus {
+    Pending
+    Confirmed
+    Cancelled
+    Completed
+}
+
+enum BusinessStatus {
+    Active
+    Paused
+    Closed
+}
