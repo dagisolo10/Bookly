@@ -1,7 +1,7 @@
 import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
-import type { Booking, Prisma, Service } from "@prisma/client";
+import { Prisma, type Booking, type Service } from "@prisma/client";
 import type { ServiceMessage, ServiceResult } from "@/types/response";
 import type { createServiceSchema, updateServiceSchema } from "@/lib/validators";
 
@@ -57,6 +57,9 @@ export async function createService(data: CreateServicePayload): ServiceResult<F
         return service;
     } catch (error) {
         console.error(error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+            return { error: "Service with that name already exists", code: 409 };
+        }
         return { error: "Internal server error", code: 500 };
     }
 }
@@ -94,11 +97,14 @@ export async function updateService(id: string, data: UpdateServicePayload): Ser
         return updated;
     } catch (error) {
         console.error(error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+            return { error: "Service with that name already exists", code: 409 };
+        }
         return { error: "Internal server error", code: 500 };
     }
 }
 
-export async function toggleService(id: string): ServiceResult<ServiceMessage> {    
+export async function toggleService(id: string): ServiceResult<ServiceMessage> {
     try {
         const ownerId = getUserId();
 
@@ -124,19 +130,19 @@ export async function toggleService(id: string): ServiceResult<ServiceMessage> {
 
         const isActive = service.isActive;
 
-        const activeBooking = await prisma.booking.findFirst({
-            where: {
-                serviceId: id,
-                status: "Confirmed",
-            },
-        });
-
-        if (activeBooking && isActive) {
-            return { error: "Can't deactivate a service with active confirmed bookings", code: 400 };
-        }
-
         await prisma.$transaction(async (trx) => {
             if (isActive) {
+                const activeBooking = await trx.booking.findFirst({
+                    where: {
+                        serviceId: id,
+                        status: "Confirmed",
+                    },
+                });
+
+                if (activeBooking) {
+                    return { error: "Can't deactivate a service with active confirmed bookings", code: 400 };
+                }
+
                 await trx.booking.updateMany({
                     where: {
                         serviceId: id,
