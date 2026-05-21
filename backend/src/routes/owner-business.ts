@@ -1,10 +1,10 @@
 import { handler } from "@/lib/handler";
-import { businessIdSchema, createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
-import { requireAuth, requireUserProfile } from "@/middlewares/auth";
-import { requireBusinessRole } from "@/middlewares/role";
-import { validate } from "@/middlewares/validation";
-import { closeBusiness, createBusiness, getMyBusinessById, getMyBusinesses, toggleBusiness, updateBusiness } from "@/services/owner-business";
 import { Router, type Request } from "express";
+import { validate } from "@/middlewares/validation";
+import { requireBusinessRole } from "@/middlewares/role";
+import { requireAuth, requireUserProfile } from "@/middlewares/auth";
+import { businessIdSchema, createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
+import { closeBusiness, createBusiness, getMyBusinessById, getMyBusinesses, toggleBusiness, updateBusiness } from "@/services/owner-business";
 
 const router = Router();
 
