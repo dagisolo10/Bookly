@@ -1,10 +1,16 @@
 import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
-import type { BookingStatus, Prisma } from "@prisma/client";
+import type { ServiceResult } from "@/types/response";
 import type { manageBookingSchema } from "@/lib/validators";
+import type { Booking, BookingStatus, Prisma, Service, User } from "@prisma/client";
 
 type BookingStatusUpdate = z.infer<typeof manageBookingSchema>["newStatus"];
+
+type FullBooking = Booking & {
+    user: User;
+    service: Service;
+};
 
 const allowedTransitions: Record<BookingStatus, BookingStatus[]> = {
     Pending: ["Confirmed", "Cancelled"],
@@ -26,7 +32,8 @@ const bookingCheck = (id: string, ownerId: string): Prisma.BookingWhereInput => 
         },
     },
 });
-export async function getBusinessBookings(businessId: string) {
+
+export async function getBusinessBookings(businessId: string): ServiceResult<FullBooking[]> {
     try {
         const ownerId = getUserId();
 
@@ -63,7 +70,7 @@ export async function getBusinessBookings(businessId: string) {
     }
 }
 
-export async function getBookingById(id: string) {
+export async function getBookingById(id: string): ServiceResult<FullBooking> {
     try {
         const ownerId = getUserId();
 
@@ -83,7 +90,7 @@ export async function getBookingById(id: string) {
     }
 }
 
-export async function manageBooking(id: string, newStatus: BookingStatusUpdate) {
+export async function manageBooking(id: string, newStatus: BookingStatusUpdate): ServiceResult<FullBooking> {
     try {
         const ownerId = getUserId();
 
