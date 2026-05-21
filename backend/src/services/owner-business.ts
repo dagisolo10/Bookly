@@ -28,7 +28,7 @@ type UpdateBusinessPayload = {
     timeZone?: string;
     location?: string;
     description?: string;
-    hours: BusinessHour[];
+    hours?: BusinessHour[];
     bannerImages?: string[];
 };
 
@@ -144,12 +144,14 @@ export async function updateBusiness(id: string, data: UpdateBusinessPayload): S
             },
             data: {
                 ...rest,
-                hours: {
-                    deleteMany: {},
-                    createMany: {
-                        data: hours,
+                ...(hours !== undefined && {
+                    hours: {
+                        deleteMany: {},
+                        createMany: {
+                            data: hours,
+                        },
                     },
-                },
+                }),
             },
             include: fullBusinessInclude,
         });
@@ -157,6 +159,9 @@ export async function updateBusiness(id: string, data: UpdateBusinessPayload): S
         return updated;
     } catch (error) {
         console.error(error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+            return { error: "Business with this name already exists in your account.", code: 409 };
+        }
         return { error: "Internal server error", code: 500 };
     }
 }
@@ -177,21 +182,21 @@ export async function toggleBusiness(id: string): ServiceResult<ServiceMessage> 
 
         const newStatus = business.status === "Paused" ? "Active" : "Paused";
 
-        if (newStatus === "Paused") {
-            const activeBooking = await prisma.booking.findFirst({
-                where: {
-                    service: {
-                        businessId: business.id,
+        await prisma.$transaction(async (tx) => {
+            if (newStatus === "Paused") {
+                const activeBooking = await tx.booking.findFirst({
+                    where: {
+                        service: {
+                            businessId: business.id,
+                        },
+                        status: "Confirmed",
                     },
-                    status: "Confirmed",
-                },
-            });
+                });
 
-            if (activeBooking) {
-                return { error: "Cannot pause business with active bookings", code: 400 };
-            }
+                if (activeBooking) {
+                    return { error: "Cannot pause business with active bookings", code: 400 };
+                }
 
-            await prisma.$transaction(async (tx) => {
                 await tx.booking.updateMany({
                     where: {
                         service: {
@@ -212,17 +217,17 @@ export async function toggleBusiness(id: string): ServiceResult<ServiceMessage> 
                         status: newStatus,
                     },
                 });
-            });
-        } else {
-            await prisma.business.update({
-                where: {
-                    id: business.id,
-                },
-                data: {
-                    status: newStatus,
-                },
-            });
-        }
+            } else {
+                await tx.business.update({
+                    where: {
+                        id: business.id,
+                    },
+                    data: {
+                        status: newStatus,
+                    },
+                });
+            }
+        });
 
         const message = `Business ${newStatus === "Active" ? "Activated" : "Paused"}`;
 

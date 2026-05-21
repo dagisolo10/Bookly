@@ -45,7 +45,7 @@ export const createBusinessSchema = z
 
 export const updateBusinessSchema = z.object({
     name: z.string().min(1, "Business name is required").optional(),
-    hours: z.array(DayHoursSchema),
+    hours: z.array(DayHoursSchema).optional(),
     phone: z.string().optional().nullable(),
     location: z.string().optional().nullable(),
     description: z.string().optional().nullable(),
