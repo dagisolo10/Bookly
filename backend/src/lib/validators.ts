@@ -81,3 +81,19 @@ export const updateServiceSchema = z.object({
 export const serviceIdSchema = z.object({
     id: z.string().min(1, "Service Id is required"),
 });
+
+/**
+ * Booking Schema
+ */
+
+export const manageBookingSchema = z.object({
+    newStatus: z.enum(["Confirmed", "Cancelled", "Completed"]),
+});
+
+export const bookingIdSchema = z.object({
+    id: z.string().min(1, "Booking Id is required"),
+});
+
+export const bookingBusinessIdSchema = z.object({
+    businessId: z.string().min(1, "Business Id is required"),
+});
