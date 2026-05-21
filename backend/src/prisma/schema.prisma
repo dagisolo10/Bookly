@@ -19,12 +19,12 @@ model User {
 model Business {
     id           String         @id @default(cuid())
     name         String
-    hours        Json
     timeZone     String
     description  String?
     location     String?
     phone        String?
     bannerImages String[]       @default([])
+    hours        BusinessHour[]
     status       BusinessStatus @default(Active)
     createdAt    DateTime       @default(now())
     updatedAt    DateTime       @updatedAt
@@ -36,12 +36,24 @@ model Business {
     @@unique([ownerId, name])
 }
 
+model BusinessHour {
+    id         String   @id @default(uuid())
+    open       String
+    close      String
+    day        WeekDay
+    businessId String
+    business   Business @relation(fields: [businessId], references: [id])
+
+    @@unique([businessId, day])
+}
+
 model Service {
     id                String   @id @default(cuid())
     name              String
     durationInMinutes Int
     price             Float
     thumbnail         String?
+    isActive          Boolean  @default(true)
     category          String?  @default("Other")
     createdAt         DateTime @default(now())
     updatedAt         DateTime @updatedAt
@@ -87,4 +99,14 @@ enum BusinessStatus {
     Active
     Paused
     Closed
+}
+
+enum WeekDay {
+    Monday
+    Tuesday
+    Wednesday
+    Thursday
+    Friday
+    Saturday
+    Sunday
 }

@@ -6,8 +6,9 @@
     "scripts": {
         "dev": "bun --watch src/index.ts",
         "start": "bun run src/index.ts",
-        "sync": "bunx prisma db push --force-reset && bunx prisma generate",
-        "studio": "bunx prisma studio"
+        "sync": "bunx prisma db push && bunx prisma generate",
+        "reset": "bunx prisma db push --force-reset && bunx prisma generate",
+        "s": "bunx prisma studio"
     },
     "devDependencies": {
         "@types/bun": "latest",
