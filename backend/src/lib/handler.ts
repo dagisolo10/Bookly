@@ -1,24 +1,22 @@
-import { hasServiceError } from "@/types/response";
 import { type Request, type Response } from "express";
+import { hasServiceError, type ServiceResult } from "@/types/response";
 
-type NoReqHandler<T> = () => Promise<T>;
-type ReqHandler<T> = (req: Request) => Promise<T>;
+export function handler<T>(fn: () => ServiceResult<T>): (req: Request, res: Response) => void;
+export function handler<T>(fn: (req: Request) => ServiceResult<T>): (req: Request, res: Response) => void;
 
-export function handler<T>(fn: NoReqHandler<T>): any;
-export function handler<T>(fn: ReqHandler<T>): any;
-
-export function handler(fn: any) {
-    return async (req: Request, res: Response) => {
+export function handler<T>(fn: (...args: Request[]) => ServiceResult<T>) {
+    return async (req: Request, res: Response): Promise<void> => {
         try {
             const result = await fn(req);
 
             if (hasServiceError(result)) {
-                return res.status(result.code).json(result);
+                res.status(result.code).json(result);
+                return;
             }
 
-            return res.status(200).json(result);
+            res.status(200).json(result);
         } catch (error: any) {
-            return res.status(500).json({ error: error.message });
+            res.status(500).json({ error: error.message });
         }
     };
 }

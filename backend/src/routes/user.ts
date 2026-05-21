@@ -1,9 +1,9 @@
 import { handler } from "@/lib/handler";
-import { Router, type Request } from "express";
-import { validate } from "@/middlewares/validation";
+import { userSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
-import { createUserSchema, updateUserSchema } from "@/lib/validators";
+import { validate } from "@/middlewares/validation";
 import { becomeBusinessOwner, createUser, getMe, updateUser } from "@/services/user";
+import { Router, type Request } from "express";
 
 const router = Router();
 
@@ -24,7 +24,7 @@ router.post(
 router.post(
     "/",
     requireAuth,
-    validate(createUserSchema, "body"),
+    validate(userSchema, "body"),
     handler((req: Request) => createUser(req.body)),
 );
 
@@ -32,7 +32,7 @@ router.patch(
     "/",
     requireAuth,
     requireUserProfile,
-    validate(updateUserSchema, "body"),
+    validate(userSchema, "body"),
     handler((req: Request) => updateUser(req.body)),
 );
 
