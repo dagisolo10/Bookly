@@ -37,12 +37,12 @@ model Business {
 }
 
 model BusinessHour {
-    id         String   @id @default(uuid())
+    id         String   @id @default(cuid())
     open       String
     close      String
     day        WeekDay
     businessId String
-    business   Business @relation(fields: [businessId], references: [id])
+    business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
     @@unique([businessId, day])
 }

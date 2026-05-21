@@ -1,25 +1,50 @@
+import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
+import type { userSchema } from "@/lib/validators";
 import type { ServiceResult } from "@/types/response";
 import type { Booking, Business, Prisma, User } from "@prisma/client";
 
-interface CreateUserPayload {
-    name: string;
-}
+type CreateUserPayload = z.infer<typeof userSchema>;
+type UpdateUserPayload = z.infer<typeof userSchema>;
 
-interface UpdateUserPayload {
-    name?: string;
-}
-
-interface FullUser extends User {
+type FullUser = User & {
     bookings: Booking[];
     businesses: Business[];
-}
+};
 
 const fullUserInclude = {
     bookings: true,
     businesses: true,
 } satisfies Prisma.UserInclude;
+
+export async function getMe(): ServiceResult<FullUser> {
+    try {
+        const id = getUserId();
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id,
+            },
+            include: fullUserInclude,
+        });
+
+        if (!user)
+            return {
+                error: "User not found",
+                code: 404,
+            };
+
+        return user;
+    } catch (error) {
+        console.error(error);
+
+        return {
+            error: "Internal server error",
+            code: 500,
+        };
+    }
+}
 
 export async function createUser(data: CreateUserPayload): ServiceResult<FullUser> {
     try {
@@ -126,34 +151,6 @@ export async function becomeBusinessOwner(): ServiceResult<FullUser> {
         return user;
     } catch (error) {
         console.error(error);
-        return {
-            error: "Internal server error",
-            code: 500,
-        };
-    }
-}
-
-export async function getMe(): ServiceResult<FullUser> {
-    try {
-        const id = getUserId();
-
-        const user = await prisma.user.findUnique({
-            where: {
-                id,
-            },
-            include: fullUserInclude,
-        });
-
-        if (!user)
-            return {
-                error: "User not found",
-                code: 404,
-            };
-
-        return user;
-    } catch (error) {
-        console.error(error);
-
         return {
             error: "Internal server error",
             code: 500,

@@ -1,36 +1,17 @@
+import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import type { ServiceMessage, ServiceResult } from "@/types/response";
+import type { createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
 import { Prisma, type Business, type BusinessHour as PrismaBusinessHour, type Service } from "@prisma/client";
 
-export interface FullBusiness extends Business {
+type FullBusiness = Business & {
     services: Service[];
     hours: PrismaBusinessHour[];
-}
-
-export type Weekday = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
-
-export type BusinessHour = { day: Weekday; open: string; close: string };
-
-type CreateBusinessPayload = {
-    name: string;
-    timeZone: string;
-    phone: string | null;
-    hours: BusinessHour[];
-    location: string | null;
-    bannerImages: string[];
-    description: string | null;
 };
 
-type UpdateBusinessPayload = {
-    name?: string;
-    phone?: string;
-    timeZone?: string;
-    location?: string;
-    description?: string;
-    hours?: BusinessHour[];
-    bannerImages?: string[];
-};
+type CreateBusinessPayload = z.infer<typeof createBusinessSchema>;
+type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;
 
 const fullBusinessInclude = {
     hours: true,

@@ -54,5 +54,30 @@ export const updateBusinessSchema = z.object({
 });
 
 export const businessIdSchema = z.object({
-    id: z.string(),
+    id: z.string().min(1, "Business Id is required"),
+});
+
+/**
+ * Service Schema
+ */
+
+export const createServiceSchema = z.object({
+    name: z.string().min(1, "Service name is required"),
+    durationInMinutes: z.number().int().positive("Duration must be positive"),
+    price: z.number().positive("Price must be positive"),
+    businessId: z.string(),
+    thumbnail: z.string().optional().nullable(),
+    category: z.string().default("Other"),
+});
+
+export const updateServiceSchema = z.object({
+    name: z.string().optional(),
+    durationInMinutes: z.number().int().positive("Duration must be positive").optional(),
+    price: z.number().positive("Price must be positive").optional(),
+    thumbnail: z.string().optional().nullable(),
+    category: z.string().optional(),
+});
+
+export const serviceIdSchema = z.object({
+    id: z.string().min(1, "Service Id is required"),
 });
