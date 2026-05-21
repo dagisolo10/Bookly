@@ -1,8 +1,17 @@
+import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import type { BookingStatus, Prisma } from "@prisma/client";
+import type { manageBookingSchema } from "@/lib/validators";
 
-type BookingStatusUpdate  = "Confirmed" | "Cancelled" | "Completed";
+type BookingStatusUpdate = z.infer<typeof manageBookingSchema>["newStatus"];
+
+const allowedTransitions: Record<BookingStatus, BookingStatus[]> = {
+    Pending: ["Confirmed", "Cancelled"],
+    Confirmed: ["Cancelled", "Completed"],
+    Cancelled: [],
+    Completed: [],
+};
 
 const fullBookingIncludes = {
     user: true,
@@ -20,6 +29,17 @@ const bookingCheck = (id: string, ownerId: string): Prisma.BookingWhereInput => 
 export async function getBusinessBookings(businessId: string) {
     try {
         const ownerId = getUserId();
+
+        const business = await prisma.business.findFirst({
+            where: {
+                id: businessId,
+                ownerId,
+            },
+        });
+
+        if (!business) {
+            return { error: "Business not found", code: 404 };
+        }
 
         const bookings = await prisma.booking.findMany({
             where: {
@@ -63,7 +83,7 @@ export async function getBookingById(id: string) {
     }
 }
 
-export async function manageBooking(id: string, newStatus: BookingStatusUpdate ) {
+export async function manageBooking(id: string, newStatus: BookingStatusUpdate) {
     try {
         const ownerId = getUserId();
 
@@ -79,13 +99,6 @@ export async function manageBooking(id: string, newStatus: BookingStatusUpdate )
         if (booking.status === newStatus) {
             return booking;
         }
-
-        const allowedTransitions: Record<BookingStatus, BookingStatus[]> = {
-            Pending: ["Confirmed", "Cancelled"],
-            Confirmed: ["Cancelled", "Completed"],
-            Cancelled: [],
-            Completed: [],
-        };
 
         if (!allowedTransitions[booking.status].includes(newStatus)) {
             return { error: "This booking can't be changed to that status.", code: 400 };

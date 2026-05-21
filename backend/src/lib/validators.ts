@@ -95,5 +95,5 @@ export const bookingIdSchema = z.object({
 });
 
 export const bookingBusinessIdSchema = z.object({
-    businessId: z.string().min(1, "Booking Id is required"),
+    businessId: z.string().min(1, "Business Id is required"),
 });
