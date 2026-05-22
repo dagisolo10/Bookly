@@ -7,7 +7,7 @@ export const ownerServiceApi = {
     createService: async (service: CreateServicePayload) => {
         const { data } = await api.post<OwnerServiceResponse>("/owner/service", service);
 
-        if (hasApiError(data)) throw data.error;
+        if (hasApiError(data)) throw data;
 
         return data;
     },
@@ -15,7 +15,7 @@ export const ownerServiceApi = {
     updateService: async (id: string, service: UpdateServicePayload) => {
         const { data } = await api.patch<OwnerServiceResponse>(`/owner/service/${id}`, service);
 
-        if (hasApiError(data)) throw data.error;
+        if (hasApiError(data)) throw data;
 
         return data;
     },
@@ -23,7 +23,7 @@ export const ownerServiceApi = {
     toggleService: async (id: string) => {
         const { data } = await api.patch<MessageResponse>(`/owner/service/${id}/toggle`, undefined);
 
-        if (hasApiError(data)) throw data.error;
+        if (hasApiError(data)) throw data;
 
         return data;
     },

@@ -1,10 +1,18 @@
+import z from "zod";
+import { BusinessHoursSchema } from "@/lib/validation";
+
 export type User = {
     id: string;
     name: string;
     roles: Role[];
     createdAt: string;
     updatedAt: string;
+
+    bookings: Booking[];
+    businesses: Business[];
 };
+
+export type BusinessHour = z.infer<typeof BusinessHoursSchema>;
 
 export type Business = {
     id: string;
@@ -14,21 +22,13 @@ export type Business = {
     location: string | null;
     phone: string | null;
     bannerImages: string[];
-    hours: BusinessHour[];
     status: BusinessStatus;
     createdAt: string;
     updatedAt: string;
-
+    
     ownerId: string;
     services: Service[];
-};
-
-export type BusinessHour = {
-    id: string;
-    open: string;
-    close: string;
-    day: WeekDay;
-    businessId: string;
+    hours: BusinessHour[];
 };
 
 export type Service = {
@@ -57,6 +57,9 @@ export type Booking = {
 
     serviceId: string;
     userId: string;
+
+    user: User;
+    service: Service;
 };
 
 export type Role = "Customer" | "Business" | "Admin";
@@ -67,21 +70,6 @@ export type BookingStatus = "Pending" | "Confirmed" | "Cancelled" | "Completed";
 
 export type WeekDay = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
 
-export type FullUser = User & {
-    bookings: Booking[];
-    businesses: Business[];
-};
 
-export type FullBusiness = Business & {
-    services: Service[];
-    hours: BusinessHour[];
-};
 
-export type FullService = Service & {
-    bookings: Booking[];
-};
 
-export type FullBooking = Booking & {
-    user: User;
-    service: Service;
-};

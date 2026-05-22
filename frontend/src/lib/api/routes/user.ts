@@ -8,7 +8,7 @@ export const userApi = {
     getMe: async () => {
         const { data } = await api.get<UserResponse>("/user/me");
 
-        if (hasApiError(data)) throw data.error;
+        if (hasApiError(data)) throw data;
 
         return data;
     },
@@ -16,7 +16,7 @@ export const userApi = {
     createUser: async (user: UserPayload) => {
         const { data } = await api.post<UserResponse>("/user", user);
 
-        if (hasApiError(data)) throw data.error;
+        if (hasApiError(data)) throw data;
 
         return data;
     },
@@ -24,7 +24,7 @@ export const userApi = {
     updateUser: async (user: UserPayload) => {
         const { data } = await api.patch<UserResponse>("/user", user);
 
-        if (hasApiError(data)) throw data.error;
+        if (hasApiError(data)) throw data;
 
         return data;
     },
@@ -32,7 +32,7 @@ export const userApi = {
     becomeBusinessOwner: async () => {
         const { data } = await api.post<UserResponse>("/user/become-owner");
 
-        if (hasApiError(data)) throw data.error;
+        if (hasApiError(data)) throw data;
 
         return data;
     },

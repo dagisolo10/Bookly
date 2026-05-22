@@ -163,21 +163,21 @@ export async function toggleBusiness(id: string): ServiceResult<ServiceMessage> 
 
         const newStatus = business.status === "Paused" ? "Active" : "Paused";
 
-        await prisma.$transaction(async (tx) => {
-            if (newStatus === "Paused") {
-                const activeBooking = await tx.booking.findFirst({
-                    where: {
-                        service: {
-                            businessId: business.id,
-                        },
-                        status: "Confirmed",
+        if (newStatus === "Paused") {
+            const activeBooking = await prisma.booking.findFirst({
+                where: {
+                    service: {
+                        businessId: business.id,
                     },
-                });
+                    status: "Confirmed",
+                },
+            });
 
-                if (activeBooking) {
-                    return { error: "Cannot pause business with active bookings", code: 400 };
-                }
+            if (activeBooking) {
+                return { error: "Cannot pause business with active bookings", code: 400 };
+            }
 
+            await prisma.$transaction(async (tx) => {
                 await tx.booking.updateMany({
                     where: {
                         service: {
@@ -198,17 +198,17 @@ export async function toggleBusiness(id: string): ServiceResult<ServiceMessage> 
                         status: newStatus,
                     },
                 });
-            } else {
-                await tx.business.update({
-                    where: {
-                        id: business.id,
-                    },
-                    data: {
-                        status: newStatus,
-                    },
-                });
-            }
-        });
+            });
+        } else {
+            await prisma.business.update({
+                where: {
+                    id: business.id,
+                },
+                data: {
+                    status: newStatus,
+                },
+            });
+        }
 
         const message = `Business ${newStatus === "Active" ? "Activated" : "Paused"}`;
 

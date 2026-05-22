@@ -1,4 +1,4 @@
-import type { ApiError, ZodError } from "./api-response";
+import type { ApiError, BackendValidationError } from "./api-response";
 
 import type { AxiosError } from "axios";
 
@@ -14,15 +14,23 @@ export class ApiRequestError extends Error {
     }
 }
 
-function isBackendErrorBody(value: unknown): value is ZodError {
-    return typeof value === "object" && value !== null && "error" in value && typeof (value as ZodError).error === "string";
+function isAxiosError(error: unknown): error is AxiosError {
+    return typeof error === "object" && error !== null && "isAxiosError" in error && (error as AxiosError).isAxiosError === true;
+}
+
+function isBackendErrorBody(value: unknown): value is BackendValidationError {
+    return typeof value === "object" && value !== null && "error" in value && typeof (value as { error: string }).error === "string";
 }
 
 export function messageFromAxiosError(err: unknown): string {
     if (err instanceof ApiRequestError) return err.message;
     if (typeof err === "string") return err;
 
-    const ax = err as AxiosError<ZodError | string>;
+    if (!isAxiosError(err)) {
+        return err instanceof Error ? err.message : "Unknown error";
+    }
+
+    const ax = err as AxiosError<BackendValidationError | string>;
     const status = ax.response?.status;
     const data = ax.response?.data;
 
@@ -44,9 +52,7 @@ export function hasApiError(result: unknown): result is ApiError {
     return (
         typeof result === "object" &&
         result !== null &&
-        "error" in result &&
-        "code" in result &&
-        typeof (result as Record<"error", unknown>).error === "string" &&
-        typeof (result as Record<"code", unknown>).code === "number"
+        "__isApiError" in result &&
+        (result as ApiError).__isApiError === true
     );
 }

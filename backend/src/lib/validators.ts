@@ -10,13 +10,11 @@ export const userSchema = z.object({ name: z.string().min(3, "Name must be at le
  * Business Schema
  */
 
-const WeeDaysSchema = z.enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "Can only accept week days");
-
 const DayHoursSchema = z
     .object({
-        open: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format"),
-        close: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format"),
-        day: WeeDaysSchema,
+        open: z.iso.time("Invalid time format"),
+        close: z.iso.time("Invalid time format"),
+        day: z.enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "Can only accept week days"),
     })
     .refine(({ open, close }) => open < close, {
         message: "Closing time must be after opening time",

@@ -1,9 +1,10 @@
-export type ZodError = {
+export type BackendValidationError = {
     error: string;
     details?: string;
 };
 
 export type ApiError = {
+    __isApiError: true;
     error: string;
     code: number;
 };
