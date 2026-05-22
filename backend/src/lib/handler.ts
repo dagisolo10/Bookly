@@ -16,7 +16,7 @@ export function handler<T>(fn: (...args: Request[]) => ServiceResult<T>) {
 
             res.status(200).json(result);
         } catch (error: any) {
-            res.status(500).json({ error: error.message, __isApiError: true });
+            res.status(500).json({ error: "Internal server error", __isApiError: true });
         }
     };
 }

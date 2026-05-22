@@ -1,5 +1,4 @@
 import z from "zod";
-import { BusinessHour } from "@/types/models";
 
 export const BusinessHoursSchema = z
     .object({
@@ -13,6 +12,6 @@ export const BusinessHoursSchema = z
         message: "Closing time must be after opening time",
     });
 
-export function validateBusinessHours(data: unknown): BusinessHour {
+export function validateBusinessHours(data: unknown): z.infer<typeof BusinessHoursSchema> {
     return BusinessHoursSchema.parse(data);
 }

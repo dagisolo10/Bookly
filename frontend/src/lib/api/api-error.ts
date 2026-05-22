@@ -25,6 +25,7 @@ function isBackendErrorBody(value: unknown): value is BackendValidationError {
 export function messageFromAxiosError(err: unknown): string {
     if (err instanceof ApiRequestError) return err.message;
     if (typeof err === "string") return err;
+    if (hasApiError(err)) return err.error;
 
     if (!isAxiosError(err)) {
         return err instanceof Error ? err.message : "Unknown error";
@@ -49,10 +50,5 @@ export function messageFromAxiosError(err: unknown): string {
 }
 
 export function hasApiError(result: unknown): result is ApiError {
-    return (
-        typeof result === "object" &&
-        result !== null &&
-        "__isApiError" in result &&
-        (result as ApiError).__isApiError === true
-    );
+    return typeof result === "object" && result !== null && "__isApiError" in result && (result as ApiError).__isApiError === true;
 }
