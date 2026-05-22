@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Card } from "@//components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3, Globe, LayoutDashboard, LucideIcon, Plus, ShieldCheck, Users, Zap } from "lucide-react";
 
@@ -23,10 +23,7 @@ export default function BusinessLanding() {
 
                 <div className="flex justify-center gap-4">
                     <Button size={"cta"} asChild>
-                        <Link
-                            href="/business/my-businesses"
-                            className="rounded-corner bg-primary hover:bg-primary/70 font-semibold text-white transition-colors"
-                        >
+                        <Link href="/business/list" className="bg-primary hover:bg-primary/70 font-semibold text-white transition-colors">
                             List Your Businesses
                         </Link>
                     </Button>

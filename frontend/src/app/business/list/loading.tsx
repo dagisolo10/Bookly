@@ -1,4 +1,4 @@
-import { Skeleton } from "@//components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
     return (
@@ -24,7 +24,7 @@ export default function Loading() {
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="space-y-3">
-                            <div className="relative aspect-16/10 overflow-hidden rounded-lg bg-zinc-900">
+                            <div className="relative aspect-video overflow-hidden rounded-lg bg-zinc-900">
                                 <Skeleton className="size-full" />
                                 <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 backdrop-blur-sm">
                                     <Skeleton className="size-3 rounded-full" />

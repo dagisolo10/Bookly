@@ -6,6 +6,6 @@ export function hasServiceError(r: unknown): r is ServiceError {
 }
 
 export type ServiceMessage = { message: string };
-export type ServiceError = { error: string; code: number };
+export type ServiceError = { error: string; code: number; __isApiError?: true };
 
 export type ServiceResult<T> = Promise<T | ServiceError>;

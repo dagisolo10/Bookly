@@ -10,13 +10,13 @@ export function handler<T>(fn: (...args: Request[]) => ServiceResult<T>) {
             const result = await fn(req);
 
             if (hasServiceError(result)) {
-                res.status(result.code).json(result);
+                res.status(result.code).json({ ...result, __isApiError: true });
                 return;
             }
 
             res.status(200).json(result);
         } catch (error: any) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: "Internal server error", __isApiError: true });
         }
     };
 }
