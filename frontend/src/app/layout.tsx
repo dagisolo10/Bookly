@@ -1,8 +1,12 @@
 import "./globals.css";
 
-import { cn } from "@/lib/utils";
+import Navbar from "@/components/navbar";
+import QueryProvider from "@/components/providers/query-provider";
+import UserSync from "@/components/providers/user-sync";
 import { defaultMetadata } from "@/lib/metadata";
-import QueryProvider from "@/components/query-provider";
+import { cn } from "@/lib/utils";
+import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "next-themes";
 import { Inter, Manrope, Playfair_Display, Poppins } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -20,7 +24,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             className={cn("font-sans antialiased", inter.variable, manrope.variable, playfair.variable, poppins.variable)}
         >
             <body className="min-h-screen">
-                <QueryProvider>{children}</QueryProvider>
+                <ClerkProvider>
+                    <QueryProvider>
+                        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+                            <UserSync>
+                                <Navbar />
+                                {children}
+                            </UserSync>
+                        </ThemeProvider>
+                    </QueryProvider>
+                </ClerkProvider>
             </body>
         </html>
     );

@@ -1,11 +1,11 @@
-import Link from "next/link";
-import { Card } from "@/components/ui/card";
+import FeatureCard from "@/components/feature-card";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Globe, LayoutDashboard, LucideIcon, Plus, ShieldCheck, Users, Zap } from "lucide-react";
+import { BarChart3, Globe, LayoutDashboard, Plus, ShieldCheck, Users, Zap } from "lucide-react";
+import Link from "next/link";
 
 export default function BusinessLanding() {
     return (
-        <main className="min-h-screen space-y-24 pt-16">
+        <main className="space-y-24">
             <section className="space-y-6 text-center">
                 <div className="text-muted-foreground inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs shadow-sm backdrop-blur sm:text-sm">
                     <Zap className="size-4 fill-blue-500 text-blue-500" />
@@ -30,7 +30,7 @@ export default function BusinessLanding() {
                 </div>
             </section>
 
-            <section className="mx-auto max-w-6xl space-y-8">
+            <section className="space-y-8">
                 <div className="space-y-2 text-center">
                     <h2 className="text-3xl leading-tight font-bold tracking-tight md:text-4xl">Everything you need to scale</h2>
                     <p className="text-muted-foreground mx-auto max-w-2xl">Powerful tools designed specifically for service-based professionals.</p>
@@ -55,7 +55,7 @@ export default function BusinessLanding() {
                 </div>
             </section>
 
-            <section className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2">
+            <section className="grid items-center gap-12 md:grid-cols-2">
                 <div className="space-y-6">
                     <h2 className="text-4xl leading-tight font-semibold">
                         Your business is open <br /> 24/7—even when you are not.
@@ -81,35 +81,6 @@ export default function BusinessLanding() {
                     <div className="absolute inset-0 flex items-center justify-center text-sm text-zinc-500 italic" />
                 </div>
             </section>
-
-            <section className="bg-primary text-primary-foreground space-y-6 border py-12 text-center">
-                <h2 className="text-4xl font-semibold">Ready to take the next step?</h2>
-
-                <p className="text-xl opacity-90">
-                    Join the thousands of professionals who have simplified their workflow and increased their revenue.
-                </p>
-
-                <Button size={"cta"} variant={"ctaPrimary"} asChild>
-                    <Link href="/business/new">Get Started for Free</Link>
-                </Button>
-
-                <p className="text-sm opacity-75">No credit card required to start.</p>
-            </section>
         </main>
-    );
-}
-
-export function FeatureCard({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
-    return (
-        <Card className="gap-4 p-8 text-left transition-shadow duration-500 hover:shadow-xl">
-            <div className="bg-primary/10 text-primary inline-flex size-14 items-center justify-center rounded-2xl">
-                <Icon />
-            </div>
-
-            <div className="space-y-2">
-                <h3 className="text-xl font-semibold">{title}</h3>
-                <p className="text-muted-foreground text-sm">{text}</p>
-            </div>
-        </Card>
     );
 }

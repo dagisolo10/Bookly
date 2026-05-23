@@ -1,9 +1,9 @@
-import { FeatureCard } from "@/app/business/page";
+import FeatureCard from "@/components/feature-card";
 import { CalendarCheck2, Store, Users } from "lucide-react";
 
 export default function About() {
     return (
-        <main className="mx-auto min-h-screen max-w-6xl space-y-8 py-16">
+        <main className="mx-auto max-w-6xl space-y-8 py-12">
             <div className="max-w-3xl space-y-4">
                 <p className="text-sm font-semibold tracking-[0.2em] text-zinc-500 uppercase">
                     About <span className="text-primary">Bookly</span>
