@@ -10,6 +10,7 @@ export default clerkMiddleware(async (auth, req) => {
         return;
     }
 
+    // Todo (remove on auth test)
     const development = true;
 
     if (development) {

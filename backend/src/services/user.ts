@@ -1,11 +1,11 @@
-import type z from "zod";
-import env from "@/utils/env";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import type { userSchema } from "@/lib/validators";
 import type { ServiceResult } from "@/types/response";
+import env from "@/utils/env";
 import { clerkClient, createClerkClient } from "@clerk/express";
 import type { Booking, Business, Prisma, User } from "@prisma/client";
+import type z from "zod";
 
 const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
 
@@ -35,22 +35,26 @@ export async function getUser(): ServiceResult<FullUser> {
         if (!user) {
             const clerkUser = await clerkClient.users.getUser(id);
 
-            const name = clerkUser.fullName ?? `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() ?? "User";
+            const fallbackName = `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim();
+            const name = clerkUser.fullName?.trim() || fallbackName || "User";
 
-            user = await prisma.user.create({
-                data: {
-                    id,
-                    name,
-                },
+            user = await prisma.user.upsert({
+                update: {},
+                where: { id },
+                create: { id, name },
                 include: fullUserInclude,
             });
         }
 
-        await clerk.users.updateUserMetadata(id, {
-            publicMetadata: {
-                roles: user.roles,
-            },
-        });
+        try {
+            await clerk.users.updateUserMetadata(id, {
+                publicMetadata: {
+                    roles: user.roles,
+                },
+            });
+        } catch (error) {
+            console.error("Failed to sync Clerk user metadata", error);
+        }
 
         return user;
     } catch (error) {

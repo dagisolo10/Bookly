@@ -13,7 +13,7 @@ const getUserId = () => {
     if (typeof window !== "undefined") {
         return localStorage.getItem("userId");
     }
-    throw new Error("UserId in headers is missing!");
+    return null;
 };
 
 api.interceptors.response.use(

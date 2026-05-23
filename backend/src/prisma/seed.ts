@@ -1,13 +1,12 @@
 import prisma from "@/lib/prisma";
-import type { Prisma, WeekDay } from "@prisma/client";
 import { randCompanyName, randLocale, randNumber, randPhoneNumber, randText, randTimeZone } from "@ngneat/falso";
+import type { Prisma, WeekDay } from "@prisma/client";
 
 function generateRandomHours(): { day: WeekDay; open: string; close: string }[] {
     const days: WeekDay[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-    // Mix it up: some open early at 6 AM, some late at 10 AM
     const openHour = Math.floor(Math.random() * 5) + 6;
-    const closeHour = Math.floor(Math.random() * 6) + 16; // Closes between 4 PM and 10 PM
+    const closeHour = Math.floor(Math.random() * 6) + 16;
 
     const openStr = `${openHour.toString().padStart(2, "0")}:00`;
     const closeStr = `${closeHour.toString().padStart(2, "0")}:00`;
@@ -15,7 +14,6 @@ function generateRandomHours(): { day: WeekDay; open: string; close: string }[] 
     return days.map((day) => ({ day, open: openStr, close: closeStr }));
 }
 
-// Structured blueprint mapping business types to deep contextual categories, services, and realistic imagery
 const industryBlueprints = [
     {
         type: "Grooming & Barbershop",
@@ -69,9 +67,12 @@ const industryBlueprints = [
 ];
 
 const ownerId = "user_3E5W2yM0VRFJDehasNi1tVti2a2";
-const TOTAL_BUSINESSES = 24; // Scale this up as much as you need!
+const TOTAL_BUSINESSES = 24;
 
 async function main() {
+    if (process.env["ALLOW_DESTRUCTIVE_SEED"] !== "true") {
+        throw new Error("Refusing destructive seed. Set ALLOW_DESTRUCTIVE_SEED=true to continue.");
+    }
     console.log("🧹 Flushing existing collection pipelines...");
     await prisma.service.deleteMany({});
     await prisma.business.deleteMany({});
@@ -80,14 +81,13 @@ async function main() {
     const createdBusinesses = [];
 
     for (let i = 0; i < TOTAL_BUSINESSES; i++) {
-        // Uniformly distribute industries down the creation line
         const blueprint = industryBlueprints[i % industryBlueprints.length]!;
 
         const biz = await prisma.business.create({
             data: {
                 ownerId,
                 location: randLocale(),
-                // Inject the industry into the name context so your app screens look phenomenal
+
                 name: `${randCompanyName()} (${blueprint.type})`,
                 description: randText(),
                 phone: randPhoneNumber(),
@@ -98,7 +98,6 @@ async function main() {
             },
         });
 
-        // Retain the blueprint reference index to target correct services downstream
         createdBusinesses.push({ id: biz.id, industryIndex: i % industryBlueprints.length });
     }
 
@@ -110,8 +109,6 @@ async function main() {
     for (const item of createdBusinesses) {
         const blueprint = industryBlueprints[item.industryIndex]!;
 
-        // Loop through the entire pool of services for this industry type
-        // This ensures every category within the blueprint gets hit cleanly
         blueprint.pool.forEach((service) => {
             allServicesToCreate.push({
                 name: service.name,
@@ -119,12 +116,11 @@ async function main() {
                 thumbnail: service.thumbnail,
                 businessId: item.id,
                 durationInMinutes: randNumber({ min: 30, max: 120, precision: 15 }),
-                price: service.basePrice + randNumber({ min: -5, max: 20 }), // Varied prices per storefront
+                price: service.basePrice + randNumber({ min: -5, max: 20 }),
             });
         });
     }
 
-    // High performance bulk insertion
     await prisma.service.createMany({
         data: allServicesToCreate,
         skipDuplicates: true,
@@ -138,6 +134,6 @@ async function main() {
 main()
     .catch((e) => {
         console.error("🔴 Seeding failed with error:", e);
-        process.exit(1);
+        process.exitCode = 1;
     })
     .finally(async () => await prisma.$disconnect());

@@ -1,6 +1,6 @@
+import { userApi } from "@/lib/api/routes/user";
 import { ownerBookingApi } from "@/lib/api/routes/owner-booking";
 import { ownerBusinessApi } from "@/lib/api/routes/owner-business";
-import { userApi } from "@/lib/api/routes/user";
 import { FullBooking, FullBusiness, FullUser } from "@/types/models";
 import { queryOptions, UseQueryOptions } from "@tanstack/react-query";
 
@@ -33,7 +33,7 @@ export function getOwnerBusinessByIdQueryOptions<TData = FullBusiness, TError = 
     });
 }
 
-export function getBusinessBookingsQueryOptions<TData = FullBusiness[], TError = Error>(
+export function getBusinessBookingsQueryOptions<TData = FullBooking[], TError = Error>(
     businessId: string,
     options?: QueryOptions<FullBooking[], TData, TError>,
 ) {
@@ -44,7 +44,7 @@ export function getBusinessBookingsQueryOptions<TData = FullBusiness[], TError =
     });
 }
 
-export function getBusinessBookingByIdQueryOptions<TData = FullBusiness[], TError = Error>(
+export function getBusinessBookingByIdQueryOptions<TData = FullBooking[], TError = Error>(
     id: string,
     options?: QueryOptions<FullBooking, TData, TError>,
 ) {
