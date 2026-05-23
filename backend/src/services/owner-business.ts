@@ -1,12 +1,11 @@
-import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
-import type { ServiceMessage, ServiceResult } from "@/types/response";
 import type { createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
-import { Prisma, type Business, type BusinessHour as PrismaBusinessHour, type Service } from "@prisma/client";
+import type { ServiceMessage, ServiceResult } from "@/types/response";
+import { Prisma, type Business, type BusinessHour as PrismaBusinessHour } from "@prisma/client";
+import type z from "zod";
 
 type FullBusiness = Business & {
-    services: Service[];
     hours: PrismaBusinessHour[];
 };
 
@@ -15,7 +14,6 @@ export type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;
 
 const fullBusinessInclude = {
     hours: true,
-    services: true,
 } satisfies Prisma.BusinessInclude;
 
 async function findOwnedBusiness(id: string, ownerId: string) {

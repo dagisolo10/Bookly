@@ -80,6 +80,11 @@ export const serviceIdSchema = z.object({
     id: z.string().min(1, "Service Id is required"),
 });
 
+export const serviceBusinessIdSchema = z.object({
+    businessId: z.string().min(1, "Business Id is required"),
+});
+
+
 /**
  * Booking Schema
  */

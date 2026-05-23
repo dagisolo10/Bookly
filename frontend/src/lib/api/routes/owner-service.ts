@@ -1,9 +1,17 @@
-import api from "@/lib/axios";
 import { hasApiError } from "@/lib/api/api-error";
-import { MessageResponse, OwnerServiceResponse } from "@/types/response";
+import api from "@/lib/axios";
 import { CreateServicePayload, UpdateServicePayload } from "@/types/payload";
+import { MessageResponse, OwnerServiceResponse, OwnerServicesResponse } from "@/types/response";
 
 export const ownerServiceApi = {
+    getBusinessServices: async (businessId: string) => {
+        const { data } = await api.get<OwnerServicesResponse>(`/owner/service/business/${businessId}`);
+
+        if (hasApiError(data)) throw data;
+
+        return data;
+    },
+
     createService: async (service: CreateServicePayload) => {
         const { data } = await api.post<OwnerServiceResponse>("/owner/service", service);
 

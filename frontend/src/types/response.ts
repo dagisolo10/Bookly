@@ -26,6 +26,7 @@ export type OwnerBusinessListResponse = ApiResult<FullBusiness[]>;
  */
 
 export type OwnerServiceResponse = ApiResult<FullService>;
+export type OwnerServicesResponse = ApiResult<FullService[]>;
 
 /**
  *  Owner - Booking Response

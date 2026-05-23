@@ -1,9 +1,9 @@
-import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
-import { Prisma, type Booking, type Service } from "@prisma/client";
-import type { ServiceMessage, ServiceResult } from "@/types/response";
 import type { createServiceSchema, updateServiceSchema } from "@/lib/validators";
+import type { ServiceMessage, ServiceResult } from "@/types/response";
+import { Prisma, type Booking, type Service } from "@prisma/client";
+import type z from "zod";
 
 type CreateServicePayload = z.infer<typeof createServiceSchema>;
 type UpdateServicePayload = z.infer<typeof updateServiceSchema>;
@@ -15,6 +15,43 @@ type FullService = Service & {
 const fullServiceInclude = {
     bookings: true,
 } satisfies Prisma.ServiceInclude;
+
+export async function getBusinessServices(businessId: string): ServiceResult<FullService[]> {
+    try {
+        const ownerId = getUserId();
+
+        const services = await prisma.service.findMany({
+            where: {
+                business: {
+                    id: businessId,
+                    ownerId,
+                },
+            },
+            include: fullServiceInclude,
+        });
+
+        if (!services.length) {
+            const businessExists = await prisma.business.findFirst({
+                where: {
+                    id: businessId,
+                    ownerId,
+                },
+                select: {
+                    id: true,
+                },
+            });
+
+            if (!businessExists) {
+                return { error: "Business not found", code: 404 };
+            }
+        }
+
+        return services;
+    } catch (error) {
+        console.error(error);
+        return { error: "Internal server error", code: 500 };
+    }
+}
 
 export async function createService(data: CreateServicePayload): ServiceResult<FullService> {
     try {

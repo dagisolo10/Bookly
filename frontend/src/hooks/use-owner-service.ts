@@ -20,8 +20,6 @@ export const useUpdateService = () => {
     return useMutation({
         mutationFn: ({ id, service }: { id: string; service: UpdateServicePayload }) => ownerServiceApi.updateService(id, service),
         onSuccess: (service) => {
-            queryClient.invalidateQueries({ queryKey: ["owner", "service", service.id] });
-            queryClient.invalidateQueries({ queryKey: ["owner", "business", service.businessId] });
             queryClient.invalidateQueries({ queryKey: ["owner", "service", "list", service.businessId] });
         },
     });
@@ -32,8 +30,7 @@ export const useToggleService = () => {
 
     return useMutation({
         mutationFn: ({ serviceId }: { serviceId: string; businessId: string }) => ownerServiceApi.toggleService(serviceId),
-        onSuccess: ({ message }, { serviceId, businessId }) => {
-            queryClient.invalidateQueries({ queryKey: ["owner", "service", serviceId] });
+        onSuccess: ({ message }, { businessId }) => {
             queryClient.invalidateQueries({ queryKey: ["owner", "service", "list", businessId] });
 
             toast.success(message);

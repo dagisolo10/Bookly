@@ -3,10 +3,19 @@ import { Router, type Request } from "express";
 import { validate } from "@/middlewares/validation";
 import { requireBusinessRole } from "@/middlewares/role";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
-import { createService, toggleService, updateService } from "@/services/owner-service";
-import { createServiceSchema, serviceIdSchema, updateServiceSchema } from "@/lib/validators";
+import { createService, getBusinessServices, toggleService, updateService } from "@/services/owner-service";
+import { createServiceSchema, serviceBusinessIdSchema, serviceIdSchema, updateServiceSchema } from "@/lib/validators";
 
 const router = Router();
+
+router.get(
+    "/business/:businessId",
+    requireAuth,
+    requireUserProfile,
+    requireBusinessRole,
+    validate(serviceBusinessIdSchema, "params"),
+    handler((req: Request) => getBusinessServices(req.params["businessId"] as string)),
+);
 
 router.post(
     "/",

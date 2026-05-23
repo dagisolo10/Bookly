@@ -1,5 +1,5 @@
-import z from "zod";
 import { BusinessHoursSchema } from "@/lib/validation";
+import z from "zod";
 
 /**
  * Base Models
@@ -71,7 +71,6 @@ export type FullService = Service & {
 };
 
 export type FullBusiness = Business & {
-    services: Service[];
     hours: BusinessHour[];
 };
 
