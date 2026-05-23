@@ -5,7 +5,7 @@ import { BarChart3, Calendar, CalendarCheck2, ChevronRight, Search, ShieldCheck,
 
 export default function Page() {
     return (
-        <main className="space-y-24 pt-12">
+        <div className="space-y-24 pt-12">
             <section className="relative flex flex-col items-center gap-6 overflow-hidden text-center">
                 <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/80 px-4 py-2 text-sm text-zinc-600 shadow-sm backdrop-blur">
                     <Sparkles className="text-primary size-4" />
@@ -96,6 +96,6 @@ export default function Page() {
 
                 <p className="text-sm opacity-75">No credit card required.</p>
             </section>
-        </main>
+        </div>
     );
 }

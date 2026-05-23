@@ -1,11 +1,11 @@
-import FeatureCard from "@/components/feature-card";
-import { Button } from "@/components/ui/button";
-import { BarChart3, Globe, LayoutDashboard, Plus, ShieldCheck, Users, Zap } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import FeatureCard from "@/components/feature-card";
+import { BarChart3, Globe, LayoutDashboard, Plus, ShieldCheck, Users, Zap } from "lucide-react";
 
 export default function BusinessLanding() {
     return (
-        <main className="space-y-24">
+        <div className="space-y-24">
             <section className="space-y-6 text-center">
                 <div className="text-muted-foreground inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs shadow-sm backdrop-blur sm:text-sm">
                     <Zap className="size-4 fill-blue-500 text-blue-500" />
@@ -81,6 +81,6 @@ export default function BusinessLanding() {
                     <div className="absolute inset-0 flex items-center justify-center text-sm text-zinc-500 italic" />
                 </div>
             </section>
-        </main>
+        </div>
     );
 }

@@ -1,13 +1,13 @@
-import FeatureCard from "@/components/feature-card";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { Calendar, Dumbbell, Flower2, Heart, LucideIcon, Scissors, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import FeatureCard from "@/components/feature-card";
+import { Calendar, Dumbbell, Flower2, Heart, LucideIcon, Scissors, Search, Sparkles } from "lucide-react";
 
 export default function Customer() {
     return (
-        <main className="space-y-24">
+        <div className="space-y-24">
             <section className="space-y-6 text-center">
                 <div className="text-muted-foreground inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs shadow-sm backdrop-blur sm:text-sm">
                     <Sparkles className="size-4 text-yellow-500" />
@@ -63,7 +63,7 @@ export default function Customer() {
                     <CategoryCard icon={Dumbbell} name="Fitness" count="45+ Gyms" color="bg-orange-50 text-orange-600 border-orange-100" />
                 </div>
             </section>
-        </main>
+        </div>
     );
 }
 

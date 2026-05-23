@@ -39,8 +39,8 @@ export async function getUser(): ServiceResult<FullUser> {
             const name = clerkUser.fullName?.trim() || fallbackName || "User";
 
             user = await prisma.user.upsert({
-                update: {},
                 where: { id },
+                update: { name },
                 create: { id, name },
                 include: fullUserInclude,
             });
