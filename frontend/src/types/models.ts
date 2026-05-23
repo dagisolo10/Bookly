@@ -37,7 +37,7 @@ export type Service = {
     price: number;
     thumbnail: string | null;
     isActive: boolean;
-    category: string | null;
+    category: string;
     createdAt: string;
     updatedAt: string;
 

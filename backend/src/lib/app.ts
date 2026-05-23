@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({ origin: env.FRONTEND_URL || "http://localhost:3001", credentials: true }));
 
-app.use(clerkMiddleware());
+app.use(clerkMiddleware({ clockSkewInMs: 60000 }));
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
 

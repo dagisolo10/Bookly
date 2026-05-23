@@ -5,16 +5,8 @@ import { UserPayload } from "@/types/payload";
 import { UserResponse } from "@/types/response";
 
 export const userApi = {
-    getMe: async () => {
+    getUser: async () => {
         const { data } = await api.get<UserResponse>("/user/me");
-
-        if (hasApiError(data)) throw data;
-
-        return data;
-    },
-
-    createUser: async (user: UserPayload) => {
-        const { data } = await api.post<UserResponse>("/user", user);
 
         if (hasApiError(data)) throw data;
 

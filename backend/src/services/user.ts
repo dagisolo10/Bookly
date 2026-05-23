@@ -1,11 +1,14 @@
 import type z from "zod";
+import env from "@/utils/env";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import type { userSchema } from "@/lib/validators";
 import type { ServiceResult } from "@/types/response";
+import { clerkClient, createClerkClient } from "@clerk/express";
 import type { Booking, Business, Prisma, User } from "@prisma/client";
 
-type CreateUserPayload = z.infer<typeof userSchema>;
+const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
+
 type UpdateUserPayload = z.infer<typeof userSchema>;
 
 type FullUser = User & {
@@ -18,62 +21,41 @@ const fullUserInclude = {
     businesses: true,
 } satisfies Prisma.UserInclude;
 
-export async function getMe(): ServiceResult<FullUser> {
+export async function getUser(): ServiceResult<FullUser> {
     try {
         const id = getUserId();
 
-        const user = await prisma.user.findUnique({
+        let user = await prisma.user.findUnique({
             where: {
                 id,
             },
             include: fullUserInclude,
         });
 
-        if (!user)
-            return {
-                error: "User not found",
-                code: 404,
-            };
+        if (!user) {
+            const clerkUser = await clerkClient.users.getUser(id);
 
-        return user;
-    } catch (error) {
-        console.error(error);
+            const name = clerkUser.fullName ?? `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() ?? "User";
 
-        return {
-            error: "Internal server error",
-            code: 500,
-        };
-    }
-}
-
-export async function createUser(data: CreateUserPayload): ServiceResult<FullUser> {
-    try {
-        const id = getUserId();
-
-        const existing = await prisma.user.findUnique({
-            where: {
-                id,
-            },
-            select: {
-                id: true,
-            },
-        });
-
-        if (existing) {
-            return {
-                error: "User already exists",
-                code: 409,
-            };
+            user = await prisma.user.create({
+                data: {
+                    id,
+                    name,
+                },
+                include: fullUserInclude,
+            });
         }
 
-        const user = await prisma.user.create({
-            data,
-            include: fullUserInclude,
+        await clerk.users.updateUserMetadata(id, {
+            publicMetadata: {
+                roles: user.roles,
+            },
         });
 
         return user;
     } catch (error) {
         console.error(error);
+
         return {
             error: "Internal server error",
             code: 500,

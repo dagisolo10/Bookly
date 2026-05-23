@@ -10,8 +10,8 @@ type FullBusiness = Business & {
     hours: PrismaBusinessHour[];
 };
 
-type CreateBusinessPayload = z.infer<typeof createBusinessSchema>;
-type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;
+export type CreateBusinessPayload = z.infer<typeof createBusinessSchema>;
+export type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;
 
 const fullBusinessInclude = {
     hours: true,

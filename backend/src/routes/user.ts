@@ -2,7 +2,7 @@ import { handler } from "@/lib/handler";
 import { userSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
 import { validate } from "@/middlewares/validation";
-import { becomeBusinessOwner, createUser, getMe, updateUser } from "@/services/user";
+import { becomeBusinessOwner, getUser, updateUser } from "@/services/user";
 import { Router, type Request } from "express";
 
 const router = Router();
@@ -10,8 +10,7 @@ const router = Router();
 router.get(
     "/me",
     requireAuth,
-    requireUserProfile,
-    handler(() => getMe()),
+    handler(() => getUser()),
 );
 
 router.post(
@@ -19,13 +18,6 @@ router.post(
     requireAuth,
     requireUserProfile,
     handler(() => becomeBusinessOwner()),
-);
-
-router.post(
-    "/",
-    requireAuth,
-    validate(userSchema, "body"),
-    handler((req: Request) => createUser(req.body)),
 );
 
 router.patch(
