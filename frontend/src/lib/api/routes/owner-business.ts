@@ -1,4 +1,4 @@
-import { hasApiError } from "../api-error";
+import { requestApi } from "../api-error";
 
 import api from "@/lib/axios";
 import { BusinessHoursSchema } from "@/lib/validation";
@@ -8,11 +8,9 @@ import { MessageResponse, OwnerBusinessResponse, PaginationResponse } from "@/ty
 
 export const ownerBusinessApi = {
     getMyBusinesses: async (page: number, limit: number) => {
-        const { data } = await api.get<PaginationResponse<FullBusiness>>("/owner/business/my", {
-            params: { page, limit },
-        });
-
-        if (hasApiError(data)) throw data;
+        const data = await requestApi(() =>
+            api.get<PaginationResponse<FullBusiness>>("/owner/business/my", { params: { page, limit } }),
+        );
 
         data.data.forEach((b) => BusinessHoursSchema.array().parse(b.hours));
 
@@ -20,9 +18,7 @@ export const ownerBusinessApi = {
     },
 
     getMyBusinessById: async (id: string) => {
-        const { data } = await api.get<OwnerBusinessResponse>(`/owner/business/my/${id}`);
-
-        if (hasApiError(data)) throw data;
+        const data = await requestApi(() => api.get<OwnerBusinessResponse>(`/owner/business/my/${id}`));
 
         BusinessHoursSchema.array().parse(data.hours);
 
@@ -30,9 +26,7 @@ export const ownerBusinessApi = {
     },
 
     createBusiness: async (business: CreateBusinessPayload) => {
-        const { data } = await api.post<OwnerBusinessResponse>("/owner/business", business);
-
-        if (hasApiError(data)) throw data;
+        const data = await requestApi(() => api.post<OwnerBusinessResponse>("/owner/business", business));
 
         BusinessHoursSchema.array().parse(data.hours);
 
@@ -40,9 +34,7 @@ export const ownerBusinessApi = {
     },
 
     updateBusiness: async (id: string, business: UpdateBusinessPayload) => {
-        const { data } = await api.patch<OwnerBusinessResponse>(`/owner/business/${id}`, business);
-
-        if (hasApiError(data)) throw data;
+        const data = await requestApi(() => api.patch<OwnerBusinessResponse>(`/owner/business/${id}`, business));
 
         BusinessHoursSchema.array().parse(data.hours);
 
@@ -50,18 +42,10 @@ export const ownerBusinessApi = {
     },
 
     toggleBusiness: async (id: string) => {
-        const { data } = await api.patch<MessageResponse>(`/owner/business/${id}/toggle`);
-
-        if (hasApiError(data)) throw data;
-
-        return data;
+        return requestApi(() => api.patch<MessageResponse>(`/owner/business/${id}/toggle`));
     },
 
     closeBusiness: async (id: string) => {
-        const { data } = await api.patch<MessageResponse>(`/owner/business/${id}/close`);
-
-        if (hasApiError(data)) throw data;
-
-        return data;
+        return requestApi(() => api.patch<MessageResponse>(`/owner/business/${id}/close`));
     },
 };

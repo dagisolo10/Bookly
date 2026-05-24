@@ -1,6 +1,7 @@
 "use client";
 
 import { getOwnerBusinessServicesQueryOptions } from "@/hooks/tan stack/query-options";
+import { useSearchPagination } from "@/hooks/shared/use-search-pagination";
 import { useToggleService } from "@/hooks/tan stack/use-owner-service";
 import type { Service } from "@/types/models";
 import { useQuery } from "@tanstack/react-query";
@@ -12,9 +13,8 @@ const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50] as const;
 export function useBusinessServices() {
     const { id: businessId } = useParams<{ id: string }>();
 
-    const [query, setQuery] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const { query, setQuery, currentPage, setCurrentPage, itemsPerPage, handleSearchChange, handleItemsPerPageChange, handleResetQuery } =
+        useSearchPagination(5);
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState<"add" | "edit">("add");
@@ -65,21 +65,6 @@ export function useBusinessServices() {
         toggleService({ serviceId: toggleTarget.id, businessId });
         setToggleTarget(null);
     }, [toggleTarget, toggleService, businessId]);
-
-    const handleItemsPerPageChange = useCallback((val: string) => {
-        setItemsPerPage(Number(val));
-        setCurrentPage(1);
-    }, []);
-
-    const handleSearchChange = useCallback((val: string) => {
-        setQuery(val);
-        setCurrentPage(1);
-    }, []);
-
-    const handleResetQuery = useCallback(() => {
-        setQuery("");
-        setCurrentPage(1);
-    }, []);
 
     return {
         servicesData,

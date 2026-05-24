@@ -1,4 +1,4 @@
-import { hasApiError } from "@/lib/api/api-error";
+import { requestApi } from "@/lib/api/api-error";
 import api from "@/lib/axios";
 import { FullService } from "@/types/models";
 import { CreateServicePayload, UpdateServicePayload } from "@/types/payload";
@@ -6,36 +6,20 @@ import { MessageResponse, OwnerServiceResponse, PaginationResponse } from "@/typ
 
 export const ownerServiceApi = {
     getBusinessServices: async (businessId: string, page: number, limit: number) => {
-        const { data } = await api.get<PaginationResponse<FullService>>(`/owner/service/business/${businessId}`, {
-            params: { page, limit },
-        });
-
-        if (hasApiError(data)) throw data;
-
-        return data;
+        return requestApi(() =>
+            api.get<PaginationResponse<FullService>>(`/owner/service/business/${businessId}`, { params: { page, limit } }),
+        );
     },
 
     createService: async (service: CreateServicePayload) => {
-        const { data } = await api.post<OwnerServiceResponse>("/owner/service", service);
-
-        if (hasApiError(data)) throw data;
-
-        return data;
+        return requestApi(() => api.post<OwnerServiceResponse>("/owner/service", service));
     },
 
     updateService: async (id: string, service: UpdateServicePayload) => {
-        const { data } = await api.patch<OwnerServiceResponse>(`/owner/service/${id}`, service);
-
-        if (hasApiError(data)) throw data;
-
-        return data;
+        return requestApi(() => api.patch<OwnerServiceResponse>(`/owner/service/${id}`, service));
     },
 
     toggleService: async (id: string) => {
-        const { data } = await api.patch<MessageResponse>(`/owner/service/${id}/toggle`, undefined);
-
-        if (hasApiError(data)) throw data;
-
-        return data;
+        return requestApi(() => api.patch<MessageResponse>(`/owner/service/${id}/toggle`, undefined));
     },
 };

@@ -1,43 +1,28 @@
 "use client";
 
 import { getOwnerBusinessesQueryOptions } from "@/hooks/tan stack/query-options";
+import { useSearchPagination } from "@/hooks/shared/use-search-pagination";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 const ITEMS_PER_PAGE_OPTIONS = [8, 16, 24, 32] as const;
 
 export function useBusinessList() {
-    const [query, setQuery] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(8);
+    const { query, currentPage, setCurrentPage, itemsPerPage, handleSearchChange, handleItemsPerPageChange, handleResetQuery } =
+        useSearchPagination(8);
 
     const { data, isPending, error, isFetching } = useQuery(getOwnerBusinessesQueryOptions({ page: currentPage, limit: itemsPerPage }));
 
     const businessData = data ?? {
         page: 1,
         total: 0,
+        data: [],
         totalPages: 1,
         hasMore: false,
-        data: [],
     };
 
     const router = useRouter();
-
-    const handleItemsPerPageChange = useCallback((val: string) => {
-        setItemsPerPage(Number(val));
-        setCurrentPage(1);
-    }, []);
-
-    const handleSearchChange = useCallback((val: string) => {
-        setQuery(val);
-        setCurrentPage(1);
-    }, []);
-
-    const handleResetQuery = useCallback(() => {
-        setQuery("");
-        setCurrentPage(1);
-    }, []);
 
     const handleAddBusiness = useCallback(() => {
         router.push("/business/new");

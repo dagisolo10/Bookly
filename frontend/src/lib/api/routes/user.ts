@@ -1,4 +1,4 @@
-import { hasApiError } from "../api-error";
+import { requestApi } from "../api-error";
 
 import api from "@/lib/axios";
 import { UserPayload } from "@/types/payload";
@@ -6,26 +6,14 @@ import { UserResponse } from "@/types/response";
 
 export const userApi = {
     getUser: async () => {
-        const { data } = await api.get<UserResponse>("/user/me");
-
-        if (hasApiError(data)) throw data;
-
-        return data;
+        return requestApi(() => api.get<UserResponse>("/user/me"));
     },
 
     updateUser: async (user: UserPayload) => {
-        const { data } = await api.patch<UserResponse>("/user", user);
-
-        if (hasApiError(data)) throw data;
-
-        return data;
+        return requestApi(() => api.patch<UserResponse>("/user", user));
     },
 
     becomeBusinessOwner: async () => {
-        const { data } = await api.post<UserResponse>("/user/become-owner");
-
-        if (hasApiError(data)) throw data;
-
-        return data;
+        return requestApi(() => api.post<UserResponse>("/user/become-owner"));
     },
 };
