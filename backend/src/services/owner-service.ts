@@ -31,8 +31,6 @@ export async function getBusinessServices(businessId: string, page: number, limi
             },
         };
 
-        await new Promise((res) => setTimeout(res, 2000));
-
         const [total, services] = await Promise.all([
             prisma.service.count({ where: queryWhere }),
             prisma.service.findMany({
