@@ -26,16 +26,21 @@ async function findOwnedBusiness(id: string, ownerId: string) {
     });
 }
 
-export async function getMyBusinesses(page: number, limit: number): ServiceResult<PaginatedData<FullBusiness>> {
+export async function getMyBusinesses(page: number, limit: number, query: string): ServiceResult<PaginatedData<FullBusiness>> {
     try {
         const ownerId = getUserId();
 
+        const queryWhere = {
+            ownerId,
+            ...(query && {
+                OR: [{ name: { contains: query, mode: Prisma.QueryMode.insensitive } }, { location: { contains: query, mode: Prisma.QueryMode.insensitive } }],
+            }),
+        };
+
         const [total, businesses] = await Promise.all([
-            prisma.business.count({ where: { ownerId } }),
+            prisma.business.count({ where: queryWhere }),
             prisma.business.findMany({
-                where: {
-                    ownerId,
-                },
+                where: queryWhere,
                 take: limit,
                 skip: (page - 1) * limit,
                 include: fullBusinessInclude,

@@ -1,57 +1,42 @@
 "use client";
 
-import { getOwnerBusinessesQueryOptions } from "@/hooks/tan stack/query-options";
 import { useSearchPagination } from "@/hooks/shared/use-search-pagination";
-import { useQuery } from "@tanstack/react-query";
+import { getOwnerBusinessesQueryOptions } from "@/hooks/tan stack/query-options";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 const ITEMS_PER_PAGE_OPTIONS = [8, 16, 24, 32] as const;
 
 export function useBusinessList() {
-    const { query, currentPage, setCurrentPage, itemsPerPage, handleSearchChange, handleItemsPerPageChange, handleResetQuery } =
+    const { query, currentPage, itemsPerPage, debouncedQuery, setCurrentPage, handleResetQuery, handleSearchChange, handleItemsPerPageChange } =
         useSearchPagination(8);
 
-    const { data, isPending, error, isFetching } = useQuery(getOwnerBusinessesQueryOptions({ page: currentPage, limit: itemsPerPage }));
-
-    const businessData = data ?? {
-        page: 1,
-        total: 0,
-        data: [],
-        totalPages: 1,
-        hasMore: false,
-    };
+    const { data, isPending, error, isFetching } = useQuery(
+        getOwnerBusinessesQueryOptions(currentPage, itemsPerPage, debouncedQuery || undefined, { placeholderData: keepPreviousData }),
+    );
 
     const router = useRouter();
+    const handleAddBusiness = useCallback(() => router.push("/business/new"), [router]);
 
-    const handleAddBusiness = useCallback(() => {
-        router.push("/business/new");
-    }, [router]);
-
-    const paginatedBusinesses = useMemo(() => {
-        if (!query.trim()) return businessData.data;
-        const q = query.toLowerCase();
-        return businessData.data.filter((b) => b.name.toLowerCase().includes(q) || b.location?.toLowerCase().includes(q));
-    }, [businessData.data, query]);
+    const businessData = data ?? { page: 1, total: 0, data: [], totalPages: 1, hasMore: false };
 
     return {
-        businessData,
-        businesses: businessData.data,
-        total: businessData.total,
-        hasMore: businessData.hasMore,
-        isPending,
-        error,
-        isFetching,
         query,
+        error,
+        isPending,
+        isFetching,
         currentPage,
+        businessData,
         itemsPerPage,
-        paginatedBusinesses,
-        totalPages: businessData.totalPages,
-        ITEMS_PER_PAGE_OPTIONS,
-        handleSearchChange,
-        handleItemsPerPageChange,
+        setCurrentPage,
         handleResetQuery,
         handleAddBusiness,
-        setCurrentPage,
+        handleSearchChange,
+        ITEMS_PER_PAGE_OPTIONS,
+        handleItemsPerPageChange,
+        total: businessData.total,
+        hasMore: businessData.hasMore,
+        totalPages: businessData.totalPages,
     } as const;
 }

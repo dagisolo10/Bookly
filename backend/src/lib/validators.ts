@@ -118,3 +118,7 @@ export const paginationQuerySchema = z.object({
         .transform((val) => parseInt(val, 10))
         .pipe(z.number().int().positive("Limit must be greater than 0").max(100, "Limit cannot exceed 100")),
 });
+
+export const querySearchSchema = z.object({
+    query: z.string().optional().default(""),
+});

@@ -13,7 +13,7 @@ export default function BusinessPage() {
     const { id } = useParams<{ id: string }>();
 
     const [userQuery, businessQuery, servicesQuery] = useQueries({
-        queries: [syncUserQueryOptions(), getOwnerBusinessByIdQueryOptions(id), getOwnerBusinessServicesQueryOptions(id, { page: 1, limit: 5 })],
+        queries: [syncUserQueryOptions(), getOwnerBusinessByIdQueryOptions(id), getOwnerBusinessServicesQueryOptions(id, 1, 5)],
     });
 
     const isPending = [userQuery, businessQuery, servicesQuery].some((q) => q.isPending);

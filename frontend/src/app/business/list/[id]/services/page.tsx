@@ -15,14 +15,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 
-import ListPageHeader from "@/components/business/shared/list-page-header";
 import ServicesTable from "@/components/business/services/services-table";
+import ListPageHeader from "@/components/business/shared/list-page-header";
 import PaginationContainer from "@/components/business/shared/pagination-container";
 
 export default function BusinessServicesPage() {
     const ubs = useBusinessServices();
 
-    if (ubs.isPending) {
+    if (ubs.isPending && !ubs.servicesData.data) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center">
                 <Spinner className="size-8" />
@@ -56,7 +56,7 @@ export default function BusinessServicesPage() {
                     handleAdd={ubs.handleAdd}
                     handleEdit={ubs.handleEdit}
                     reset={() => ubs.setQuery("")}
-                    services={ubs.filteredServices}
+                    services={ubs.servicesData.data}
                     hasServices={ubs.hasAnyServices}
                     noSearchResult={ubs.showEmptySearch}
                     setToggleTarget={ubs.setToggleTarget}

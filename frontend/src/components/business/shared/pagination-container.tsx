@@ -49,8 +49,12 @@ export default function PaginationContainer(props: PaginationContainerProps) {
                 <PaginationContent className="px-2">
                     <PaginationItem>
                         <PaginationPrevious
-                            onClick={currentPage > 1 ? () => setCurrentPage(currentPage - 1) : undefined}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (currentPage > 1) setCurrentPage(currentPage - 1);
+                            }}
                             aria-disabled={currentPage <= 1}
+                            tabIndex={currentPage <= 1 ? -1 : 0}
                             className={currentPage <= 1 ? "pointer-events-none opacity-50" : undefined}
                         />
                     </PaginationItem>
@@ -61,8 +65,12 @@ export default function PaginationContainer(props: PaginationContainerProps) {
 
                     <PaginationItem>
                         <PaginationNext
-                            onClick={hasMore ? () => setCurrentPage(currentPage + 1) : undefined}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (hasMore) setCurrentPage(currentPage + 1);
+                            }}
                             aria-disabled={!hasMore}
+                            tabIndex={!hasMore ? -1 : 0}
                             className={!hasMore ? "pointer-events-none opacity-50" : undefined}
                         />
                     </PaginationItem>

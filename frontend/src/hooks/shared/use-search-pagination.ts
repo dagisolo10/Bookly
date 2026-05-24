@@ -1,13 +1,24 @@
 "use client";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export function useSearchPagination(defaultItemsPerPage: number) {
     const [query, setQuery] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
+
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedQuery(query);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [query]);
+
     const handleItemsPerPageChange = useCallback((val: string) => {
-        setItemsPerPage(Number(val));
+        const parsed = Number.parseInt(val, 10);
+        if (!Number.isFinite(parsed) || parsed <= 0) return;
+        setItemsPerPage(parsed);
         setCurrentPage(1);
     }, []);
 
@@ -19,16 +30,18 @@ export function useSearchPagination(defaultItemsPerPage: number) {
     const handleResetQuery = useCallback(() => {
         setQuery("");
         setCurrentPage(1);
+        setDebouncedQuery("");
     }, []);
 
     return {
         query,
         setQuery,
         currentPage,
-        setCurrentPage,
         itemsPerPage,
+        setCurrentPage,
+        debouncedQuery,
+        handleResetQuery,
         handleSearchChange,
         handleItemsPerPageChange,
-        handleResetQuery,
     } as const;
 }

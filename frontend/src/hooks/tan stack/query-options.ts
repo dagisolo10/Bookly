@@ -16,13 +16,15 @@ export function syncUserQueryOptions<TData = FullUser, TError = Error>(options?:
 }
 
 export function getOwnerBusinessesQueryOptions<TData = PaginatedData<FullBusiness>, TError = Error>(
-    pagination: { page: number; limit: number },
+    page: number,
+    limit: number,
+    query?: string,
     options?: QueryOptions<PaginatedData<FullBusiness>, TData, TError>,
 ) {
     return queryOptions({
         ...options,
-        queryKey: ["owner", "business", "list", pagination.page, pagination.limit],
-        queryFn: () => ownerBusinessApi.getMyBusinesses(pagination.page, pagination.limit),
+        queryKey: ["owner", "business", "list", page, limit, query],
+        queryFn: () => ownerBusinessApi.getMyBusinesses(page, limit, query),
     });
 }
 
@@ -39,13 +41,15 @@ export function getOwnerBusinessByIdQueryOptions<TData = FullBusiness, TError = 
 
 export function getOwnerBusinessServicesQueryOptions<TData = PaginatedData<FullService>, TError = Error>(
     businessId: string,
-    pagination: { page: number; limit: number },
+    page: number,
+    limit: number,
+    query?: string,
     options?: QueryOptions<PaginatedData<FullService>, TData, TError>,
 ) {
     return queryOptions({
         ...options,
-        queryKey: ["owner", "service", "list", businessId, pagination.page, pagination.limit],
-        queryFn: () => ownerServiceApi.getBusinessServices(businessId, pagination.page, pagination.limit),
+        queryKey: ["owner", "service", "list", businessId, page, limit, query],
+        queryFn: () => ownerServiceApi.getBusinessServices(businessId, page, limit, query),
     });
 }
 

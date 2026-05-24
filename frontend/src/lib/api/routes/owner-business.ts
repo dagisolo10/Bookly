@@ -7,10 +7,8 @@ import { CreateBusinessPayload, UpdateBusinessPayload } from "@/types/payload";
 import { MessageResponse, OwnerBusinessResponse, PaginationResponse } from "@/types/response";
 
 export const ownerBusinessApi = {
-    getMyBusinesses: async (page: number, limit: number) => {
-        const data = await requestApi(() =>
-            api.get<PaginationResponse<FullBusiness>>("/owner/business/my", { params: { page, limit } }),
-        );
+    getMyBusinesses: async (page: number, limit: number, query?: string) => {
+        const data = await requestApi(() => api.get<PaginationResponse<FullBusiness>>("/owner/business/my", { params: { page, limit, query } }));
 
         data.data.forEach((b) => BusinessHoursSchema.array().parse(b.hours));
 

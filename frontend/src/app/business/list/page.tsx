@@ -10,7 +10,7 @@ import { ListRestart } from "lucide-react";
 export default function BusinessList() {
     const ubl = useBusinessList();
 
-    if (ubl.isPending) {
+    if (ubl.isPending && !ubl.businessData.data) {
         return <BusinessListLoading />;
     }
 
@@ -25,18 +25,18 @@ export default function BusinessList() {
     return (
         <div className="space-y-6">
             <ListPageHeader
-                title="My Businesses"
-                description="Manage your storefronts, view ratings, and update service listings."
                 query={ubl.query}
-                onSearchChange={ubl.handleSearchChange}
-                isFetching={ubl.isFetching}
-                placeholder="Search your businesses by name or city..."
-                buttonLabel="Add Business"
+                title="My Businesses"
                 addHref="/business/new"
+                buttonLabel="Add Business"
+                isFetching={ubl.isFetching}
+                onSearchChange={ubl.handleSearchChange}
+                placeholder="Search your businesses by name or city..."
+                description="Manage your storefronts, view ratings, and update service listings."
             />
 
             {(() => {
-                if (ubl.businessData.data.length === 0) {
+                if (ubl.businessData.data.length === 0 && !ubl.query) {
                     return (
                         <EmptyState
                             button="Add Business"
@@ -47,7 +47,7 @@ export default function BusinessList() {
                     );
                 }
 
-                if (ubl.paginatedBusinesses.length === 0) {
+                if (ubl.businessData.data.length === 0) {
                     return (
                         <EmptyState
                             button="Reset"
@@ -61,7 +61,7 @@ export default function BusinessList() {
 
                 return (
                     <div>
-                        <BusinessGrid businesses={ubl.paginatedBusinesses} linkPath="/business/list" />
+                        <BusinessGrid businesses={ubl.businessData.data} linkPath="/business/list" />
 
                         <PaginationContainer
                             total={ubl.total}

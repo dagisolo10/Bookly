@@ -16,7 +16,7 @@ const fullServiceInclude = {
     bookings: true,
 } satisfies Prisma.ServiceInclude;
 
-export async function getBusinessServices(businessId: string, page: number, limit: number): ServiceResult<PaginatedData<FullService>> {
+export async function getBusinessServices(businessId: string, page: number, limit: number, query: string): ServiceResult<PaginatedData<FullService>> {
     try {
         const ownerId = getUserId();
 
@@ -25,7 +25,13 @@ export async function getBusinessServices(businessId: string, page: number, limi
                 id: businessId,
                 ownerId,
             },
+            name: {
+                contains: query,
+                mode: Prisma.QueryMode.insensitive,
+            },
         };
+
+        await new Promise((res) => setTimeout(res, 2000));
 
         const [total, services] = await Promise.all([
             prisma.service.count({ where: queryWhere }),

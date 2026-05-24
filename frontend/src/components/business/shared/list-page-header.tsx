@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { Plus, Search } from "lucide-react";
 import Link from "next/link";
+import { Plus, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ListPageHeaderProps {
     title: string;
@@ -46,8 +46,8 @@ export default function ListPageHeader({ title, description, query, onSearchChan
                     <Input
                         value={query}
                         className="pl-9"
-                        onChange={(e) => onSearchChange(e.target.value)}
                         placeholder={placeholder}
+                        onChange={(e) => onSearchChange(e.target.value)}
                     />
                 </div>
                 {isFetching && <Spinner className="size-4" />}

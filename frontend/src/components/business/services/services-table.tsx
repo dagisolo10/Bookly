@@ -21,21 +21,6 @@ interface ServiceTableProps {
 
 export default function ServicesTable({ hasServices, noSearchResult, services, handleEdit, handleAdd, setToggleTarget, reset }: ServiceTableProps) {
     const renderBody = () => {
-        if (!hasServices) {
-            return (
-                <TableRow>
-                    <TableCell colSpan={7} className="h-72 text-center">
-                        <EmptyState
-                            button="Add Service"
-                            title="No services yet"
-                            description="Get started by adding your first service offering."
-                            onClick={handleAdd}
-                        />
-                    </TableCell>
-                </TableRow>
-            );
-        }
-
         if (noSearchResult) {
             return (
                 <TableRow>
@@ -55,6 +40,21 @@ export default function ServicesTable({ hasServices, noSearchResult, services, h
                                 Reset
                             </Button>
                         </div>
+                    </TableCell>
+                </TableRow>
+            );
+        }
+
+        if (!hasServices) {
+            return (
+                <TableRow>
+                    <TableCell colSpan={7} className="h-72 text-center">
+                        <EmptyState
+                            button="Add Service"
+                            title="No services yet"
+                            description="Get started by adding your first service offering."
+                            onClick={handleAdd}
+                        />
                     </TableCell>
                 </TableRow>
             );

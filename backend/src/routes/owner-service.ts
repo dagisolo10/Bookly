@@ -1,5 +1,5 @@
 import { handler } from "@/lib/handler";
-import { createServiceSchema, paginationQuerySchema, serviceBusinessIdSchema, serviceIdSchema, updateServiceSchema } from "@/lib/validators";
+import { createServiceSchema, paginationQuerySchema, querySearchSchema, serviceBusinessIdSchema, serviceIdSchema, updateServiceSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
 import { requireBusinessRole } from "@/middlewares/role";
 import { validate } from "@/middlewares/validation";
@@ -13,13 +13,15 @@ router.get(
     requireAuth,
     requireUserProfile,
     requireBusinessRole,
+    validate(querySearchSchema, "query"),
     validate(paginationQuerySchema, "query"),
     validate(serviceBusinessIdSchema, "params"),
     handler((req: Request) => {
         const businessId = req.params["businessId"] as string;
         const page = parseInt(req.query["page"] as string, 10) || 1;
         const limit = parseInt(req.query["limit"] as string, 10) || 10;
-        return getBusinessServices(businessId, page, limit);
+        const query = req.query["query"] as string;
+        return getBusinessServices(businessId, page, limit, query);
     }),
 );
 
