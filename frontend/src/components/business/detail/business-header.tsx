@@ -1,5 +1,4 @@
-import { Button } from "../ui/button";
-
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { FullBusiness } from "@/types/models";
@@ -40,7 +39,7 @@ export default function BusinessHeader({ business, show }: BusinessHeaderProps) 
                 <div className="absolute top-6 right-6">
                     <Link href={`/business/list/${business.id}/settings`}>
                         <Button
-                            variant={`secondary`}
+                            variant="secondary"
                             className="cursor-pointer rounded-full border-none bg-white/20 text-white backdrop-blur-md hover:bg-white/40"
                         >
                             <Settings className="size-4" />

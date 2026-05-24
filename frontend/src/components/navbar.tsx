@@ -1,6 +1,6 @@
 "use client";
-import { syncUserQueryOptions } from "@/hooks/query-options";
-import { useBecomeBusinessOwner } from "@/hooks/use-user";
+import { syncUserQueryOptions } from "@/hooks/tan stack/query-options";
+import { useBecomeBusinessOwner } from "@/hooks/tan stack/use-user";
 import { UserButton } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { Briefcase, Settings, User } from "lucide-react";

@@ -86,3 +86,10 @@ export type BusinessStatus = "Active" | "Paused" | "Closed";
 export type BookingStatus = "Pending" | "Confirmed" | "Cancelled" | "Completed";
 
 export type WeekDay = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+
+export type PaginatedServicesData = {
+    page: number;
+    total: number;
+    totalPages: number;
+    services: FullService[];
+};

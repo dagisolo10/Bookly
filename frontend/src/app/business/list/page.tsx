@@ -1,60 +1,99 @@
 "use client";
 import { Button } from "@//components/ui/button";
-import BusinessListLoading from "@/components/business/business-loading";
-import BusinessSearch from "@/components/business/business-search";
-import { getOwnerBusinessesQueryOptions } from "@/hooks/query-options";
-import { useQuery } from "@tanstack/react-query";
-import { Plus, Store } from "lucide-react";
+import BusinessGrid from "@/components/business/list/business-grid";
+import BusinessListLoading from "@/components/business/loading/business-list-loading";
+import PaginationContainer from "@/components/business/shared/pagination-container";
+import EmptyState from "@/components/empty-state";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { useBusinessList } from "@/hooks/business/use-business-list";
+import { ListRestart, Plus, Search } from "lucide-react";
 import Link from "next/link";
 
 export default function BusinessList() {
-    const { data: businesses, isPending, error } = useQuery(getOwnerBusinessesQueryOptions());
+    const ubl = useBusinessList();
 
-    if (isPending) {
+    if (ubl.isPending) {
         return <BusinessListLoading />;
     }
 
-    if (error) {
+    if (ubl.error) {
         return (
             <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Error: {error.message}</p>
+                <p className="text-destructive">Error: {ubl.error.message}</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-4xl font-bold tracking-tight">My Businesses</h1>
-                    <p className="text-muted-foreground mt-2 text-sm">Manage your storefronts, view ratings, and update service listings.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">My Businesses</h1>
+                    <p className="text-muted-foreground mt-1 text-sm">Manage your storefronts, view ratings, and update service listings.</p>
                 </div>
 
                 <Button asChild>
                     <Link href="/business/new">
                         <Plus className="size-4" />
-                        Add New Business
+                        Add Business
                     </Link>
                 </Button>
             </div>
 
-            {businesses.length > 0 ? (
-                <div>
-                    <BusinessSearch businesses={businesses} linkPath="/business/list" placeholder="Search your businesses by name or city..." />
+            <div className="flex items-center gap-4">
+                <div className="relative max-w-sm flex-1">
+                    <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+                    <Input
+                        id="query"
+                        value={ubl.query}
+                        className="pl-9"
+                        onChange={(e) => ubl.handleSearchChange(e.target.value)}
+                        placeholder="Search your businesses by name or city..."
+                    />
                 </div>
-            ) : (
-                <EmptyBusiness />
-            )}
-        </div>
-    );
-}
+                {ubl.isFetching && <Spinner className="size-4" />}
+            </div>
 
-function EmptyBusiness() {
-    return (
-        <div className="flex h-96 flex-col items-center justify-center rounded-3xl border-2 border-dashed">
-            <Store className="text-muted-foreground mb-4 size-12" />
-            <h2 className="text-xl font-semibold">No businesses found</h2>
-            <p className="text-muted-foreground">Get started by registering your first business.</p>
+            {(() => {
+                if (ubl.businesses.length === 0) {
+                    return (
+                        <EmptyState
+                            button="Add Business"
+                            title="No businesses found"
+                            onClick={ubl.handleAddBusiness}
+                            description="Get started by registering your first business."
+                        />
+                    );
+                }
+
+                if (ubl.paginatedBusinesses.length === 0) {
+                    return (
+                        <EmptyState
+                            button="Reset"
+                            icon={ListRestart}
+                            onClick={ubl.handleResetQuery}
+                            title="No businesses match your search"
+                            description="Try adjusting your keywords or location."
+                        />
+                    );
+                }
+
+                return (
+                    <div>
+                        <BusinessGrid businesses={ubl.paginatedBusinesses} linkPath="/business/list" />
+
+                        <PaginationContainer
+                            totalPages={ubl.totalPages}
+                            currentPage={ubl.currentPage}
+                            itemsPerPage={ubl.itemsPerPage}
+                            setCurrentPage={ubl.setCurrentPage}
+                            ITEMS_PER_PAGE_OPTIONS={ubl.ITEMS_PER_PAGE_OPTIONS}
+                            onValueChange={(val) => ubl.handleItemsPerPageChange(val)}
+                        />
+                    </div>
+                );
+            })()}
         </div>
     );
 }

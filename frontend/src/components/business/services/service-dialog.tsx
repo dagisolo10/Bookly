@@ -5,7 +5,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateService, useUpdateService } from "@/hooks/use-owner-service";
+import { useCreateService, useUpdateService } from "@/hooks/tan stack/use-owner-service";
 import { Service } from "@/types/models";
 import { SyntheticEvent } from "react";
 
@@ -17,7 +17,7 @@ interface DialogProp {
     setOpen: (val: boolean) => void;
 }
 
-export function ServiceDialog({ open, setOpen, mode = "add", service, businessId }: DialogProp) {
+export default function ServiceDialog({ open, setOpen, mode = "add", service, businessId }: DialogProp) {
     const addDesc = "Create a new offering for your clients. Fill in the details below to list this service on your booking profile.";
     const editDesc = "Update the details of your service. These changes will reflect on your business page immediately.";
 

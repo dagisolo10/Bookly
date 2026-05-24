@@ -1,7 +1,8 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import AuthButton from "@/components/auth-button";
 import FeatureCard from "@/components/feature-card";
+import { Button } from "@/components/ui/button";
 import { BarChart3, Calendar, CalendarCheck2, ChevronRight, Search, ShieldCheck, Sparkles, Store } from "lucide-react";
+import Link from "next/link";
 
 export default function Page() {
     return (
@@ -22,16 +23,14 @@ export default function Page() {
                 </p>
 
                 <div className="flex items-center justify-center gap-4">
-                    <Button size={"cta"} asChild>
-                        <Link href="/handler/sign-up">Get started</Link>
-                    </Button>
+                    <AuthButton />
 
                     <Button asChild size={"cta"} variant={"outline"}>
                         <Link href="/about">Learn more</Link>
                     </Button>
                 </div>
             </section>
-          
+
             <section className="mx-auto max-w-6xl space-y-12">
                 <div className="space-y-2 text-center">
                     <p className="text-sm font-semibold tracking-[0.2em] text-zinc-500 uppercase">For customers</p>
@@ -45,7 +44,7 @@ export default function Page() {
                     <FeatureCard icon={CalendarCheck2} title="Manage" text="View, reschedule, or cancel bookings from your personal dashboard." />
                 </div>
             </section>
-     
+
             <section className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2">
                 <div className="space-y-6">
                     <div className="space-y-4">
@@ -82,7 +81,7 @@ export default function Page() {
                     </div>
                 </div>
             </section>
-    
+
             <section className="bg-primary text-primary-foreground space-y-6 border py-12 text-center">
                 <h2 className="text-4xl font-bold">Ready to get started?</h2>
 

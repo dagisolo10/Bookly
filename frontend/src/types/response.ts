@@ -1,4 +1,4 @@
-import { FullBooking, FullBusiness, FullService, FullUser } from "./models";
+import { FullBooking, FullBusiness, FullService, FullUser, PaginatedServicesData } from "./models";
 
 import { ApiMessage, ApiResult } from "@/lib/api/api-response";
 
@@ -27,6 +27,7 @@ export type OwnerBusinessListResponse = ApiResult<FullBusiness[]>;
 
 export type OwnerServiceResponse = ApiResult<FullService>;
 export type OwnerServicesResponse = ApiResult<FullService[]>;
+export type OwnerPaginatedServicesResponse = ApiResult<PaginatedServicesData>;
 
 /**
  *  Owner - Booking Response

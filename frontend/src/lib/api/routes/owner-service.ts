@@ -4,7 +4,7 @@ import { CreateServicePayload, UpdateServicePayload } from "@/types/payload";
 import { MessageResponse, OwnerServiceResponse, OwnerServicesResponse } from "@/types/response";
 
 export const ownerServiceApi = {
-    getBusinessServices: async (businessId: string) => {
+    getBusinessServices: async (businessId: string, _page?: number, _limit?: number) => {
         const { data } = await api.get<OwnerServicesResponse>(`/owner/service/business/${businessId}`);
 
         if (hasApiError(data)) throw data;

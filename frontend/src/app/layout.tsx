@@ -26,7 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <body className="min-h-screen">
                 <ClerkProvider>
                     <QueryProvider>
-                        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+                        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
                             <UserSync>
                                 <Navbar />
                                 {children}
