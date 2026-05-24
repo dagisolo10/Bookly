@@ -1,8 +1,8 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Loading() {
+export default function BusinessListLoading() {
     return (
-        <main className="mx-auto min-h-screen p-8 px-4 sm:px-12">
+        <div>
             <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div className="space-y-2">
                     <Skeleton className="h-10 w-56" />
@@ -56,6 +56,6 @@ export default function Loading() {
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

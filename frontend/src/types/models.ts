@@ -1,5 +1,5 @@
-import z from "zod";
 import { BusinessHoursSchema } from "@/lib/validation";
+import z from "zod";
 
 /**
  * Base Models
@@ -37,7 +37,7 @@ export type Service = {
     price: number;
     thumbnail: string | null;
     isActive: boolean;
-    category: string | null;
+    category: string;
     createdAt: string;
     updatedAt: string;
 
@@ -71,7 +71,6 @@ export type FullService = Service & {
 };
 
 export type FullBusiness = Business & {
-    services: Service[];
     hours: BusinessHour[];
 };
 
@@ -87,3 +86,10 @@ export type BusinessStatus = "Active" | "Paused" | "Closed";
 export type BookingStatus = "Pending" | "Confirmed" | "Cancelled" | "Completed";
 
 export type WeekDay = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+
+export type PaginatedData<T> = {
+    data: T[];
+    total: number;
+    hasMore: boolean;
+    totalPages: number;
+};

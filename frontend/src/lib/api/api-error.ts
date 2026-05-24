@@ -52,3 +52,9 @@ export function messageFromAxiosError(err: unknown): string {
 export function hasApiError(result: unknown): result is ApiError {
     return typeof result === "object" && result !== null && "__isApiError" in result && (result as ApiError).__isApiError === true;
 }
+
+export async function requestApi<T>(request: () => Promise<{ data: T | ApiError }>): Promise<T> {
+    const { data } = await request();
+    if (hasApiError(data)) throw data;
+    return data;
+}

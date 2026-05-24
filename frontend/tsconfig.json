@@ -30,7 +30,7 @@
         "noUnusedParameters": true,
         "forceConsistentCasingInFileNames": true,
         "noPropertyAccessFromIndexSignature": true,
-        "noUncheckedSideEffectImports": true,
+        // "noUncheckedSideEffectImports": true,
         "allowUnreachableCode": false,
 
         "noImplicitAny": true,

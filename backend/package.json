@@ -8,7 +8,8 @@
         "start": "bun run src/index.ts",
         "sync": "bunx prisma db push && bunx prisma generate",
         "reset": "bunx prisma db push --force-reset && bunx prisma generate",
-        "s": "bunx prisma studio"
+        "s": "bunx prisma studio",
+        "seed": "bun run src/prisma/seed.ts"
     },
     "devDependencies": {
         "@types/bun": "latest",
@@ -23,6 +24,7 @@
     },
     "dependencies": {
         "@clerk/express": "^2.1.17",
+        "@ngneat/falso": "^8.0.2",
         "@prisma/adapter-pg": "^7.8.0",
         "@prisma/client": "^7.8.0",
         "cors": "^2.8.6",

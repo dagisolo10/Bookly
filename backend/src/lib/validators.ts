@@ -80,6 +80,10 @@ export const serviceIdSchema = z.object({
     id: z.string().min(1, "Service Id is required"),
 });
 
+export const serviceBusinessIdSchema = z.object({
+    businessId: z.string().min(1, "Business Id is required"),
+});
+
 /**
  * Booking Schema
  */
@@ -94,4 +98,27 @@ export const bookingIdSchema = z.object({
 
 export const bookingBusinessIdSchema = z.object({
     businessId: z.string().min(1, "Business Id is required"),
+});
+
+/**
+ * Pagination Schema
+ */
+
+export const paginationQuerySchema = z.object({
+    page: z
+        .string()
+        .optional()
+        .default("1")
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number().int().positive("Page must be greater than 0")),
+    limit: z
+        .string()
+        .optional()
+        .default("10")
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number().int().positive("Limit must be greater than 0").max(100, "Limit cannot exceed 100")),
+});
+
+export const querySearchSchema = z.object({
+    query: z.string().optional().default(""),
 });

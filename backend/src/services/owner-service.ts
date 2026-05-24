@@ -1,9 +1,9 @@
-import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
-import { Prisma, type Booking, type Service } from "@prisma/client";
-import type { ServiceMessage, ServiceResult } from "@/types/response";
 import type { createServiceSchema, updateServiceSchema } from "@/lib/validators";
+import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
+import { Prisma, type Booking, type Service } from "@prisma/client";
+import type z from "zod";
 
 type CreateServicePayload = z.infer<typeof createServiceSchema>;
 type UpdateServicePayload = z.infer<typeof updateServiceSchema>;
@@ -15,6 +15,62 @@ type FullService = Service & {
 const fullServiceInclude = {
     bookings: true,
 } satisfies Prisma.ServiceInclude;
+
+export async function getBusinessServices(businessId: string, page: number, limit: number, query: string): ServiceResult<PaginatedData<FullService>> {
+    try {
+        const ownerId = getUserId();
+
+        const queryWhere = {
+            business: {
+                id: businessId,
+                ownerId,
+            },
+            name: {
+                contains: query,
+                mode: Prisma.QueryMode.insensitive,
+            },
+        };
+
+        const [total, services] = await Promise.all([
+            prisma.service.count({ where: queryWhere }),
+            prisma.service.findMany({
+                where: queryWhere,
+                take: limit,
+                skip: (page - 1) * limit,
+                include: fullServiceInclude,
+            }),
+        ]);
+
+        if (!services.length && total === 0) {
+            const businessExists = await prisma.business.findFirst({
+                where: {
+                    id: businessId,
+                    ownerId,
+                },
+                select: {
+                    id: true,
+                },
+            });
+
+            if (!businessExists) {
+                return { error: "Business not found", code: 404 };
+            }
+        }
+
+        const totalPages = Math.ceil(total / limit);
+        const hasMore = page < totalPages;
+
+        return {
+            total,
+            hasMore,
+            data: services,
+            totalPages: totalPages || 1,
+        };
+    } catch (error) {
+        console.error(error);
+        return { error: "Internal server error", code: 500 };
+    }
+}
 
 export async function createService(data: CreateServicePayload): ServiceResult<FullService> {
     try {

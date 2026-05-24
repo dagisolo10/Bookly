@@ -1,21 +1,19 @@
-import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
-import type { ServiceMessage, ServiceResult } from "@/types/response";
 import type { createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
-import { Prisma, type Business, type BusinessHour as PrismaBusinessHour, type Service } from "@prisma/client";
+import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
+import { Prisma, type Business, type BusinessHour as PrismaBusinessHour } from "@prisma/client";
+import type z from "zod";
 
 type FullBusiness = Business & {
-    services: Service[];
     hours: PrismaBusinessHour[];
 };
 
-type CreateBusinessPayload = z.infer<typeof createBusinessSchema>;
-type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;
+export type CreateBusinessPayload = z.infer<typeof createBusinessSchema>;
+export type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;
 
 const fullBusinessInclude = {
     hours: true,
-    services: true,
 } satisfies Prisma.BusinessInclude;
 
 async function findOwnedBusiness(id: string, ownerId: string) {
@@ -28,18 +26,36 @@ async function findOwnedBusiness(id: string, ownerId: string) {
     });
 }
 
-export async function getMyBusinesses(): ServiceResult<FullBusiness[]> {
+export async function getMyBusinesses(page: number, limit: number, query: string): ServiceResult<PaginatedData<FullBusiness>> {
     try {
         const ownerId = getUserId();
 
-        const businesses = await prisma.business.findMany({
-            where: {
-                ownerId,
-            },
-            include: fullBusinessInclude,
-        });
+        const queryWhere = {
+            ownerId,
+            ...(query && {
+                OR: [{ name: { contains: query, mode: Prisma.QueryMode.insensitive } }, { location: { contains: query, mode: Prisma.QueryMode.insensitive } }],
+            }),
+        };
 
-        return businesses;
+        const [total, businesses] = await Promise.all([
+            prisma.business.count({ where: queryWhere }),
+            prisma.business.findMany({
+                where: queryWhere,
+                take: limit,
+                skip: (page - 1) * limit,
+                include: fullBusinessInclude,
+            }),
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+        const hasMore = page < totalPages;
+
+        return {
+            total,
+            hasMore,
+            totalPages,
+            data: businesses,
+        };
     } catch (error) {
         console.error(error);
         return { error: "Internal server error", code: 500 };

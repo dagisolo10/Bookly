@@ -1,34 +1,25 @@
-import { z } from "zod";
 import type { NextFunction, Request, Response } from "express";
-import type { ParamsDictionary } from "express-serve-static-core";
+import { z } from "zod";
 
 type Target = "body" | "params" | "query";
 
 export function validate<T extends z.ZodTypeAny>(schema: T, target: Target) {
     return (req: Request, res: Response, next: NextFunction) => {
-        const result = schema.safeParse(req[target]);
+        const parsed = schema.safeParse(req[target]);
 
-        if (!result.success) {
+        if (!parsed.success) {
             return res.status(400).json({
                 error: "Validation failed",
-                details: result.error.issues.map((e) => ({
+                details: parsed.error.issues.map((e) => ({
                     field: e.path.join("."),
                     message: e.message,
                 })),
             });
         }
 
-        switch (target) {
-            case "body":
-                req.body = result.data;
-                break;
-            case "params":
-                req.params = result.data as unknown as ParamsDictionary;
-                break;
-            case "query":
-                req.query = result.data as unknown as Request["query"];
-                break;
-        }
+        const current = req[target] as Record<string, unknown>;
+        Object.keys(current).forEach((key) => delete current[key]);
+        Object.assign(current, parsed.data as Record<string, unknown>);
         return next();
     };
 }
