@@ -1,14 +1,11 @@
 "use client";
-import { Button } from "@//components/ui/button";
 import BusinessGrid from "@/components/business/list/business-grid";
 import BusinessListLoading from "@/components/business/loading/business-list-loading";
+import ListPageHeader from "@/components/business/shared/list-page-header";
 import PaginationContainer from "@/components/business/shared/pagination-container";
 import EmptyState from "@/components/empty-state";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
 import { useBusinessList } from "@/hooks/business/use-business-list";
-import { ListRestart, Plus, Search } from "lucide-react";
-import Link from "next/link";
+import { ListRestart } from "lucide-react";
 
 export default function BusinessList() {
     const ubl = useBusinessList();
@@ -27,33 +24,16 @@ export default function BusinessList() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">My Businesses</h1>
-                    <p className="text-muted-foreground mt-1 text-sm">Manage your storefronts, view ratings, and update service listings.</p>
-                </div>
-
-                <Button asChild>
-                    <Link href="/business/new">
-                        <Plus className="size-4" />
-                        Add Business
-                    </Link>
-                </Button>
-            </div>
-
-            <div className="flex items-center gap-4">
-                <div className="relative max-w-sm flex-1">
-                    <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                    <Input
-                        id="query"
-                        value={ubl.query}
-                        className="pl-9"
-                        onChange={(e) => ubl.handleSearchChange(e.target.value)}
-                        placeholder="Search your businesses by name or city..."
-                    />
-                </div>
-                {ubl.isFetching && <Spinner className="size-4" />}
-            </div>
+            <ListPageHeader
+                title="My Businesses"
+                description="Manage your storefronts, view ratings, and update service listings."
+                query={ubl.query}
+                onSearchChange={ubl.handleSearchChange}
+                isFetching={ubl.isFetching}
+                placeholder="Search your businesses by name or city..."
+                buttonLabel="Add Business"
+                addHref="/business/new"
+            />
 
             {(() => {
                 if (ubl.businessData.data.length === 0) {

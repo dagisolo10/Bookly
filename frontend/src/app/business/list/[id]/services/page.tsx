@@ -13,13 +13,11 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 
+import ListPageHeader from "@/components/business/shared/list-page-header";
 import ServicesTable from "@/components/business/services/services-table";
 import PaginationContainer from "@/components/business/shared/pagination-container";
-import { Plus, Search } from "lucide-react";
 
 export default function BusinessServicesPage() {
     const ubs = useBusinessServices();
@@ -42,29 +40,16 @@ export default function BusinessServicesPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Services</h1>
-                    <p className="text-muted-foreground mt-1 text-sm">Manage your business service offerings</p>
-                </div>
-                <Button onClick={ubs.handleAdd}>
-                    <Plus className="size-4" />
-                    Add Service
-                </Button>
-            </div>
-
-            <div className="flex items-center gap-4">
-                <div className="relative max-w-sm flex-1">
-                    <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                    <Input
-                        placeholder="Search services..."
-                        value={ubs.query}
-                        onChange={(e) => ubs.handleSearchChange(e.target.value)}
-                        className="pl-9"
-                    />
-                </div>
-                {ubs.isFetching && <Spinner className="size-4" />}
-            </div>
+            <ListPageHeader
+                title="Services"
+                description="Manage your business service offerings"
+                query={ubs.query}
+                onSearchChange={ubs.handleSearchChange}
+                isFetching={ubs.isFetching}
+                placeholder="Search services..."
+                buttonLabel="Add Service"
+                onAdd={ubs.handleAdd}
+            />
 
             <div className="rounded-xl border">
                 <ServicesTable
