@@ -12,11 +12,13 @@ import { useParams } from "next/navigation";
 export default function BusinessPage() {
     const { id } = useParams<{ id: string }>();
 
-    const queries = useQueries({ queries: [syncUserQueryOptions(), getOwnerBusinessByIdQueryOptions(id), getOwnerBusinessServicesQueryOptions(id)] });
+    const queries = useQueries({
+        queries: [syncUserQueryOptions(), getOwnerBusinessByIdQueryOptions(id), getOwnerBusinessServicesQueryOptions(id, { page: 1, limit: 5 })],
+    });
 
     const user = queries[0]?.data;
     const business = queries[1]?.data;
-    const services = queries[2]?.data;
+    const services = queries[2]?.data?.data;
 
     const isPending = queries.some((q) => q.isPending);
 
@@ -71,7 +73,7 @@ export default function BusinessPage() {
 
             <div className="py-8">
                 <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
-                    <ServiceList businessId={business.id} services={services || []} />
+                    <ServiceList businessId={business.id} services={services ?? []} />
 
                     <aside className="top-20 order-1 space-y-6 sm:sticky lg:order-2">
                         <BusinessHours timezone={business.timeZone} hours={business.hours} />

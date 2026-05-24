@@ -87,9 +87,9 @@ export type BookingStatus = "Pending" | "Confirmed" | "Cancelled" | "Completed";
 
 export type WeekDay = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
 
-export type PaginatedServicesData = {
-    page: number;
+export type PaginatedData<T> = {
+    data: T[];
     total: number;
+    hasMore: boolean;
     totalPages: number;
-    services: FullService[];
 };

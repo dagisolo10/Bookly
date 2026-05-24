@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import type { createServiceSchema, updateServiceSchema } from "@/lib/validators";
-import type { ServiceMessage, ServiceResult } from "@/types/response";
+import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
 import { Prisma, type Booking, type Service } from "@prisma/client";
 import type z from "zod";
 
@@ -16,21 +16,28 @@ const fullServiceInclude = {
     bookings: true,
 } satisfies Prisma.ServiceInclude;
 
-export async function getBusinessServices(businessId: string): ServiceResult<FullService[]> {
+export async function getBusinessServices(businessId: string, page: number, limit: number): ServiceResult<PaginatedData<FullService>> {
     try {
         const ownerId = getUserId();
 
-        const services = await prisma.service.findMany({
-            where: {
-                business: {
-                    id: businessId,
-                    ownerId,
-                },
+        const queryWhere = {
+            business: {
+                id: businessId,
+                ownerId,
             },
-            include: fullServiceInclude,
-        });
+        };
 
-        if (!services.length) {
+        const [total, services] = await Promise.all([
+            prisma.service.count({ where: queryWhere }),
+            prisma.service.findMany({
+                where: queryWhere,
+                take: limit,
+                skip: (page - 1) * limit,
+                include: fullServiceInclude,
+            }),
+        ]);
+
+        if (!services.length && total === 0) {
             const businessExists = await prisma.business.findFirst({
                 where: {
                     id: businessId,
@@ -46,7 +53,15 @@ export async function getBusinessServices(businessId: string): ServiceResult<Ful
             }
         }
 
-        return services;
+        const totalPages = Math.ceil(total / limit);
+        const hasMore = page < totalPages;
+
+        return {
+            total,
+            hasMore,
+            data: services,
+            totalPages: totalPages || 1,
+        };
     } catch (error) {
         console.error(error);
         return { error: "Internal server error", code: 500 };

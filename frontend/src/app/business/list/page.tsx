@@ -56,7 +56,7 @@ export default function BusinessList() {
             </div>
 
             {(() => {
-                if (ubl.businesses.length === 0) {
+                if (ubl.businessData.data.length === 0) {
                     return (
                         <EmptyState
                             button="Add Business"
@@ -84,6 +84,8 @@ export default function BusinessList() {
                         <BusinessGrid businesses={ubl.paginatedBusinesses} linkPath="/business/list" />
 
                         <PaginationContainer
+                            total={ubl.total}
+                            hasMore={ubl.hasMore}
                             totalPages={ubl.totalPages}
                             currentPage={ubl.currentPage}
                             itemsPerPage={ubl.itemsPerPage}

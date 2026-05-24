@@ -6,6 +6,7 @@ import UserSync from "@/components/providers/user-sync";
 import { defaultMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "next-themes";
 import { Inter, Manrope, Playfair_Display, Poppins } from "next/font/google";
 
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                                 <Navbar />
                                 {children}
                             </UserSync>
+                            <ReactQueryDevtools />
                         </ThemeProvider>
                     </QueryProvider>
                 </ClerkProvider>

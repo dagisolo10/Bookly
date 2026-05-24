@@ -71,18 +71,20 @@ export default function BusinessServicesPage() {
                     handleAdd={ubs.handleAdd}
                     handleEdit={ubs.handleEdit}
                     reset={() => ubs.setQuery("")}
+                    services={ubs.filteredServices}
                     hasServices={ubs.hasAnyServices}
-                    services={ubs.paginatedServices}
                     noSearchResult={ubs.showEmptySearch}
                     setToggleTarget={ubs.setToggleTarget}
                 />
 
                 <div className="border-t">
                     <PaginationContainer
-                        totalPages={ubs.totalPages}
                         currentPage={ubs.currentPage}
+                        total={ubs.servicesData.total}
                         itemsPerPage={ubs.itemsPerPage}
+                        hasMore={ubs.servicesData.hasMore}
                         setCurrentPage={ubs.setCurrentPage}
+                        totalPages={ubs.servicesData.totalPages}
                         ITEMS_PER_PAGE_OPTIONS={ubs.ITEMS_PER_PAGE_OPTIONS}
                         onValueChange={(val) => ubs.handleItemsPerPageChange(val)}
                     />
@@ -91,10 +93,10 @@ export default function BusinessServicesPage() {
 
             <ServiceDialog
                 open={ubs.dialogOpen}
-                setOpen={ubs.setDialogOpen}
                 mode={ubs.dialogMode}
-                service={ubs.editingService}
+                setOpen={ubs.setDialogOpen}
                 businessId={ubs.businessId}
+                service={ubs.editingService}
             />
 
             <AlertDialog open={!!ubs.toggleTarget} onOpenChange={(open) => !open && ubs.setToggleTarget(null)}>

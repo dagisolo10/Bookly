@@ -14,43 +14,39 @@ export function useBusinessServices() {
 
     const [query, setQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState<"add" | "edit">("add");
-    const [editingService, setEditingService] = useState<Service | undefined>();
-    const [toggleTarget, setToggleTarget] = useState<Service | null>(null);
 
-    const {
-        data: services,
-        isPending,
-        isFetching,
-        error,
-    } = useQuery(getOwnerBusinessServicesQueryOptions(businessId, { page: currentPage, limit: itemsPerPage }));
+    const [toggleTarget, setToggleTarget] = useState<Service | null>(null);
+    const [editingService, setEditingService] = useState<Service | undefined>();
+
+    const { data, isPending, isFetching, error } = useQuery(
+        getOwnerBusinessServicesQueryOptions(businessId, { page: currentPage, limit: itemsPerPage }),
+    );
+
+    const servicesData = data ?? {
+        page: 1,
+        total: 0,
+        data: [],
+        totalPages: 1,
+        hasMore: false,
+    };
 
     const { mutate: toggleService, isPending: isToggling } = useToggleService();
 
-    const hasAnyServices = services ? services.length > 0 : false;
+    const hasAnyServices = servicesData.data.length > 0;
     const cleanedQuery = query.trim().toLowerCase();
 
-    const displayServices = useMemo(() => {
-        if (!services) return [];
-        if (!cleanedQuery) return services;
-        return services.filter(
+    const filteredServices = useMemo(() => {
+        if (!cleanedQuery) return servicesData.data;
+        return servicesData.data.filter(
             (s) => s.name.toLowerCase().includes(cleanedQuery) || (s.category && s.category.toLowerCase().includes(cleanedQuery)),
         );
-    }, [services, cleanedQuery]);
+    }, [cleanedQuery, servicesData.data]);
 
-    const totalServices = displayServices.length;
-    const totalPages = useMemo(() => Math.max(1, Math.ceil(totalServices / itemsPerPage)), [totalServices, itemsPerPage]);
-
-    const safePage = Math.min(currentPage, totalPages);
-
-    const paginatedServices = useMemo(() => {
-        const start = (safePage - 1) * itemsPerPage;
-        return displayServices.slice(start, start + itemsPerPage) ?? [];
-    }, [displayServices, safePage, itemsPerPage]);
-
-    const showEmptySearch = hasAnyServices && paginatedServices.length === 0 && cleanedQuery.length > 0;
+    const showEmptySearch = hasAnyServices && filteredServices.length === 0 && cleanedQuery.length > 0;
 
     const handleEdit = useCallback((service: Service) => {
         setEditingService(service);
@@ -85,8 +81,8 @@ export function useBusinessServices() {
     }, []);
 
     return {
+        servicesData,
         businessId,
-        services: services ?? [],
         isPending,
         isFetching,
         error,
@@ -98,8 +94,7 @@ export function useBusinessServices() {
         dialogMode,
         editingService,
         toggleTarget,
-        paginatedServices,
-        totalPages,
+        filteredServices,
         showEmptySearch,
         hasAnyServices,
         ITEMS_PER_PAGE_OPTIONS,

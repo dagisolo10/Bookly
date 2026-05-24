@@ -1,10 +1,10 @@
 import { handler } from "@/lib/handler";
-import { Router, type Request } from "express";
-import { validate } from "@/middlewares/validation";
-import { requireBusinessRole } from "@/middlewares/role";
+import { businessIdSchema, createBusinessSchema, paginationQuerySchema, updateBusinessSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
-import { businessIdSchema, createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
+import { requireBusinessRole } from "@/middlewares/role";
+import { validate } from "@/middlewares/validation";
 import { closeBusiness, createBusiness, getMyBusinessById, getMyBusinesses, toggleBusiness, updateBusiness } from "@/services/owner-business";
+import { Router, type Request } from "express";
 
 const router = Router();
 
@@ -13,7 +13,12 @@ router.get(
     requireAuth,
     requireUserProfile,
     requireBusinessRole,
-    handler(() => getMyBusinesses()),
+    validate(paginationQuerySchema, "query"),
+    handler((req: Request) => {
+        const page = parseInt(req.query["page"] as string, 10) || 1;
+        const limit = parseInt(req.query["limit"] as string, 10) || 10;
+        return getMyBusinesses(page, limit);
+    }),
 );
 
 router.get(

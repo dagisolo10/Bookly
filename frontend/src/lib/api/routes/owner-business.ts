@@ -2,16 +2,19 @@ import { hasApiError } from "../api-error";
 
 import api from "@/lib/axios";
 import { BusinessHoursSchema } from "@/lib/validation";
+import { FullBusiness } from "@/types/models";
 import { CreateBusinessPayload, UpdateBusinessPayload } from "@/types/payload";
-import { MessageResponse, OwnerBusinessListResponse, OwnerBusinessResponse } from "@/types/response";
+import { MessageResponse, OwnerBusinessResponse, PaginationResponse } from "@/types/response";
 
 export const ownerBusinessApi = {
-    getMyBusinesses: async () => {
-        const { data } = await api.get<OwnerBusinessListResponse>("/owner/business/my");
+    getMyBusinesses: async (page: number, limit: number) => {
+        const { data } = await api.get<PaginationResponse<FullBusiness>>("/owner/business/my", {
+            params: { page, limit },
+        });
 
         if (hasApiError(data)) throw data;
 
-        data.forEach((b) => BusinessHoursSchema.array().parse(b.hours));
+        data.data.forEach((b) => BusinessHoursSchema.array().parse(b.hours));
 
         return data;
     },

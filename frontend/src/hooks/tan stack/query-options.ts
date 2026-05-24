@@ -2,8 +2,8 @@ import { ownerBookingApi } from "@/lib/api/routes/owner-booking";
 import { ownerBusinessApi } from "@/lib/api/routes/owner-business";
 import { ownerServiceApi } from "@/lib/api/routes/owner-service";
 import { userApi } from "@/lib/api/routes/user";
-import { FullBooking, FullBusiness, FullService, FullUser } from "@/types/models";
-import { queryOptions, UseQueryOptions } from "@tanstack/react-query";
+import { FullBooking, FullBusiness, FullService, FullUser, PaginatedData } from "@/types/models";
+import { UseQueryOptions, queryOptions } from "@tanstack/react-query";
 
 type QueryOptions<TQueryFnData, TData = TQueryFnData, TError = Error> = Omit<UseQueryOptions<TQueryFnData, TError, TData>, "queryKey" | "queryFn">;
 
@@ -15,11 +15,14 @@ export function syncUserQueryOptions<TData = FullUser, TError = Error>(options?:
     });
 }
 
-export function getOwnerBusinessesQueryOptions<TData = FullBusiness[], TError = Error>(options?: QueryOptions<FullBusiness[], TData, TError>) {
+export function getOwnerBusinessesQueryOptions<TData = PaginatedData<FullBusiness>, TError = Error>(
+    pagination: { page: number; limit: number },
+    options?: QueryOptions<PaginatedData<FullBusiness>, TData, TError>,
+) {
     return queryOptions({
         ...options,
-        queryKey: ["owner", "business", "list"],
-        queryFn: ownerBusinessApi.getMyBusinesses,
+        queryKey: ["owner", "business", "list", pagination.page, pagination.limit],
+        queryFn: () => ownerBusinessApi.getMyBusinesses(pagination.page, pagination.limit),
     });
 }
 
@@ -34,19 +37,15 @@ export function getOwnerBusinessByIdQueryOptions<TData = FullBusiness, TError = 
     });
 }
 
-export function getOwnerBusinessServicesQueryOptions<TData = FullService[], TError = Error>(
+export function getOwnerBusinessServicesQueryOptions<TData = PaginatedData<FullService>, TError = Error>(
     businessId: string,
-    pagination?: { page?: number; limit?: number },
-    options?: QueryOptions<FullService[], TData, TError>,
+    pagination: { page: number; limit: number },
+    options?: QueryOptions<PaginatedData<FullService>, TData, TError>,
 ) {
-    const queryKey: unknown[] = ["owner", "service", "list", businessId];
-    if (pagination?.page || pagination?.limit) {
-        queryKey.push({ page: pagination.page, limit: pagination.limit });
-    }
     return queryOptions({
         ...options,
-        queryKey,
-        queryFn: () => ownerServiceApi.getBusinessServices(businessId, pagination?.page, pagination?.limit),
+        queryKey: ["owner", "service", "list", businessId, pagination.page, pagination.limit],
+        queryFn: () => ownerServiceApi.getBusinessServices(businessId, pagination.page, pagination.limit),
     });
 }
 

@@ -9,3 +9,10 @@ export type ServiceMessage = { message: string };
 export type ServiceError = { error: string; code: number; __isApiError?: true };
 
 export type ServiceResult<T> = Promise<T | ServiceError>;
+
+export type PaginatedData<T> = {
+    data: T[];
+    total: number;
+    hasMore: boolean;
+    totalPages: number;
+};

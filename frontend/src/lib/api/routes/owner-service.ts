@@ -1,11 +1,14 @@
 import { hasApiError } from "@/lib/api/api-error";
 import api from "@/lib/axios";
+import { FullService } from "@/types/models";
 import { CreateServicePayload, UpdateServicePayload } from "@/types/payload";
-import { MessageResponse, OwnerServiceResponse, OwnerServicesResponse } from "@/types/response";
+import { MessageResponse, OwnerServiceResponse, PaginationResponse } from "@/types/response";
 
 export const ownerServiceApi = {
-    getBusinessServices: async (businessId: string, _page?: number, _limit?: number) => {
-        const { data } = await api.get<OwnerServicesResponse>(`/owner/service/business/${businessId}`);
+    getBusinessServices: async (businessId: string, page: number, limit: number) => {
+        const { data } = await api.get<PaginationResponse<FullService>>(`/owner/service/business/${businessId}`, {
+            params: { page, limit },
+        });
 
         if (hasApiError(data)) throw data;
 

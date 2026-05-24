@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import type { createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
-import type { ServiceMessage, ServiceResult } from "@/types/response";
+import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
 import { Prisma, type Business, type BusinessHour as PrismaBusinessHour } from "@prisma/client";
 import type z from "zod";
 
@@ -26,18 +26,35 @@ async function findOwnedBusiness(id: string, ownerId: string) {
     });
 }
 
-export async function getMyBusinesses(): ServiceResult<FullBusiness[]> {
+export async function getMyBusinesses(page: number, limit: number): ServiceResult<PaginatedData<FullBusiness>> {
     try {
         const ownerId = getUserId();
 
-        const businesses = await prisma.business.findMany({
-            where: {
-                ownerId,
-            },
-            include: fullBusinessInclude,
-        });
+        const [total, businesses] = await Promise.all([
+            await prisma.business.count({
+                where: {
+                    ownerId,
+                },
+            }),
+            await prisma.business.findMany({
+                where: {
+                    ownerId,
+                },
+                take: limit,
+                skip: (page - 1) * limit,
+                include: fullBusinessInclude,
+            }),
+        ]);
 
-        return businesses;
+        const totalPages = Math.ceil(total / limit);
+        const hasMore = page < totalPages;
+
+        return {
+            total,
+            hasMore,
+            totalPages,
+            data: businesses,
+        };
     } catch (error) {
         console.error(error);
         return { error: "Internal server error", code: 500 };

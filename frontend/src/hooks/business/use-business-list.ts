@@ -8,11 +8,19 @@ import { useCallback, useMemo, useState } from "react";
 const ITEMS_PER_PAGE_OPTIONS = [8, 16, 24, 32] as const;
 
 export function useBusinessList() {
-    const { data: businesses, isPending, error, isFetching } = useQuery(getOwnerBusinessesQueryOptions());
-
     const [query, setQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(8);
+
+    const { data, isPending, error, isFetching } = useQuery(getOwnerBusinessesQueryOptions({ page: currentPage, limit: itemsPerPage }));
+
+    const businessData = data ?? {
+        page: 1,
+        total: 0,
+        totalPages: 1,
+        hasMore: false,
+        data: [],
+    };
 
     const router = useRouter();
 
@@ -35,12 +43,10 @@ export function useBusinessList() {
     }, [router]);
 
     const displayBusinesses = useMemo(() => {
-        if (!query.trim()) return businesses ?? [];
+        if (!query.trim()) return businessData.data;
         const q = query.toLowerCase();
-        return (businesses ?? []).filter(
-            (b) => b.name.toLowerCase().includes(q) || b.location?.toLowerCase().includes(q),
-        );
-    }, [businesses, query]);
+        return businessData.data.filter((b) => b.name.toLowerCase().includes(q) || b.location?.toLowerCase().includes(q));
+    }, [businessData.data, query]);
 
     const totalPages = useMemo(() => Math.ceil(displayBusinesses.length / itemsPerPage), [displayBusinesses.length, itemsPerPage]);
 
@@ -50,7 +56,10 @@ export function useBusinessList() {
     }, [displayBusinesses, currentPage, itemsPerPage]);
 
     return {
-        businesses: businesses ?? [],
+        businessData,
+        businesses: businessData.data,
+        total: businessData.total,
+        hasMore: businessData.hasMore,
         isPending,
         error,
         isFetching,

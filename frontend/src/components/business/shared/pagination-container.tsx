@@ -2,6 +2,8 @@ import { Pagination, PaginationContent, PaginationItem, PaginationNext, Paginati
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PaginationContainerProps {
+    total: number;
+    hasMore: boolean;
     totalPages: number;
     currentPage: number;
     itemsPerPage: number;
@@ -12,25 +14,35 @@ interface PaginationContainerProps {
 }
 
 export default function PaginationContainer(props: PaginationContainerProps) {
-    const { itemsPerPage, currentPage, setCurrentPage, totalPages, ITEMS_PER_PAGE_OPTIONS, onValueChange } = props;
+    const { hasMore, total, itemsPerPage, currentPage, setCurrentPage, totalPages, ITEMS_PER_PAGE_OPTIONS, onValueChange } = props;
+
+    const start = (currentPage - 1) * itemsPerPage + 1;
+    const end = Math.min(currentPage * itemsPerPage, total);
 
     return (
         <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-sm">Rows per page</span>
-                <Select onValueChange={onValueChange} value={String(itemsPerPage)}>
-                    <SelectTrigger className="h-8 w-16">
-                        <SelectValue />
-                    </SelectTrigger>
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground text-sm">Rows per page</span>
 
-                    <SelectContent>
-                        {ITEMS_PER_PAGE_OPTIONS.map((n) => (
-                            <SelectItem key={n} value={String(n)}>
-                                {n}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                    <Select onValueChange={onValueChange} value={String(itemsPerPage)}>
+                        <SelectTrigger className="h-8 w-16">
+                            <SelectValue />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                            {ITEMS_PER_PAGE_OPTIONS.map((n) => (
+                                <SelectItem key={n} value={String(n)}>
+                                    {n}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <span className="text-muted-foreground text-sm">
+                    {total === 0 ? 0 : start} – {end} of {total}
+                </span>
             </div>
 
             <Pagination className="mx-0 w-auto">
@@ -46,12 +58,7 @@ export default function PaginationContainer(props: PaginationContainerProps) {
                     </span>
 
                     <PaginationItem>
-                        <button
-                            type="button"
-                            title="pagination previous"
-                            disabled={currentPage >= totalPages}
-                            onClick={() => setCurrentPage(currentPage + 1)}
-                        >
+                        <button type="button" title="pagination previous" disabled={!hasMore} onClick={() => setCurrentPage(currentPage + 1)}>
                             <PaginationNext />
                         </button>
                     </PaginationItem>
