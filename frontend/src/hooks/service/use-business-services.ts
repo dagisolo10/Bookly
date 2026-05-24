@@ -78,6 +78,7 @@ export function useBusinessServices() {
 
     const handleResetQuery = useCallback(() => {
         setQuery("");
+        setCurrentPage(1);
     }, []);
 
     return {

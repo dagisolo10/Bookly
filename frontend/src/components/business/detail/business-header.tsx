@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { FullBusiness } from "@/types/models";
 import { MapPin, Phone, Settings } from "lucide-react";
+import Link from "next/link";
 
 interface BusinessHeaderProps {
     show: boolean;
@@ -37,15 +37,16 @@ export default function BusinessHeader({ business, show }: BusinessHeaderProps) 
 
             {show && business.status !== "Closed" && (
                 <div className="absolute top-6 right-6">
-                    <Link href={`/business/list/${business.id}/settings`}>
-                        <Button
-                            variant="secondary"
-                            className="cursor-pointer rounded-full border-none bg-white/20 text-white backdrop-blur-md hover:bg-white/40"
-                        >
+                    <Button
+                        asChild
+                        variant="secondary"
+                        className="cursor-pointer rounded-full border-none bg-white/20 text-white backdrop-blur-md hover:bg-white/40"
+                    >
+                        <Link href={`/business/list/${business.id}/settings`}>
                             <Settings className="size-4" />
                             Business Settings
-                        </Button>
-                    </Link>
+                        </Link>
+                    </Button>
                 </div>
             )}
         </div>

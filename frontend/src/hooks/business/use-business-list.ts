@@ -36,24 +36,18 @@ export function useBusinessList() {
 
     const handleResetQuery = useCallback(() => {
         setQuery("");
+        setCurrentPage(1);
     }, []);
 
     const handleAddBusiness = useCallback(() => {
         router.push("/business/new");
     }, [router]);
 
-    const displayBusinesses = useMemo(() => {
+    const paginatedBusinesses = useMemo(() => {
         if (!query.trim()) return businessData.data;
         const q = query.toLowerCase();
         return businessData.data.filter((b) => b.name.toLowerCase().includes(q) || b.location?.toLowerCase().includes(q));
     }, [businessData.data, query]);
-
-    const totalPages = useMemo(() => Math.ceil(displayBusinesses.length / itemsPerPage), [displayBusinesses.length, itemsPerPage]);
-
-    const paginatedBusinesses = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        return displayBusinesses.slice(startIndex, startIndex + itemsPerPage);
-    }, [displayBusinesses, currentPage, itemsPerPage]);
 
     return {
         businessData,
@@ -67,7 +61,7 @@ export function useBusinessList() {
         currentPage,
         itemsPerPage,
         paginatedBusinesses,
-        totalPages,
+        totalPages: businessData.totalPages,
         ITEMS_PER_PAGE_OPTIONS,
         handleSearchChange,
         handleItemsPerPageChange,

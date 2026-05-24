@@ -31,12 +31,8 @@ export async function getMyBusinesses(page: number, limit: number): ServiceResul
         const ownerId = getUserId();
 
         const [total, businesses] = await Promise.all([
-            await prisma.business.count({
-                where: {
-                    ownerId,
-                },
-            }),
-            await prisma.business.findMany({
+            prisma.business.count({ where: { ownerId } }),
+            prisma.business.findMany({
                 where: {
                     ownerId,
                 },

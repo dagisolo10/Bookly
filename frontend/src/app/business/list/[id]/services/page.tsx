@@ -35,7 +35,7 @@ export default function BusinessServicesPage() {
     if (ubs.error) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center">
-                <p className="text-destructive">Failed to load services: {ubs.error.message}</p>
+                <p className="text-destructive">Failed to load services. Please try again.</p>
             </div>
         );
     }

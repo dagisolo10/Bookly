@@ -6,8 +6,8 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateService, useUpdateService } from "@/hooks/tan stack/use-owner-service";
-import { Service } from "@/types/models";
-import { SyntheticEvent } from "react";
+import type { Service } from "@/types/models";
+import { SyntheticEvent, useState } from "react";
 
 interface DialogProp {
     open: boolean;
@@ -27,33 +27,46 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
     const { mutate: createService } = useCreateService();
     const { mutate: updateService } = useUpdateService();
 
+    const [errors, setErrors] = useState<Partial<Record<"name" | "price" | "category" | "durationInMinutes", string>>>({});
+
     function handleSubmitForm(e: SyntheticEvent<HTMLFormElement>) {
         e.preventDefault();
 
         const formData = new FormData(e.currentTarget);
         const payload = Object.fromEntries(formData);
 
-        const name = payload["name"] as string;
-        const price = Number(payload["price"]);
-        const category = payload["category"] as string;
-        const durationInMinutes = Number(payload["durationInMinutes"]);
+        const rawName = (payload["name"] as string) ?? "";
+        const rawPrice = payload["price"] as string;
+        const rawCategory = (payload["category"] as string) ?? "";
+        const rawDuration = payload["durationInMinutes"] as string;
 
-        const data = { name, price, category, durationInMinutes, businessId };
+        const parsedPrice = Number(rawPrice);
+        const parsedDuration = Number(rawDuration);
+        const trimmedName = rawName.trim();
+        const trimmedCategory = rawCategory.trim();
+
+        const next: typeof errors = {};
+
+        if (!trimmedName) next.name = "Service name is required";
+        if (!trimmedCategory) next.category = "Category is required";
+        if (!Number.isFinite(parsedPrice) || parsedPrice < 0.01) next.price = "Price must be at least $0.01";
+        if (!Number.isFinite(parsedDuration) || parsedDuration < 1 || !Number.isInteger(parsedDuration))
+            next.durationInMinutes = "Duration must be a whole number of at least 1 minute";
+
+        setErrors(next);
+        if (Object.keys(next).length > 0) return;
+
+        const data = { name: trimmedName, price: parsedPrice, category: trimmedCategory, durationInMinutes: parsedDuration, businessId };
 
         if (mode === "add") {
-            createService(data);
+            createService(data, { onSuccess: () => setOpen(false) });
         } else if (mode === "edit" && service) {
-            updateService({
-                id: service.id,
-                service: data,
-            });
+            updateService({ id: service.id, service: data }, { onSuccess: () => setOpen(false) });
         }
-
-        setOpen(false);
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setErrors({}); }}>
             <DialogContent className="sm:max-w-125">
                 <form onSubmit={handleSubmitForm}>
                     <DialogHeader className="mb-4">
@@ -71,6 +84,7 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
                                     id="service-name"
                                     placeholder="e.g. Men's Haircut"
                                 />
+                                {errors.name && <p className="text-destructive mt-1 text-xs">{errors.name}</p>}
                             </Field>
 
                             <Field>
@@ -84,6 +98,7 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
                                     type="number"
                                     placeholder="0.00"
                                 />
+                                {errors.price && <p className="text-destructive mt-1 text-xs">{errors.price}</p>}
                             </Field>
                         </div>
 
@@ -97,6 +112,7 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
                                     type="number"
                                     placeholder="30"
                                 />
+                                {errors.durationInMinutes && <p className="text-destructive mt-1 text-xs">{errors.durationInMinutes}</p>}
                             </Field>
 
                             <Field>
@@ -107,6 +123,7 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
                                     id="service-category"
                                     placeholder="e.g. Hair"
                                 />
+                                {errors.category && <p className="text-destructive mt-1 text-xs">{errors.category}</p>}
                             </Field>
                         </div>
                     </FieldGroup>

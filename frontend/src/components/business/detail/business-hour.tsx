@@ -5,16 +5,34 @@ import { BusinessHour } from "@/types/models";
 import { Clock, Globe } from "lucide-react";
 
 export default function BusinessHours({ hours, timezone }: { hours: BusinessHour[]; timezone: string }) {
-    const dayOrder = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const sortedHours = Object.entries(hours || {}).sort(([a], [b]) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+    const dayOrder = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
+
+    const hoursByDay = new Map(hours.map((h) => [h.day, h] as const));
+    const sortedHours = dayOrder.map((day) => [day, hoursByDay.get(day)] as const);
 
     const now = new Date();
-    const currentDay = dayOrder[now.getDay()];
+    const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: timezone,
+        weekday: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    }).formatToParts(now);
+
     const offset = getTimezoneOffset(timezone);
 
-    const currentTime = now.toLocaleTimeString(undefined, { timeZone: timezone, hour12: false, hour: "2-digit", minute: "2-digit" });
+    const currentDay = parts.find((p) => p.type === "weekday")?.value ?? dayOrder[now.getDay()];
+    const currentHour = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
+    const currentMinute = Number(parts.find((p) => p.type === "minute")?.value ?? "0");
+    const currentTotalMinutes = currentHour * 60 + currentMinute;
+
+    const toMinutes = (time: string) => {
+        const [h, m] = time.split(":");
+        return Number(h) * 60 + Number(m);
+    };
+
     const todayHours = hours.find((h) => h.day === currentDay);
-    const isOpen = todayHours && currentTime >= todayHours.open && currentTime <= todayHours.close;
+    const isOpen = !!todayHours && currentTotalMinutes >= toMinutes(todayHours.open) && currentTotalMinutes <= toMinutes(todayHours.close);
 
     return (
         <Card className="border-none shadow-sm">

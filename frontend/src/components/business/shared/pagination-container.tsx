@@ -48,9 +48,11 @@ export default function PaginationContainer(props: PaginationContainerProps) {
             <Pagination className="mx-0 w-auto">
                 <PaginationContent className="px-2">
                     <PaginationItem>
-                        <button type="button" title="pagination next" disabled={currentPage <= 1} onClick={() => setCurrentPage(currentPage - 1)}>
-                            <PaginationPrevious />
-                        </button>
+                        <PaginationPrevious
+                            onClick={currentPage > 1 ? () => setCurrentPage(currentPage - 1) : undefined}
+                            aria-disabled={currentPage <= 1}
+                            className={currentPage <= 1 ? "pointer-events-none opacity-50" : undefined}
+                        />
                     </PaginationItem>
 
                     <span className="text-muted-foreground text-sm">
@@ -58,9 +60,11 @@ export default function PaginationContainer(props: PaginationContainerProps) {
                     </span>
 
                     <PaginationItem>
-                        <button type="button" title="pagination previous" disabled={!hasMore} onClick={() => setCurrentPage(currentPage + 1)}>
-                            <PaginationNext />
-                        </button>
+                        <PaginationNext
+                            onClick={hasMore ? () => setCurrentPage(currentPage + 1) : undefined}
+                            aria-disabled={!hasMore}
+                            className={!hasMore ? "pointer-events-none opacity-50" : undefined}
+                        />
                     </PaginationItem>
                 </PaginationContent>
             </Pagination>

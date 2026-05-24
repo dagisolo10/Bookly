@@ -5,8 +5,8 @@ import { Layers, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CategoryCarousel from "../detail/category-carousel";
-import ServiceDialog from "./service-dialog";
 import ServiceCard from "./service-card";
+import ServiceDialog from "./service-dialog";
 
 interface ServiceListProps {
     businessId: string;
@@ -62,6 +62,8 @@ export default function ServiceList({ businessId, services }: ServiceListProps) 
             setTimeout(() => {
                 isScrollingRef.current = false;
             }, 800);
+        } else {
+            isScrollingRef.current = false;
         }
     }
 
@@ -107,7 +109,7 @@ export default function ServiceList({ businessId, services }: ServiceListProps) 
                     })}
                 </div>
 
-                <Button variant="outline">
+                <Button variant="outline" asChild>
                     <Link href={`/business/list/${businessId}/services`}>See All</Link>
                 </Button>
             </div>

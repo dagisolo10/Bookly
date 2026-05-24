@@ -32,7 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                                 <Navbar />
                                 {children}
                             </UserSync>
-                            <ReactQueryDevtools />
+                            {process.env.NODE_ENV === "development" && <ReactQueryDevtools />}
                         </ThemeProvider>
                     </QueryProvider>
                 </ClerkProvider>

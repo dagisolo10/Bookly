@@ -12,20 +12,29 @@ import { useParams } from "next/navigation";
 export default function BusinessPage() {
     const { id } = useParams<{ id: string }>();
 
-    const queries = useQueries({
+    const [userQuery, businessQuery, servicesQuery] = useQueries({
         queries: [syncUserQueryOptions(), getOwnerBusinessByIdQueryOptions(id), getOwnerBusinessServicesQueryOptions(id, { page: 1, limit: 5 })],
     });
 
-    const user = queries[0]?.data;
-    const business = queries[1]?.data;
-    const services = queries[2]?.data?.data;
+    const isPending = [userQuery, businessQuery, servicesQuery].some((q) => q.isPending);
+    const hasError = [userQuery, businessQuery, servicesQuery].some((q) => q.isError);
 
-    const isPending = queries.some((q) => q.isPending);
+    const user = userQuery.data;
+    const business = businessQuery.data;
+    const serviceData = servicesQuery.data;
 
     if (isPending) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <p className="text-muted-foreground">Loading...</p>
+            </div>
+        );
+    }
+
+    if (hasError) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <p className="text-destructive">Failed to load business data. Please try again.</p>
             </div>
         );
     }
@@ -73,7 +82,7 @@ export default function BusinessPage() {
 
             <div className="py-8">
                 <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
-                    <ServiceList businessId={business.id} services={services ?? []} />
+                    <ServiceList businessId={business.id} services={serviceData?.data ?? []} />
 
                     <aside className="top-20 order-1 space-y-6 sm:sticky lg:order-2">
                         <BusinessHours timezone={business.timeZone} hours={business.hours} />
