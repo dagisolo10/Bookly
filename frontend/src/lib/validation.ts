@@ -16,11 +16,9 @@ export function validateBusinessHours(data: unknown): z.infer<typeof BusinessHou
     return BusinessHoursSchema.parse(data);
 }
 
-const DayHoursSchema = z.object({
-    open: z.iso.time("Invalid time format (HH:MM)"),
-    close: z.iso.time("Invalid time format (HH:MM)"),
-    day: z.enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "Can only accept week days"),
-});
+const DayHoursSchema = z
+    .object({ open: z.iso.time("Invalid time format (HH:MM)"), close: z.iso.time("Invalid time format (HH:MM)"), day: z.enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "Can only accept week days") })
+    .refine(({ open, close }) => open < close, { message: "Closing time must be after opening time" });
 
 export const createBusinessSchema = z.object({
     name: z.string().min(1, "Business name is required"),
@@ -38,7 +36,7 @@ export const updateBusinessSchema = z.object({
     phone: z.string().nullish(),
     location: z.string().nullish(),
     description: z.string().nullish(),
-    bannerImages: z.array(z.string()).optional(),
+    bannerImages: z.array(z.string().url("Invalid banner image URL")).optional(),
     timeZone: z.string().min(1, "Timezone is required").optional(),
 });
 

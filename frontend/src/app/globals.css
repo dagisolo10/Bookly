@@ -160,6 +160,8 @@
     }
 
     .screen {
-        @apply mx-auto max-w-6xl py-12;
+        max-width: 72rem;
+        margin-inline: auto;
+        padding-block: 3rem;
     }
 }

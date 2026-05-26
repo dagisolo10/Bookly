@@ -4,14 +4,13 @@ import { uploadImage } from "@/lib/supabase/upload-image";
 import type { createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
 import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
 import { Prisma, type Business, type BusinessHour as PrismaBusinessHour } from "@prisma/client";
-import type z from "zod";
+import z from "zod";
 
 type FullBusiness = Business & {
     hours: PrismaBusinessHour[];
 };
 
 export type CreateBusinessPayload = z.infer<typeof createBusinessSchema>;
-export type CreateBusinessPayloadWithoutImages = CreateBusinessPayload;
 export type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;
 
 const fullBusinessInclude = {
@@ -82,7 +81,7 @@ export async function getMyBusinessById(id: string): ServiceResult<FullBusiness>
     }
 }
 
-export async function createBusiness(data: CreateBusinessPayloadWithoutImages, _files: Express.Multer.File[]): ServiceResult<FullBusiness> {
+export async function createBusiness(data: CreateBusinessPayload, _files: Express.Multer.File[]): ServiceResult<FullBusiness> {
     try {
         const ownerId = getUserId();
 

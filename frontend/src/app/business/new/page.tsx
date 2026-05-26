@@ -33,7 +33,7 @@ export default function CreateBusiness() {
                             <p className="text-xs text-zinc-500">A dedicated page for your business.</p>
                         </div>
                     </div>
-                    <div className="items-c enter flex gap-4">
+                    <div className="flex items-center gap-4">
                         <div className="flex size-10 items-center justify-center rounded-full bg-white/5">
                             <CheckCircle2 className="size-5 text-green-400" />
                         </div>

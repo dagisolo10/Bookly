@@ -13,7 +13,7 @@ import { CreateBusinessPayload } from "@/types/payload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Globe, Plus } from "lucide-react";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -27,6 +27,8 @@ export default function BusinessForm() {
     const [banners, setBanners] = useState<BannerUpload[]>([]);
     const weekDays: WeekDay[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const timezones = useMemo(() => Intl.supportedValuesOf("timeZone").map((tz) => ({ label: tz.replace(/_/g, " "), value: tz })), []);
+
+    const bannersRef = useRef<BannerUpload[]>([]);
 
     const {
         register,
@@ -70,8 +72,25 @@ export default function BusinessForm() {
     }
 
     function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+        const MAX_BYTES = 5 * 1024 * 1024;
         const newlySelectedFiles = Array.from(e.target.files || []);
-        const newEntries: BannerUpload[] = newlySelectedFiles.map((file) => ({
+
+        const oversized: string[] = [];
+        const validFiles: File[] = [];
+
+        for (const file of newlySelectedFiles) {
+            if (file.size > MAX_BYTES) {
+                oversized.push(file.name);
+            } else {
+                validFiles.push(file);
+            }
+        }
+
+        if (oversized.length > 0) {
+            toast.error(`Some files exceed the 10MB limit and were skipped: ${oversized.join(", ")}`);
+        }
+
+        const newEntries: BannerUpload[] = validFiles.map((file) => ({
             file,
             id: crypto.randomUUID(),
             previewUrl: URL.createObjectURL(file),
@@ -86,7 +105,11 @@ export default function BusinessForm() {
     }
 
     useEffect(() => {
-        return () => banners.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl));
+        bannersRef.current = banners;
+    }, [banners]);
+
+    useEffect(() => {
+        return () => bannersRef.current.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl));
     }, [banners]);
 
     const onSubmit: SubmitHandler<CreateBusinessPayload> = async (data) => {
