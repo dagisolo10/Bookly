@@ -8,7 +8,11 @@ const upload = multer({
     },
     fileFilter(_req, file, callback) {
         const allowed = ["image/jpeg", "image/png", "image/webp"];
-        callback(null, allowed.includes(file.mimetype));
+        if (!allowed.includes(file.mimetype)) {
+            callback(new Error("Unsupported file type!"));
+            return;
+        }
+        callback(null, true);
     },
 });
 

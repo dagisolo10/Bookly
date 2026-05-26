@@ -87,7 +87,7 @@ export default function BusinessForm() {
         }
 
         if (oversized.length > 0) {
-            toast.error(`Some files exceed the 10MB limit and were skipped: ${oversized.join(", ")}`);
+            toast.error(`Some files exceed the 5MB limit and were skipped: ${oversized.join(", ")}`);
         }
 
         const newEntries: BannerUpload[] = validFiles.map((file) => ({
@@ -279,7 +279,7 @@ export default function BusinessForm() {
 
                                     <p className="text-muted-foreground text-sm font-semibold">Upload Banner Images</p>
                                     <p className="my-2 text-xs text-zinc-500">Use horizontal (landscape) images for the best look.</p>
-                                    <p className="text-xs text-zinc-500">PNG, JPG up to 10MB</p>
+                                    <p className="text-xs text-zinc-500">PNG, JPG or WEBP up to 5MB</p>
                                 </div>
 
                                 <input multiple onChange={handleFileChange} type="file" id="banner" accept="image/*" className="absolute inset-0 cursor-pointer opacity-0" />
