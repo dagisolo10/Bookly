@@ -2,9 +2,13 @@ import { handler } from "@/lib/handler";
 import { businessIdSchema, createBusinessSchema, paginationQuerySchema, querySearchSchema, updateBusinessSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
 import { requireBusinessRole } from "@/middlewares/role";
+import upload from "@/middlewares/upload";
 import { validate } from "@/middlewares/validation";
 import { closeBusiness, createBusiness, getMyBusinessById, getMyBusinesses, toggleBusiness, updateBusiness } from "@/services/owner-business";
 import { Router, type Request } from "express";
+import type z from "zod";
+
+type CreateBusinessBody = z.infer<typeof createBusinessSchema>;
 
 const router = Router();
 
@@ -37,8 +41,9 @@ router.post(
     requireAuth,
     requireUserProfile,
     requireBusinessRole,
+    upload.array("bannerImages"),
     validate(createBusinessSchema, "body"),
-    handler((req: Request) => createBusiness(req.body)),
+    handler((req: Request) => createBusiness(req.body as CreateBusinessBody, req.files as Express.Multer.File[])),
 );
 
 router.patch(

@@ -1,14 +1,18 @@
 import { ownerBusinessApi } from "@/lib/api/routes/owner-business";
+import { UpdateBusinessPayload } from "@/types/payload";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreateBusinessPayload, UpdateBusinessPayload } from "@/types/payload";
+import { useRouter } from "next/navigation";
 
 export const useCreateBusiness = () => {
+    const router = useRouter();
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (business: CreateBusinessPayload) => ownerBusinessApi.createBusiness(business),
-        onSuccess: () => {
+        mutationFn: (business: FormData) => ownerBusinessApi.createBusiness(business),
+        onSuccess: (business) => {
             queryClient.invalidateQueries({ queryKey: ["owner", "business", "list"] });
+            queryClient.setQueryData(["owner", "business", business.id], business);
+            router.push(`/business/list/${business.id}`);
         },
     });
 };
@@ -48,4 +52,3 @@ export const useCloseBusiness = () => {
         },
     });
 };
-

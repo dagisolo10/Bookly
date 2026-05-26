@@ -1,4 +1,5 @@
 "use client";
+import EmptyState from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { FullService, Service } from "@/types/models";
 import { Layers, Plus } from "lucide-react";
@@ -68,9 +69,7 @@ export default function ServiceList({ businessId, services }: ServiceListProps) 
     }
 
     const handleCloseEditDialog = (isOpen: boolean) => {
-        if (!isOpen) {
-            setTargetService(null);
-        }
+        if (!isOpen) setTargetService(null);
     };
 
     return (
@@ -87,41 +86,39 @@ export default function ServiceList({ businessId, services }: ServiceListProps) 
                 </Button>
             </div>
 
-            <div className="col-span-2 space-y-4">
-                <CategoryCarousel categories={categories} activeCategory={activeCategory} scrollToCategory={scrollToCategory} />
+            {services.length === 0 ? (
+                <EmptyState button="Add Service" title="No services yet" onClick={() => setOpen(true)} description="Add your first service offering to start receiving bookings." />
+            ) : (
+                <div className="col-span-2 space-y-4">
+                    <CategoryCarousel categories={categories} activeCategory={activeCategory} scrollToCategory={scrollToCategory} />
 
-                <div className="space-y-8">
-                    {categories.map((category) => {
-                        const filtered = services.filter((s) => s.category === category);
-                        return (
-                            <section key={category} className="scroll-mt-40 space-y-2">
-                                <h2 id={category} className="scroll-mt-36 text-xl font-bold tracking-tight">
-                                    {category}
-                                </h2>
+                    <div className="space-y-8">
+                        {categories.map((category) => {
+                            const filtered = services.filter((s) => s.category === category);
+                            return (
+                                <section key={category} className="scroll-mt-40 space-y-2">
+                                    <h2 id={category} className="scroll-mt-36 text-xl font-bold tracking-tight">
+                                        {category}
+                                    </h2>
 
-                                <div className="space-y-4">
-                                    {filtered.map((service) => (
-                                        <ServiceCard key={`${category}-${service.id}`} service={service} onEdit={setTargetService} />
-                                    ))}
-                                </div>
-                            </section>
-                        );
-                    })}
+                                    <div className="space-y-4">
+                                        {filtered.map((service) => (
+                                            <ServiceCard key={`${category}-${service.id}`} service={service} onEdit={setTargetService} />
+                                        ))}
+                                    </div>
+                                </section>
+                            );
+                        })}
+                    </div>
+
+                    <Button variant="outline" asChild>
+                        <Link href={`/business/list/${businessId}/services`}>See All</Link>
+                    </Button>
                 </div>
-
-                <Button variant="outline" asChild>
-                    <Link href={`/business/list/${businessId}/services`}>See All</Link>
-                </Button>
-            </div>
+            )}
 
             <ServiceDialog businessId={businessId} open={open} setOpen={setOpen} mode="add" />
-            <ServiceDialog
-                mode="edit"
-                open={!!targetService}
-                businessId={businessId}
-                setOpen={handleCloseEditDialog}
-                service={targetService || undefined}
-            />
+            <ServiceDialog mode="edit" open={!!targetService} businessId={businessId} setOpen={handleCloseEditDialog} service={targetService || undefined} />
         </div>
     );
 }

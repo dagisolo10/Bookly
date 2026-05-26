@@ -1,5 +1,5 @@
 import AuthButton from "@/components/auth-button";
-import FeatureCard from "@/components/feature-card";
+import FeatureCard from "@/components/shared/feature-card";
 import { Button } from "@/components/ui/button";
 import { BarChart3, Calendar, CalendarCheck2, ChevronRight, Search, ShieldCheck, Sparkles, Store } from "lucide-react";
 import Link from "next/link";
@@ -18,9 +18,7 @@ export default function Page() {
                     <span className="text-primary">effortlessly</span>
                 </h1>
 
-                <p className="text-muted-foreground mx-auto max-w-2xl">
-                    Discover and book top-rated services near you, or grow your business with smart scheduling and management tools.
-                </p>
+                <p className="text-muted-foreground mx-auto max-w-2xl">Discover and book top-rated services near you, or grow your business with smart scheduling and management tools.</p>
 
                 <div className="flex items-center justify-center gap-4">
                     <AuthButton />
@@ -50,9 +48,7 @@ export default function Page() {
                     <div className="space-y-4">
                         <p className="text-sm font-semibold tracking-[0.2em] text-zinc-500 uppercase">For business owners</p>
                         <h2 className="text-4xl font-bold tracking-tight">Grow your business with smart scheduling</h2>
-                        <p className="text-muted-foreground text-lg leading-relaxed">
-                            Take control of your bookings, reduce no-shows, and attract more customers.
-                        </p>
+                        <p className="text-muted-foreground text-lg leading-relaxed">Take control of your bookings, reduce no-shows, and attract more customers.</p>
                     </div>
 
                     <ul className="space-y-4">
@@ -85,9 +81,7 @@ export default function Page() {
             <section className="bg-primary text-primary-foreground space-y-6 border py-12 text-center">
                 <h2 className="text-4xl font-bold">Ready to get started?</h2>
 
-                <p className="mx-auto max-w-xl text-xl opacity-90">
-                    Join thousands of users who are already booking and managing services on Bookly.
-                </p>
+                <p className="mx-auto max-w-xl text-xl opacity-90">Join thousands of users who are already booking and managing services on Bookly.</p>
 
                 <Button size={"cta"} variant={"ctaPrimary"} asChild>
                     <Link href="/handler/sign-up">Create your free account</Link>

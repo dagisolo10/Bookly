@@ -3,7 +3,7 @@ import { requestApi } from "../api-error";
 import api from "@/lib/axios";
 import { BusinessHoursSchema } from "@/lib/validation";
 import { FullBusiness } from "@/types/models";
-import { CreateBusinessPayload, UpdateBusinessPayload } from "@/types/payload";
+import { UpdateBusinessPayload } from "@/types/payload";
 import { MessageResponse, OwnerBusinessResponse, PaginationResponse } from "@/types/response";
 
 export const ownerBusinessApi = {
@@ -23,7 +23,7 @@ export const ownerBusinessApi = {
         return data;
     },
 
-    createBusiness: async (business: CreateBusinessPayload) => {
+    createBusiness: async (business: FormData) => {
         const data = await requestApi(() => api.post<OwnerBusinessResponse>("/owner/business", business));
 
         BusinessHoursSchema.array().parse(data.hours);

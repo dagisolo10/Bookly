@@ -1,5 +1,5 @@
-import { Button } from "./ui/button";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "./ui/empty";
+import { Button } from "../ui/button";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "../ui/empty";
 
 import { Layers, LucideIcon, Plus } from "lucide-react";
 

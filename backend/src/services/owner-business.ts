@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
+import { uploadImage } from "@/lib/supabase/upload-image";
 import type { createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
 import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
 import { Prisma, type Business, type BusinessHour as PrismaBusinessHour } from "@prisma/client";
@@ -10,6 +11,7 @@ type FullBusiness = Business & {
 };
 
 export type CreateBusinessPayload = z.infer<typeof createBusinessSchema>;
+export type CreateBusinessPayloadWithoutImages = CreateBusinessPayload;
 export type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;
 
 const fullBusinessInclude = {
@@ -44,6 +46,7 @@ export async function getMyBusinesses(page: number, limit: number, query: string
                 take: limit,
                 skip: (page - 1) * limit,
                 include: fullBusinessInclude,
+                orderBy: { createdAt: "desc" },
             }),
         ]);
 
@@ -79,7 +82,7 @@ export async function getMyBusinessById(id: string): ServiceResult<FullBusiness>
     }
 }
 
-export async function createBusiness(data: CreateBusinessPayload): ServiceResult<FullBusiness> {
+export async function createBusiness(data: CreateBusinessPayloadWithoutImages, _files: Express.Multer.File[]): ServiceResult<FullBusiness> {
     try {
         const ownerId = getUserId();
 
@@ -99,10 +102,13 @@ export async function createBusiness(data: CreateBusinessPayload): ServiceResult
 
         const { hours, ...rest } = data;
 
+        const bannerImages = await uploadImage(_files, "business", "bannerImages");
+
         const business = await prisma.business.create({
             data: {
                 ownerId,
                 ...rest,
+                bannerImages,
                 hours: {
                     createMany: {
                         data: hours,
