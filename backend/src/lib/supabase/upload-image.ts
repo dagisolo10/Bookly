@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from "./server";
 
-export async function uploadImage(files: Express.Multer.File[], path: string, bucket: string) {
+type UploadResult = { success: true; images: string[] } | { success: false; error: string };
+
+export async function uploadImages(files: Express.Multer.File[], path: string, bucket: string): Promise<UploadResult> {
     const supabase = createSupabaseServerClient();
     const publicUrls: string[] = [];
     const uploadedPaths: string[] = [];
@@ -25,9 +27,41 @@ export async function uploadImage(files: Express.Multer.File[], path: string, bu
             publicUrls.push(data.publicUrl);
         }
 
-        return publicUrls;
-    } catch (error) {
-        if (uploadedPaths.length > 0) await supabase.storage.from(bucket).remove(uploadedPaths);
-        throw error;
+        return { images: publicUrls, success: true };
+    } catch (err) {
+        if (uploadedPaths.length > 0) {
+            await supabase.storage.from(bucket).remove(uploadedPaths);
+        }
+        const message = err instanceof Error ? err.message : "Unknown upload error";
+        return { success: false, error: message };
+    }
+}
+
+export async function removeImages(urls: string[], bucket: string) {
+    const supabase = createSupabaseServerClient();
+
+    const paths = urls
+        .map((url) => {
+            try {
+                const decodedUrl = decodeURIComponent(url);
+                const splitKey = `/storage/v1/object/public/${bucket}/`;
+                const parts = decodedUrl.split(splitKey);
+
+                if (parts.length < 2) return null;
+
+                const path = parts[1];
+                return path || null;
+            } catch {
+                return null;
+            }
+        })
+        .filter((path): path is string => Boolean(path));
+
+    if (paths.length === 0) return;
+
+    const { error } = await supabase.storage.from(bucket).remove(paths);
+
+    if (error) {
+        throw new Error(`Image removal failed: ${error.message}`);
     }
 }

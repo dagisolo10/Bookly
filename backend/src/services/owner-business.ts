@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
-import { uploadImage } from "@/lib/supabase/upload-image";
+import { removeImages, uploadImages } from "@/lib/supabase/upload-image";
 import type { createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
 import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
 import { Prisma, type Business, type BusinessHour as PrismaBusinessHour } from "@prisma/client";
@@ -81,7 +81,7 @@ export async function getMyBusinessById(id: string): ServiceResult<FullBusiness>
     }
 }
 
-export async function createBusiness(data: CreateBusinessPayload, _files: Express.Multer.File[]): ServiceResult<FullBusiness> {
+export async function createBusiness(data: CreateBusinessPayload, files: Express.Multer.File[]): ServiceResult<FullBusiness> {
     try {
         const ownerId = getUserId();
 
@@ -101,13 +101,17 @@ export async function createBusiness(data: CreateBusinessPayload, _files: Expres
 
         const { hours, ...rest } = data;
 
-        const bannerImages = await uploadImage(_files, "business", "bannerImages");
+        const uploadResult = await uploadImages(files, "business", "bannerImages");
+
+        if (!uploadResult.success) {
+            return { error: uploadResult.error, code: 500 };
+        }
 
         const business = await prisma.business.create({
             data: {
                 ownerId,
                 ...rest,
-                bannerImages,
+                bannerImages: uploadResult.images,
                 hours: {
                     createMany: {
                         data: hours,
@@ -124,7 +128,7 @@ export async function createBusiness(data: CreateBusinessPayload, _files: Expres
     }
 }
 
-export async function updateBusiness(id: string, data: UpdateBusinessPayload): ServiceResult<FullBusiness> {
+export async function updateBusiness(id: string, data: UpdateBusinessPayload, files: Express.Multer.File[]): ServiceResult<FullBusiness> {
     try {
         const ownerId = getUserId();
 
@@ -138,7 +142,17 @@ export async function updateBusiness(id: string, data: UpdateBusinessPayload): S
             return { error: "Closed businesses can not be edited.", code: 400 };
         }
 
-        const { hours, ...rest } = data;
+        const { hours, removedBannerImages, ...rest } = data;
+
+        const keptImages = business.bannerImages.filter((img) => !(removedBannerImages || []).includes(img));
+
+        const uploadResult = await uploadImages(files, "business", "bannerImages");
+
+        if (!uploadResult.success) {
+            return { error: uploadResult.error, code: 500 };
+        }
+
+        const finalImages = [...keptImages, ...uploadResult.images];
 
         const updated = await prisma.business.update({
             where: {
@@ -146,17 +160,22 @@ export async function updateBusiness(id: string, data: UpdateBusinessPayload): S
             },
             data: {
                 ...rest,
+                bannerImages: finalImages,
                 ...(hours !== undefined && {
                     hours: {
                         deleteMany: {},
-                        createMany: {
-                            data: hours,
-                        },
+                        createMany: { data: hours },
                     },
                 }),
             },
             include: fullBusinessInclude,
         });
+
+        try {
+            await removeImages(data.removedBannerImages ?? [], "bannerImages");
+        } catch (err) {
+            console.error("Cleanup failed:", err);
+        }
 
         return updated;
     } catch (error) {

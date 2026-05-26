@@ -1,10 +1,10 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { FullBusiness } from "@/types/models";
-import { MapPin, Phone, Settings } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { FullBusiness } from "@/types/models";
+import { Button } from "@/components/ui/button";
+import { MapPin, Phone, Settings } from "lucide-react";
 
 interface BusinessHeaderProps {
     show: boolean;

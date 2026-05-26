@@ -1,9 +1,8 @@
 import { requestApi } from "../api-error";
 
 import api from "@/lib/axios";
-import { BusinessHoursSchema } from "@/lib/validation";
 import { FullBusiness } from "@/types/models";
-import { UpdateBusinessPayload } from "@/types/payload";
+import { BusinessHoursSchema } from "@/lib/validation";
 import { MessageResponse, OwnerBusinessResponse, PaginationResponse } from "@/types/response";
 
 export const ownerBusinessApi = {
@@ -31,7 +30,7 @@ export const ownerBusinessApi = {
         return data;
     },
 
-    updateBusiness: async (id: string, business: UpdateBusinessPayload) => {
+    updateBusiness: async (id: string, business: FormData) => {
         const data = await requestApi(() => api.patch<OwnerBusinessResponse>(`/owner/business/${id}`, business));
 
         BusinessHoursSchema.array().parse(data.hours);

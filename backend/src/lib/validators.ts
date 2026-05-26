@@ -17,7 +17,16 @@ const DayHoursSchema = z
 export const createBusinessSchema = z
     .object({
         name: z.string().min(1, "Business name is required"),
-        hours: z.array(DayHoursSchema),
+        hours: z.preprocess((val) => {
+            if (typeof val === "string") {
+                try {
+                    return JSON.parse(val);
+                } catch {
+                    return val;
+                }
+            }
+            return val;
+        }, z.array(DayHoursSchema)),
         phone: z.string().nullish(),
         location: z.string().nullish(),
         description: z.string().nullish(),
@@ -33,11 +42,22 @@ export const createBusinessSchema = z
 
 export const updateBusinessSchema = z.object({
     name: z.string().min(1, "Business name is required").optional(),
-    hours: z.array(DayHoursSchema).optional(),
+    hours: z
+        .preprocess((val) => {
+            if (typeof val === "string") {
+                try {
+                    return JSON.parse(val);
+                } catch {
+                    return val;
+                }
+            }
+            return val;
+        }, z.array(DayHoursSchema))
+        .optional(),
     phone: z.string().nullish(),
     location: z.string().nullish(),
     description: z.string().nullish(),
-    bannerImages: z.array(z.string()).optional(),
+    removedBannerImages: z.array(z.string().url()).optional(),
     timeZone: z.string().min(1, "Timezone is required").optional(),
 });
 

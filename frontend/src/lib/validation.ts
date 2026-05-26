@@ -32,12 +32,12 @@ export const createBusinessSchema = z.object({
 
 export const updateBusinessSchema = z.object({
     name: z.string().min(1, "Business name is required").optional(),
-    hours: z.array(DayHoursSchema).optional(),
     phone: z.string().nullish(),
     location: z.string().nullish(),
     description: z.string().nullish(),
-    bannerImages: z.array(z.string().url("Invalid banner image URL")).optional(),
     timeZone: z.string().min(1, "Timezone is required").optional(),
+    bannerImages: z.array(z.string().url("Invalid banner image URL")).optional(),
+    hours: z.array(DayHoursSchema).min(1, "At least one open day is required"),
 });
 
 export const createServiceSchema = z.object({

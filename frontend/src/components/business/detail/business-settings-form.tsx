@@ -6,15 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateBusiness } from "@/hooks/tan stack/use-owner-business";
-import { createBusinessSchema } from "@/lib/validation";
-import { WeekDay } from "@/types/models";
-import { CreateBusinessPayload } from "@/types/payload";
+import { useUpdateBusiness } from "@/hooks/tan stack/use-owner-business";
+import { updateBusinessSchema } from "@/lib/validation";
+import { FullBusiness, WeekDay } from "@/types/models";
+import { UpdateBusinessPayload } from "@/types/payload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Globe, Plus } from "lucide-react";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Controller, SubmitHandler, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 type BannerUpload = {
@@ -23,8 +23,10 @@ type BannerUpload = {
     previewUrl: string;
 };
 
-export default function BusinessForm() {
+export default function BusinessSettingsForm({ initialData }: { initialData: FullBusiness }) {
     const [banners, setBanners] = useState<BannerUpload[]>([]);
+    const [existingImages, setExistingImages] = useState<string[]>(initialData.bannerImages);
+    const [removedExistingImages, setRemovedExistingImages] = useState<string[]>([]);
 
     const weekDays: WeekDay[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const timezones = useMemo(() => Intl.supportedValuesOf("timeZone").map((tz) => ({ label: tz.replace(/_/g, " "), value: tz })), []);
@@ -38,30 +40,23 @@ export default function BusinessForm() {
         setValue,
         control,
         formState: { errors },
-    } = useForm<CreateBusinessPayload>({
-        resolver: zodResolver(createBusinessSchema),
+    } = useForm<UpdateBusinessPayload>({
+        resolver: zodResolver(updateBusinessSchema),
         shouldUnregister: true,
         defaultValues: {
-            name: "",
-            location: "",
-            phone: "",
-            description: "",
-            bannerImages: [],
-            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            hours: [
-                { day: "Monday", open: "09:00", close: "17:00" },
-                { day: "Tuesday", open: "09:00", close: "17:00" },
-                { day: "Wednesday", open: "09:00", close: "17:00" },
-                { day: "Thursday", open: "09:00", close: "17:00" },
-                { day: "Friday", open: "09:00", close: "17:00" },
-                { day: "Saturday", open: "09:00", close: "17:00" },
-            ],
+            name: initialData.name,
+            location: initialData.location ?? "",
+            phone: initialData.phone ?? "",
+            description: initialData.description ?? "",
+            hours: initialData.hours.map(({ day, open, close }) => ({ day, open, close })),
+            bannerImages: initialData.bannerImages,
+            timeZone: initialData.timeZone,
         },
     });
 
     const { fields, append, remove } = useFieldArray({ control, name: "hours" });
 
-    const { mutateAsync: createBusiness, isPending: isCreating } = useCreateBusiness();
+    const { mutateAsync: updateBusiness, isPending: isUpdating } = useUpdateBusiness();
 
     useEffect(() => {
         const bannerImages = banners.map((b) => b.previewUrl);
@@ -112,6 +107,11 @@ export default function BusinessForm() {
         setBanners((prev) => prev.filter((item) => item.id !== idToRemove));
     }
 
+    function handleRemoveExistingBanner(url: string) {
+        setExistingImages((prev) => prev.filter((img) => img !== url));
+        setRemovedExistingImages((prev) => [...prev, url]);
+    }
+
     useEffect(() => {
         bannersRef.current = banners;
     }, [banners]);
@@ -126,25 +126,33 @@ export default function BusinessForm() {
         return () => bannersRef.current.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl));
     }, [banners]);
 
-    const onSubmit: SubmitHandler<CreateBusinessPayload> = async (data) => {
+    const onSubmit = async (data: UpdateBusinessPayload) => {
         const formData = new FormData();
 
-        formData.append("name", data.name);
+        console.log(data);
+
+        formData.append("name", data.name ?? "");
         formData.append("phone", data.phone ?? "");
-        formData.append("timeZone", data.timeZone);
+        formData.append("timeZone", data.timeZone ?? "");
         formData.append("location", data.location ?? "");
         formData.append("description", data.description ?? "");
 
-        formData.append("hours", JSON.stringify(data.hours));
+        formData.append("hours", JSON.stringify(data.hours ?? []));
+
+        removedExistingImages.forEach((url) => {
+            formData.append("removedBannerImages[]", url);
+        });
 
         banners.forEach((banner) => {
             formData.append("bannerImages", banner.file);
         });
 
-        const promise = createBusiness(formData);
+        console.log(formData);
+
+        const promise = updateBusiness({ id: initialData.id, business: formData });
         toast.promise(promise, {
-            loading: "Creating business...",
-            success: "Business created successfully",
+            loading: "Updating business...",
+            success: "Business updated successfully",
             error: (err) => err.message || "Something went wrong",
         });
         await promise;
@@ -220,7 +228,7 @@ export default function BusinessForm() {
                                 );
                             })}
                         </div>
-                        <ErrorMessage message={getHoursError(errors.hours)} />
+                        <ErrorMessage message={errors.hours?.root?.message} />
                     </Field>
 
                     <Field className="gap-2">
@@ -269,14 +277,29 @@ export default function BusinessForm() {
                     <Field>
                         <Label>Storefront Banner</Label>
 
-                        {banners.length > 0 && (
+                        {existingImages.length > 0 && (
                             <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+                                {existingImages.map((url) => (
+                                    <div key={url} className="relative aspect-video overflow-hidden rounded-xl border">
+                                        <Image src={url} alt="Current" fill className="object-cover" />
+
+                                        <button type="button" onClick={() => handleRemoveExistingBanner(url)} className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white">
+                                            <Plus className="size-3 rotate-45" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {banners.length > 0 && (
+                            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                                 {banners.map(({ id, previewUrl }) => (
                                     <div key={id} className="relative aspect-video overflow-hidden rounded-xl border">
                                         <Image src={previewUrl} alt="Preview" width={1080} height={400} className="h-full w-full object-cover" />
                                         <button onClick={() => handleRemoveNewBanner(id, previewUrl)} title="Remove Banner Image" type="button" className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black">
                                             <Plus className="size-3 rotate-45" />
                                         </button>
+                                        <div className="bg-primary absolute top-1 left-1 rounded px-1.5 text-[10px] text-white">NEW</div>
                                     </div>
                                 ))}
                             </div>
@@ -307,15 +330,15 @@ export default function BusinessForm() {
                     Discard
                 </Button>
 
-                <Button disabled={isCreating} type="submit" size={"cta"} className="sm:w-auto">
-                    Register Business
+                <Button disabled={isUpdating} type="submit" size={"cta"} className="sm:w-auto">
+                    Update Business
                 </Button>
             </div>
         </form>
     );
 }
 
-export function Tag({ text }: { text: string }) {
+function Tag({ text }: { text: string }) {
     return (
         <div className="flex items-center gap-2">
             <div className="bg-foreground h-4 w-1 rounded-full" />
@@ -325,14 +348,5 @@ export function Tag({ text }: { text: string }) {
 }
 
 function ErrorMessage({ message }: { message?: string }) {
-    return message ? <p className="mt-1 text-xs font-medium text-destructive">{message}</p> : null;
-}
-
-function getHoursError(errors: unknown): string | undefined {
-    if (!errors) return;
-    if (Array.isArray(errors)) {
-        const itemErrors = errors.map((e) => e?.root?.message).filter(Boolean);
-        return itemErrors.length > 0 ? itemErrors.join(", ") : undefined;
-    }
-    return (errors as { message?: string })?.message;
+    return message ? <p className="mt-1 text-xs font-medium text-red-500">{message}</p> : null;
 }
