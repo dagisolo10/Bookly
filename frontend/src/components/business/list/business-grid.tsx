@@ -34,8 +34,8 @@ export default function BusinessGrid({ businesses, linkPath }: { businesses: Ful
                             </div>
 
                             {business.status !== "Active" && (
-                                <div className={cn(business.status === "Paused" ? "bg-blue-100 text-blue-500" : "bg-red-100 text-red-500", "flex items-center gap-1 rounded-lg px-2 py-1 text-sm")}>
-                                    {business.status === "Paused" ? <Pause className="size-4" /> : <Ban className="size-4" />}
+                                <div className={cn(business.status === "Paused" ? "bg-blue-100 text-blue-500" : "bg-red-100 text-red-500", "flex items-center gap-1 rounded-lg px-2 py-1 text-xs")}>
+                                    {business.status === "Paused" ? <Pause className="size-3" /> : <Ban className="size-3" />}
                                     <p>{business.status}</p>
                                 </div>
                             )}

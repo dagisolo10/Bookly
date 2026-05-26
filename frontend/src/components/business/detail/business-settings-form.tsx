@@ -124,12 +124,10 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
 
     useEffect(() => {
         return () => bannersRef.current.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl));
-    }, [banners]);
+    }, []);
 
     const onSubmit = async (data: UpdateBusinessPayload) => {
         const formData = new FormData();
-
-        console.log(data);
 
         formData.append("name", data.name ?? "");
         formData.append("phone", data.phone ?? "");
@@ -146,8 +144,6 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
         banners.forEach((banner) => {
             formData.append("bannerImages", banner.file);
         });
-
-        console.log(formData);
 
         const promise = updateBusiness({ id: initialData.id, business: formData });
         toast.promise(promise, {

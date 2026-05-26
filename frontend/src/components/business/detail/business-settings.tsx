@@ -2,6 +2,7 @@
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useCloseBusiness, useToggleBusiness } from "@/hooks/tan stack/use-owner-business";
 import { FullBusiness } from "@/types/models";
 import { motion } from "framer-motion";
 import { ChevronRight, Clock, Info, LayoutDashboard } from "lucide-react";
@@ -61,7 +62,7 @@ export default function BusinessSettings({ initialData }: { initialData: FullBus
                 </div>
             </div>
 
-            <div className="screen">
+            <div className="screen py-0">
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.2fr_0.8fr]">
                     <aside className="hidden lg:block">
                         <nav className="sticky top-24 space-y-1">
@@ -90,15 +91,24 @@ export default function BusinessSettings({ initialData }: { initialData: FullBus
     );
 }
 
-interface DangerZoneProp {
-    business: { status: string };
-}
-
 type Method = "pause" | "activate" | "close" | null;
 
-function DangerZone({ business }: DangerZoneProp) {
+function DangerZone({ business }: { business: FullBusiness }) {
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
     const [method, setMethod] = useState<Method>(null);
+
+    const { mutate: toggleBusiness } = useToggleBusiness();
+    const { mutate: closeBusiness } = useCloseBusiness();
+
+    function onConfirm() {
+        if (method === "close") {
+            closeBusiness(business.id);
+        } else {
+            toggleBusiness(business.id);
+        }
+
+        setShowConfirm(false);
+    }
 
     return (
         <div className="border border-red-200 bg-red-50/50 p-6">
@@ -139,7 +149,7 @@ function DangerZone({ business }: DangerZoneProp) {
                     Close Business
                 </Button>
             </div>
-            <Confirmation method={method} showConfirm={showConfirm} onConfirm={() => setShowConfirm(false)} setShowConfirm={setShowConfirm} />
+            <Confirmation method={method} showConfirm={showConfirm} onConfirm={onConfirm} setShowConfirm={setShowConfirm} />
         </div>
     );
 }
