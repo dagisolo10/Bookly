@@ -10,6 +10,7 @@ export type BusinessHour = z.infer<typeof BusinessHoursSchema>;
 export type User = {
     id: string;
     name: string;
+    phone?: string | null;
     roles: Role[];
     createdAt: string;
     updatedAt: string;
@@ -46,8 +47,6 @@ export type Service = {
 
 export type Booking = {
     id: string;
-    name: string;
-    phone: string;
     startsAt: string;
     createdAt: string;
     updatedAt: string;

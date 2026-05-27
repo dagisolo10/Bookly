@@ -9,6 +9,7 @@ datasource db {
 model User {
     id         String     @id @default(cuid())
     name       String
+    phone      String?
     roles      Role[]     @default([Customer])
     bookings   Booking[]
     businesses Business[] @relation("UserBusinesses")
@@ -67,8 +68,6 @@ model Service {
 
 model Booking {
     id        String        @id @default(cuid())
-    name      String
-    phone     String
     startsAt  DateTime
     status    BookingStatus @default(Pending)
     createdAt DateTime      @default(now())

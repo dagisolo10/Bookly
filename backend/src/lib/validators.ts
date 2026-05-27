@@ -4,7 +4,12 @@ import { z } from "zod";
  * User Schema
  */
 
-export const userSchema = z.object({ name: z.string().min(3, "Name must be at least 3 characters.") }).strict();
+export const userSchema = z
+    .object({
+        name: z.string().min(3, "Name must be at least 3 characters."),
+        phone: z.string().nullish(),
+    })
+    .strict();
 
 /**
  * Business Schema
@@ -124,14 +129,7 @@ export const manageBookingSchema = z.object({ newStatus: z.enum(["Confirmed", "C
 export const bookingBusinessIdSchema = z.object({ businessId: z.string().min(1, "Business Id is required") });
 
 export const createBookingSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    phone: z.string().min(1, "Phone is required"),
     startsAt: z.iso.datetime({ message: "Invalid date format" }),
     serviceId: z.string().cuid(),
 });
 
-export const updateBookingSchema = z.object({
-    name: z.string().min(1, "Name is required").optional(),
-    phone: z.string().min(1, "Phone is required").optional(),
-    startsAt: z.string().datetime({ message: "Invalid date format" }).optional(),
-});

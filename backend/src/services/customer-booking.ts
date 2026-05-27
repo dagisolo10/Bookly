@@ -9,7 +9,7 @@ import { Prisma } from "@prisma/client";
 export async function createBooking(data: CreateBookingPayload): ServiceResult<FullBooking> {
     try {
         const userId = getUserId();
-        const { name, phone, serviceId, startsAt } = data;
+        const { serviceId, startsAt } = data;
 
         const business = await prisma.business.findFirst({
             where: { services: { some: { id: serviceId } } },
@@ -70,8 +70,6 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
                 userId,
                 startsAt,
                 serviceId,
-                phone,
-                name,
             },
             include: fullBookingIncludes,
         });
