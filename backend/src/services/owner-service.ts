@@ -1,20 +1,9 @@
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
-import type { createServiceSchema, updateServiceSchema } from "@/lib/validators";
+import type { CreateServicePayload, UpdateServicePayload } from "@/types/payload";
+import { type FullService, fullServiceInclude } from "@/types/populated";
 import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
-import { Prisma, type Booking, type Service } from "@prisma/client";
-import type z from "zod";
-
-type CreateServicePayload = z.infer<typeof createServiceSchema>;
-type UpdateServicePayload = z.infer<typeof updateServiceSchema>;
-
-type FullService = Service & {
-    bookings: Booking[];
-};
-
-const fullServiceInclude = {
-    bookings: true,
-} satisfies Prisma.ServiceInclude;
+import { Prisma } from "@prisma/client";
 
 export async function getBusinessServices(businessId: string, page: number, limit: number, query: string): ServiceResult<PaginatedData<FullService>> {
     try {

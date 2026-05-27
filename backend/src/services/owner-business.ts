@@ -1,21 +1,10 @@
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import { removeImages, uploadImages } from "@/lib/supabase/upload-image";
-import type { createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
+import type { CreateBusinessPayload, UpdateBusinessPayload } from "@/types/payload";
+import { type FullBusiness, fullBusinessInclude } from "@/types/populated";
 import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
-import { Prisma, type Business, type BusinessHour as PrismaBusinessHour } from "@prisma/client";
-import z from "zod";
-
-type FullBusiness = Business & {
-    hours: PrismaBusinessHour[];
-};
-
-export type CreateBusinessPayload = z.infer<typeof createBusinessSchema>;
-export type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;
-
-const fullBusinessInclude = {
-    hours: true,
-} satisfies Prisma.BusinessInclude;
+import { Prisma } from "@prisma/client";
 
 async function findOwnedBusiness(id: string, ownerId: string) {
     return prisma.business.findFirst({
