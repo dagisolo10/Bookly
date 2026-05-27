@@ -1,25 +1,12 @@
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
-import type { userSchema } from "@/lib/validators";
+import type { UpdateUserPayload } from "@/types/payload";
+import { type FullUser, fullUserInclude } from "@/types/populated";
 import type { ServiceResult } from "@/types/response";
 import env from "@/utils/env";
 import { clerkClient, createClerkClient } from "@clerk/express";
-import type { Booking, Business, Prisma, User } from "@prisma/client";
-import type z from "zod";
 
 const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
-
-type UpdateUserPayload = z.infer<typeof userSchema>;
-
-type FullUser = User & {
-    bookings: Booking[];
-    businesses: Business[];
-};
-
-const fullUserInclude = {
-    bookings: true,
-    businesses: true,
-} satisfies Prisma.UserInclude;
 
 export async function getUser(): ServiceResult<FullUser> {
     try {

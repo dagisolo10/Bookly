@@ -1,7 +1,7 @@
 import { createBusinessSchema, updateBusinessSchema, createServiceSchema, updateServiceSchema } from "@/lib/validation";
 import z from "zod";
 
-export type UserPayload = { name: string };
+export type UserPayload = { name: string; phone?: string | null };
 
 export type CreateBusinessPayload = z.infer<typeof createBusinessSchema>;
 export type UpdateBusinessPayload = z.infer<typeof updateBusinessSchema>;

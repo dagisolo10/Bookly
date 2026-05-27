@@ -1,16 +1,9 @@
-import type z from "zod";
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
+import type { BookingStatusUpdate } from "@/types/payload";
+import { fullBookingIncludes, type FullBooking } from "@/types/populated";
 import type { ServiceResult } from "@/types/response";
-import type { manageBookingSchema } from "@/lib/validators";
-import type { Booking, BookingStatus, Prisma, Service, User } from "@prisma/client";
-
-type BookingStatusUpdate = z.infer<typeof manageBookingSchema>["newStatus"];
-
-type FullBooking = Booking & {
-    user: User;
-    service: Service;
-};
+import type { BookingStatus, Prisma } from "@prisma/client";
 
 const allowedTransitions: Record<BookingStatus, BookingStatus[]> = {
     Pending: ["Confirmed", "Cancelled"],
@@ -18,11 +11,6 @@ const allowedTransitions: Record<BookingStatus, BookingStatus[]> = {
     Cancelled: [],
     Completed: [],
 };
-
-const fullBookingIncludes = {
-    user: true,
-    service: true,
-} satisfies Prisma.BookingInclude;
 
 const bookingCheck = (id: string, ownerId: string): Prisma.BookingWhereInput => ({
     id,
