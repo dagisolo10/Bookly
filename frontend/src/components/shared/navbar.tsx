@@ -13,7 +13,8 @@ const ROUTE_MAP = {
     Business: [{ label: "My Businesses", path: "/business/list" }],
     Customer: [
         // { label: "My Bookings", path: "/customer/bookings" },
-        { label: "Find Services", path: "/customer/" },
+        { label: "Customer", path: "/customer" },
+        { label: "Find Services", path: "/customer/services" },
         // { label: "Browse Businesses", path: "/customer/businesses" },
     ],
     Visitor: [

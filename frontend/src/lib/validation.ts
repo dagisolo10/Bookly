@@ -56,3 +56,8 @@ export const updateServiceSchema = z.object({
     thumbnail: z.string().nullish(),
     category: z.string().optional(),
 });
+
+export const createBookingSchema = z.object({
+    startsAt: z.iso.datetime({ message: "Invalid date format" }),
+    serviceId: z.string().cuid(),
+});

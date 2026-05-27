@@ -18,25 +18,25 @@ export type UserResponse = ApiResult<FullUser>;
  *  Owner - Business Response
  */
 
-export type OwnerBusinessResponse = ApiResult<FullBusiness>;
-export type OwnerBusinessListResponse = ApiResult<FullBusiness[]>;
+export type BusinessResponse = ApiResult<FullBusiness>;
+export type BusinessListResponse = ApiResult<FullBusiness[]>;
 
 /**
  *  Owner - Service Response
  */
 
-export type OwnerServiceResponse = ApiResult<FullService>;
-export type OwnerServicesResponse = ApiResult<FullService[]>;
+export type ServiceResponse = ApiResult<FullService>;
+export type ServiceListResponse = ApiResult<FullService[]>;
 
 /**
  *  Owner - Booking Response
-*/
+ */
 
-export type OwnerBookingResponse = ApiResult<FullBooking>;
-export type OwnerBookingListResponse = ApiResult<FullBooking[]>;
+export type BookingResponse = ApiResult<FullBooking>;
+export type BookingListResponse = ApiResult<FullBooking[]>;
 
 /**
  * Pagination Response
- */ 
+ */
 
 export type PaginationResponse<T> = ApiResult<PaginatedData<T>>;

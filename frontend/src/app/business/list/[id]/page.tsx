@@ -4,7 +4,7 @@ import BusinessHeader from "@/components/business/detail/business-header";
 import BusinessHours from "@/components/business/detail/business-hour";
 import ServiceList from "@/components/business/services/service-list";
 import { BusinessBaseSkeleton, ServiceListSkeleton } from "@/components/shared/skeletons";
-import { getOwnerBusinessByIdQueryOptions, getOwnerBusinessServicesQueryOptions, syncUserQueryOptions } from "@/hooks/tan stack/query-options";
+import { getOwnerBusinessQueryOptions, getOwnerBusinessServicesQueryOptions, syncUserQueryOptions } from "@/hooks/tan stack/query-options";
 import { useQueries } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 
@@ -12,7 +12,7 @@ export default function BusinessPage() {
     const { id } = useParams<{ id: string }>();
 
     const [userQuery, businessQuery, servicesQuery] = useQueries({
-        queries: [syncUserQueryOptions(), getOwnerBusinessByIdQueryOptions(id), getOwnerBusinessServicesQueryOptions(id, 1, 5)],
+        queries: [syncUserQueryOptions(), getOwnerBusinessQueryOptions(id), getOwnerBusinessServicesQueryOptions(id, 1, 5)],
     });
 
     const isPending = userQuery.isPending || businessQuery.isPending;
