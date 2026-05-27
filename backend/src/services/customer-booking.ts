@@ -24,7 +24,7 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
             return { error: "This business is currently not accepting bookings.", code: 400 };
         }
 
-        const isOpen = isBusinessOpen(startsAt, business.hours);
+        const isOpen = isBusinessOpen(startsAt, business.hours, business.timeZone);
 
         if (!isOpen) {
             return { error: `This business is closed during the selected time. Please pick another slot.`, code: 400 };
@@ -36,7 +36,7 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
             return { error: "The selected service couldn't be found.", code: 404 };
         }
 
-        const enoughTime = hasEnoughTime(startsAt, business.hours, service.durationInMinutes);
+        const enoughTime = hasEnoughTime(startsAt, business.hours, service.durationInMinutes, business.timeZone);
 
         if (!enoughTime) {
             return { error: "The selected time doesn't leave enough time before closing. Please choose an earlier slot.", code: 400 };
@@ -44,13 +44,21 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
 
         const activeBookings = await prisma.booking.findMany({
             where: { userId, status: { not: "Cancelled" } },
-            select: { startsAt: true },
+            select: {
+                startsAt: true,
+                service: {
+                    select: { durationInMinutes: true },
+                },
+            },
         });
 
         const isValid = isScheduleValid(
             startsAt,
             service.durationInMinutes,
-            activeBookings.map((b) => b.startsAt),
+            activeBookings.map((b) => ({
+                startsAt: b.startsAt,
+                durationInMinutes: b.service.durationInMinutes,
+            })),
         );
 
         if (!isValid) {

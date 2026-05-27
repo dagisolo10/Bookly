@@ -19,7 +19,7 @@ router.get(
     requireAuth,
     requireUserProfile,
     validate(businessIdSchema, "params"),
-    handler((req: Request) => getBusinessById(req.params["businessId"] as string)),
+    handler((req: Request) => getBusinessById(req.params["id"] as string)),
 );
 
 export default router;

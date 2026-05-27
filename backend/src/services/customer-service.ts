@@ -19,9 +19,10 @@ export async function getServices() {
 
 export async function getBusinessServices(businessId: string) {
     try {
-        const business = await prisma.business.findUnique({
+        const business = await prisma.business.findFirst({
             where: {
                 id: businessId,
+                status: "Active",
             },
             select: {
                 id: true,

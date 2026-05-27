@@ -15,7 +15,7 @@ router.get(
 );
 
 router.get(
-    "/businessId",
+    "/:businessId",
     requireAuth,
     requireUserProfile,
     validate(serviceBusinessIdSchema, "params"),

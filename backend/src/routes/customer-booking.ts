@@ -23,11 +23,11 @@ router.get(
 );
 
 router.get(
-    "/:bookingId",
+    "/:id",
     requireAuth,
     requireUserProfile,
     validate(bookingIdSchema, "params"),
-    handler((req: Request) => getBookingById(req.params["businessId"] as string)),
+    handler((req: Request) => getBookingById(req.params["id"] as string)),
 );
 
 export default router;
