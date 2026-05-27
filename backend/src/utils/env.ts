@@ -13,6 +13,8 @@ const env = {
     DATABASE_URL: requireEnv("DATABASE_URL"),
     CLERK_SECRET_KEY: requireEnv("CLERK_SECRET_KEY"),
     CLERK_PUBLISHABLE_KEY: requireEnv("CLERK_PUBLISHABLE_KEY"),
+    SUPABASE_URL: requireEnv("SUPABASE_URL"),
+    SUPABASE_SERVICE_ROLE_KEY: requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
 };
 
 export default env;

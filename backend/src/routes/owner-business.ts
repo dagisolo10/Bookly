@@ -2,6 +2,7 @@ import { handler } from "@/lib/handler";
 import { businessIdSchema, createBusinessSchema, paginationQuerySchema, querySearchSchema, updateBusinessSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
 import { requireBusinessRole } from "@/middlewares/role";
+import upload from "@/middlewares/upload";
 import { validate } from "@/middlewares/validation";
 import { closeBusiness, createBusiness, getMyBusinessById, getMyBusinesses, toggleBusiness, updateBusiness } from "@/services/owner-business";
 import { Router, type Request } from "express";
@@ -37,8 +38,9 @@ router.post(
     requireAuth,
     requireUserProfile,
     requireBusinessRole,
+    upload.array("bannerImages"),
     validate(createBusinessSchema, "body"),
-    handler((req: Request) => createBusiness(req.body)),
+    handler((req: Request) => createBusiness(req.body, req.files as Express.Multer.File[])),
 );
 
 router.patch(
@@ -46,9 +48,13 @@ router.patch(
     requireAuth,
     requireUserProfile,
     requireBusinessRole,
+    upload.array("bannerImages"),
     validate(businessIdSchema, "params"),
     validate(updateBusinessSchema, "body"),
-    handler((req: Request) => updateBusiness(req.params["id"] as string, req.body)),
+    handler((req: Request) => {
+        const removedBannerImages = req.body.removedBannerImages ? (Array.isArray(req.body.removedBannerImages) ? req.body.removedBannerImages : [req.body.removedBannerImages]) : [];
+        return updateBusiness(req.params["id"] as string, { ...req.body, removedBannerImages }, req.files as Express.Multer.File[]);
+    }),
 );
 
 router.patch(

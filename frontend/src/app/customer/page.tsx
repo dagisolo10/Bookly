@@ -1,9 +1,9 @@
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
+import FeatureCard from "@/components/shared/feature-card";
 import { Button } from "@/components/ui/button";
-import FeatureCard from "@/components/feature-card";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { Calendar, Dumbbell, Flower2, Heart, LucideIcon, Scissors, Search, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 export default function Customer() {
     return (
@@ -18,9 +18,7 @@ export default function Customer() {
                     Book trusted local <span className="text-primary">services</span> in seconds.
                 </h1>
 
-                <p className="text-muted-foreground mx-auto max-w-2xl">
-                    Discover salons, spas, gyms, and wellness experts near you. Book instantly, no phone calls required.
-                </p>
+                <p className="text-muted-foreground mx-auto max-w-2xl">Discover salons, spas, gyms, and wellness experts near you. Book instantly, no phone calls required.</p>
             </section>
 
             <section className="space-y-8">
@@ -30,16 +28,8 @@ export default function Customer() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                    <FeatureCard
-                        icon={Search}
-                        title="1. Find a Service"
-                        text="Browse trusted local businesses or search for the exact service you need."
-                    />
-                    <FeatureCard
-                        icon={Calendar}
-                        title="2. Pick a Time"
-                        text="View real-time availability and choose a slot that fits your schedule."
-                    />
+                    <FeatureCard icon={Search} title="1. Find a Service" text="Browse trusted local businesses or search for the exact service you need." />
+                    <FeatureCard icon={Calendar} title="2. Pick a Time" text="View real-time availability and choose a slot that fits your schedule." />
                     <FeatureCard icon={Heart} title="3. Book & Relax" text="Confirm instantly and show up. No calls, no waiting — just results." />
                 </div>
             </section>

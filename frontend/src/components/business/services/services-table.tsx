@@ -1,13 +1,13 @@
 "use client";
 
-import EmptyState from "@/components/empty-state";
+import EmptyState from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate, formatDuration } from "@/lib/helpers/formatters";
 import { FullService } from "@/types/models";
-import { FolderOpen, ListRestart, LucideEllipsisVertical } from "lucide-react";
+import { ListRestart, LucideEllipsisVertical } from "lucide-react";
 
 interface ServiceTableProps {
     hasServices: boolean;
@@ -25,21 +25,7 @@ export default function ServicesTable({ hasServices, noSearchResult, services, h
             return (
                 <TableRow>
                     <TableCell colSpan={7} className="h-72 text-center">
-                        <div className="flex flex-col items-center justify-center space-y-2">
-                            <div className="bg-muted flex size-12 items-center justify-center rounded-full">
-                                <FolderOpen className="text-muted-foreground size-6" />
-                            </div>
-                            <div className="space-y-1">
-                                <h3 className="text-base font-semibold tracking-tight">No services found</h3>
-                                <p className="text-muted-foreground text-center text-sm">
-                                    No offerings match your search criteria. Try using alternative keywords.
-                                </p>
-                            </div>
-                            <Button onClick={reset}>
-                                <ListRestart className="size-4" />
-                                Reset
-                            </Button>
-                        </div>
+                        <EmptyState button="Reset" icon={ListRestart} title="No services found" description="No offerings match your search criteria. Try using alternative keywords." onClick={reset} />
                     </TableCell>
                 </TableRow>
             );
@@ -49,12 +35,7 @@ export default function ServicesTable({ hasServices, noSearchResult, services, h
             return (
                 <TableRow>
                     <TableCell colSpan={7} className="h-72 text-center">
-                        <EmptyState
-                            button="Add Service"
-                            title="No services yet"
-                            description="Get started by adding your first service offering."
-                            onClick={handleAdd}
-                        />
+                        <EmptyState button="Add Service" title="No services yet" description="Get started by adding your first service offering." onClick={handleAdd} />
                     </TableCell>
                 </TableRow>
             );
@@ -63,13 +44,7 @@ export default function ServicesTable({ hasServices, noSearchResult, services, h
         return services.map((service) => (
             <TableRow key={service.id}>
                 <TableCell className="font-medium">{service.name}</TableCell>
-                <TableCell>
-                    {service.category ? (
-                        <Badge variant="secondary">{service.category}</Badge>
-                    ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
-                    )}
-                </TableCell>
+                <TableCell>{service.category ? <Badge variant="secondary">{service.category}</Badge> : <span className="text-muted-foreground text-sm">—</span>}</TableCell>
                 <TableCell className="text-muted-foreground">{formatDuration(service.durationInMinutes)}</TableCell>
                 <TableCell>${service.price.toFixed(2)}</TableCell>
                 <TableCell>

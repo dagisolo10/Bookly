@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Briefcase, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 const ROUTE_MAP = {
     Admin: [{ label: "Admin Console", path: "/admin/dashboard" }],
@@ -32,13 +32,7 @@ export default function Navbar() {
 
     if (isHidden) return null;
 
-    const currentSection = pathname.startsWith("/admin")
-        ? "Admin"
-        : pathname.startsWith("/business")
-          ? "Business"
-          : pathname.startsWith("/customer")
-            ? "Customer"
-            : "Visitor";
+    const currentSection = pathname.startsWith("/admin") ? "Admin" : pathname.startsWith("/business") ? "Business" : pathname.startsWith("/customer") ? "Customer" : "Visitor";
 
     // const routes = ROUTE_MAP[currentSection];
     const routes = [...ROUTE_MAP.Business, ...ROUTE_MAP.Customer, ...ROUTE_MAP.Visitor];
@@ -55,15 +49,7 @@ export default function Navbar() {
 
                 <div className="hidden items-center gap-2 font-medium sm:flex">
                     {routes.map((route) => (
-                        <Button
-                            key={route.path}
-                            asChild
-                            className={
-                                pathname === route.path
-                                    ? "bg-foreground text-background hover:bg-zinc-800 dark:hover:bg-zinc-300"
-                                    : "bg-transparent text-zinc-600 hover:bg-zinc-100"
-                            }
-                        >
+                        <Button key={route.path} asChild className={pathname === route.path ? "bg-foreground text-background hover:bg-zinc-800 dark:hover:bg-zinc-300" : "bg-transparent text-zinc-600 hover:bg-zinc-100"}>
                             <Link href={route.path}>{route.label}</Link>
                         </Button>
                     ))}
@@ -80,21 +66,13 @@ export default function Navbar() {
                         }}
                     >
                         <UserButton.MenuItems>
-                            {hasBusinessRole && currentSection !== "Business" && (
-                                <UserButton.Link label="Switch to Business" labelIcon={<Briefcase className="size-4" />} href="/business/" />
-                            )}
+                            {hasBusinessRole && currentSection !== "Business" && <UserButton.Link label="Switch to Business" labelIcon={<Briefcase className="size-4" />} href="/business/" />}
 
-                            {currentSection === "Business" && (
-                                <UserButton.Link label="Switch to Customer" labelIcon={<User className="size-4" />} href="/customer/" />
-                            )}
+                            {currentSection === "Business" && <UserButton.Link label="Switch to Customer" labelIcon={<User className="size-4" />} href="/customer/" />}
 
-                            {hasAdminRole && currentSection !== "Admin" && (
-                                <UserButton.Link label="Admin Dashboard" labelIcon={<Settings className="size-4" />} href="/admin/" />
-                            )}
+                            {hasAdminRole && currentSection !== "Admin" && <UserButton.Link label="Admin Dashboard" labelIcon={<Settings className="size-4" />} href="/admin/" />}
 
-                            {!hasBusinessRole && (
-                                <UserButton.Action label="Start a business" labelIcon={<Briefcase className="size-4" />} onClick={mutate} />
-                            )}
+                            {!hasBusinessRole && <UserButton.Action label="Start a business" labelIcon={<Briefcase className="size-4" />} onClick={mutate} />}
                         </UserButton.MenuItems>
                     </UserButton>
                 </div>

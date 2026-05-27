@@ -1,9 +1,10 @@
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
+import { removeImages, uploadImages } from "@/lib/supabase/upload-image";
 import type { createBusinessSchema, updateBusinessSchema } from "@/lib/validators";
 import type { PaginatedData, ServiceMessage, ServiceResult } from "@/types/response";
 import { Prisma, type Business, type BusinessHour as PrismaBusinessHour } from "@prisma/client";
-import type z from "zod";
+import z from "zod";
 
 type FullBusiness = Business & {
     hours: PrismaBusinessHour[];
@@ -44,6 +45,7 @@ export async function getMyBusinesses(page: number, limit: number, query: string
                 take: limit,
                 skip: (page - 1) * limit,
                 include: fullBusinessInclude,
+                orderBy: { createdAt: "desc" },
             }),
         ]);
 
@@ -79,7 +81,9 @@ export async function getMyBusinessById(id: string): ServiceResult<FullBusiness>
     }
 }
 
-export async function createBusiness(data: CreateBusinessPayload): ServiceResult<FullBusiness> {
+export async function createBusiness(data: CreateBusinessPayload, files: Express.Multer.File[]): ServiceResult<FullBusiness> {
+    let newUploadedUrls: string[] = [];
+
     try {
         const ownerId = getUserId();
 
@@ -99,10 +103,19 @@ export async function createBusiness(data: CreateBusinessPayload): ServiceResult
 
         const { hours, ...rest } = data;
 
+        const uploadResult = await uploadImages(files, "business", "bannerImages");
+
+        if (!uploadResult.success) {
+            return { error: uploadResult.error, code: 500 };
+        }
+
+        newUploadedUrls = uploadResult.images;
+
         const business = await prisma.business.create({
             data: {
                 ownerId,
                 ...rest,
+                bannerImages: uploadResult.images,
                 hours: {
                     createMany: {
                         data: hours,
@@ -114,12 +127,21 @@ export async function createBusiness(data: CreateBusinessPayload): ServiceResult
 
         return business;
     } catch (error) {
+        if (newUploadedUrls.length > 0) {
+            try {
+                await removeImages(newUploadedUrls, "bannerImages");
+            } catch (cleanupErr) {
+                console.error("Upload rollback failed:", cleanupErr);
+            }
+        }
         console.error(error);
         return { error: "Internal server error", code: 500 };
     }
 }
 
-export async function updateBusiness(id: string, data: UpdateBusinessPayload): ServiceResult<FullBusiness> {
+export async function updateBusiness(id: string, data: UpdateBusinessPayload, files: Express.Multer.File[]): ServiceResult<FullBusiness> {
+    let newUploadedUrls: string[] = [];
+
     try {
         const ownerId = getUserId();
 
@@ -133,7 +155,19 @@ export async function updateBusiness(id: string, data: UpdateBusinessPayload): S
             return { error: "Closed businesses can not be edited.", code: 400 };
         }
 
-        const { hours, ...rest } = data;
+        const { hours, removedBannerImages, ...rest } = data;
+
+        const keptImages = business.bannerImages.filter((img) => !(removedBannerImages || []).includes(img));
+
+        const uploadResult = await uploadImages(files, "business", "bannerImages");
+
+        if (!uploadResult.success) {
+            return { error: uploadResult.error, code: 500 };
+        }
+
+        newUploadedUrls = uploadResult.images;
+
+        const finalImages = [...keptImages, ...uploadResult.images];
 
         const updated = await prisma.business.update({
             where: {
@@ -141,20 +175,33 @@ export async function updateBusiness(id: string, data: UpdateBusinessPayload): S
             },
             data: {
                 ...rest,
+                bannerImages: finalImages,
                 ...(hours !== undefined && {
                     hours: {
                         deleteMany: {},
-                        createMany: {
-                            data: hours,
-                        },
+                        createMany: { data: hours },
                     },
                 }),
             },
             include: fullBusinessInclude,
         });
 
+        try {
+            const removable = business.bannerImages.filter((img) => (data.removedBannerImages ?? []).includes(img));
+            await removeImages(removable, "bannerImages");
+        } catch (err) {
+            console.error("Cleanup failed:", err);
+        }
+
         return updated;
     } catch (error) {
+        if (newUploadedUrls.length > 0) {
+            try {
+                await removeImages(newUploadedUrls, "bannerImages");
+            } catch (cleanupErr) {
+                console.error("Upload rollback failed:", cleanupErr);
+            }
+        }
         console.error(error);
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
             return { error: "Business with this name already exists in your account.", code: 409 };
@@ -249,7 +296,7 @@ export async function closeBusiness(id: string): ServiceResult<ServiceMessage> {
         });
 
         if (activeBookings) {
-            return { error: "Can not close business with active bookings. Please complete or cancel them first.", code: 400 };
+            return { error: "Can't close business with active bookings. Please complete or cancel them first.", code: 400 };
         }
 
         await prisma.$transaction(async (tx) => {
@@ -284,6 +331,12 @@ export async function closeBusiness(id: string): ServiceResult<ServiceMessage> {
                 },
             });
         });
+
+        try {
+            await removeImages(business.bannerImages, "bannerImages");
+        } catch (err) {
+            console.error("Cleanup failed:", err);
+        }
 
         return { message: "Business Closed" };
     } catch (error) {
