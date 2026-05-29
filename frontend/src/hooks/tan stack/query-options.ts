@@ -66,11 +66,11 @@ export function getOwnerBookingQueryOptions<TData = FullBooking, TError = Error>
  * Customer query options
  */
 
-export function getBusinessesQueryOptions<TData = FullBusiness[], TError = Error>(options?: QueryOptions<FullBusiness[], TData, TError>) {
+export function getBusinessesQueryOptions<TData = PaginatedData<FullBusiness>, TError = Error>(page: number, limit: number, query?: string, options?: QueryOptions<PaginatedData<FullBusiness>, TData, TError>) {
     return queryOptions({
         ...options,
-        queryKey: ["customer", "business", "list"],
-        queryFn: customerBusinessApi.getBusinesses,
+        queryKey: ["customer", "business", "list", page, limit, query],
+        queryFn: () => customerBusinessApi.getBusinesses(page, limit, query),
     });
 }
 
@@ -98,18 +98,18 @@ export function getBookingQueryOptions<TData = FullBooking, TError = Error>(id: 
     });
 }
 
-export function getServicesQueryOptions<TData = FullService[], TError = Error>(options?: QueryOptions<FullService[], TData, TError>) {
+export function getServicesQueryOptions<TData = PaginatedData<FullService>, TError = Error>(page: number, limit: number, query?: string, options?: QueryOptions<PaginatedData<FullService>, TData, TError>) {
     return queryOptions({
         ...options,
-        queryKey: ["customer", "service", "list"],
-        queryFn: customerServiceApi.getServices,
+        queryKey: ["customer", "service", "list", page, limit, query],
+        queryFn: () => customerServiceApi.getServices(page, limit, query),
     });
 }
 
-export function getBusinessServicesQueryOptions<TData = FullService[], TError = Error>(businessId: string, options?: QueryOptions<FullService[], TData, TError>) {
+export function getBusinessServicesQueryOptions<TData = PaginatedData<FullService>, TError = Error>(businessId: string, page: number, limit: number, query?: string, options?: QueryOptions<PaginatedData<FullService>, TData, TError>) {
     return queryOptions({
         ...options,
-        queryKey: ["customer", "service", businessId],
-        queryFn: () => customerServiceApi.getBusinessServices(businessId),
+        queryKey: ["customer", "service", businessId, page, limit, query],
+        queryFn: () => customerServiceApi.getBusinessServices(businessId, page, limit, query),
     });
 }

@@ -1,13 +1,14 @@
 import api from "@/lib/axios";
-import { ServiceListResponse } from "@/types/response";
+import { FullService } from "@/types/models";
+import { PaginationResponse } from "@/types/response";
 import { requestApi } from "../api-error";
 
 export const customerServiceApi = {
-    getServices: async () => {
-        return requestApi(() => api.get<ServiceListResponse>("/customer/service"));
+    getServices: async (page: number, limit: number, query?: string) => {
+        return requestApi(() => api.get<PaginationResponse<FullService>>("/customer/service", { params: { page, limit, query } }));
     },
 
-    getBusinessServices: async (businessId: string) => {
-        return requestApi(() => api.get<ServiceListResponse>(`/customer/service/${businessId}`));
+    getBusinessServices: async (businessId: string, page: number, limit: number, query?: string) => {
+        return requestApi(() => api.get<PaginationResponse<FullService>>(`/customer/service/business/${businessId}`, { params: { page, limit, query } }));
     },
 };

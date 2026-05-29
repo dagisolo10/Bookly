@@ -1,5 +1,5 @@
 import { handler } from "@/lib/handler";
-import { businessIdSchema } from "@/lib/validators";
+import { businessIdSchema, paginationQuerySchema, querySearchSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
 import { validate } from "@/middlewares/validation";
 import { getBusinessById, getBusinesses } from "@/services/customer-business";
@@ -11,7 +11,14 @@ router.get(
     "/",
     requireAuth,
     requireUserProfile,
-    handler(() => getBusinesses()),
+    validate(querySearchSchema, "query"),
+    validate(paginationQuerySchema, "query"),
+    handler((req: Request) => {
+        const query = req.query["query"] as string;
+        const page = parseInt(req.query["page"] as string, 10) || 1;
+        const limit = parseInt(req.query["limit"] as string, 10) || 10;
+        return getBusinesses(page, limit, query);
+    }),
 );
 
 router.get(

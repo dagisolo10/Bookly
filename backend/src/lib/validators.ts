@@ -38,7 +38,6 @@ export const createBusinessSchema = z
         phone: z.string().nullish(),
         location: z.string().nullish(),
         description: z.string().nullish(),
-        timeZone: z.string().min(1, "Timezone is required"),
     })
     .refine(
         (data) => {
@@ -69,7 +68,6 @@ export const updateBusinessSchema = z.object({
     location: z.string().nullish(),
     description: z.string().nullish(),
     removedBannerImages: z.array(z.string().url()).optional(),
-    timeZone: z.string().min(1, "Timezone is required").optional(),
 });
 
 export const businessIdSchema = z.object({ id: z.string().min(1, "Business Id is required") });
@@ -132,4 +130,3 @@ export const createBookingSchema = z.object({
     startsAt: z.iso.datetime({ message: "Invalid date format" }),
     serviceId: z.string().cuid(),
 });
-

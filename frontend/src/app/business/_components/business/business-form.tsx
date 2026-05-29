@@ -1,20 +1,19 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { useUpdateBusiness } from "@/hooks/tan stack/use-owner-business";
-import { updateBusinessSchema } from "@/lib/validation";
-import { FullBusiness, WeekDay } from "@/types/models";
-import { UpdateBusinessPayload } from "@/types/payload";
+import { useCreateBusiness } from "@/hooks/tan stack/use-owner-business";
+import { createBusinessSchema } from "@/lib/validation";
+import { WeekDay } from "@/types/models";
+import { CreateBusinessPayload } from "@/types/payload";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Globe, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 type BannerUpload = {
@@ -23,13 +22,10 @@ type BannerUpload = {
     previewUrl: string;
 };
 
-export default function BusinessSettingsForm({ initialData }: { initialData: FullBusiness }) {
+export default function BusinessForm() {
     const [banners, setBanners] = useState<BannerUpload[]>([]);
-    const [existingImages, setExistingImages] = useState<string[]>(initialData.bannerImages);
-    const [removedExistingImages, setRemovedExistingImages] = useState<string[]>([]);
 
     const weekDays: WeekDay[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const timezones = useMemo(() => Intl.supportedValuesOf("timeZone").map((tz) => ({ label: tz.replace(/_/g, " "), value: tz })), []);
 
     const bannersRef = useRef<BannerUpload[]>([]);
     const hoursSectionRef = useRef<HTMLDivElement>(null);
@@ -40,23 +36,29 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
         setValue,
         control,
         formState: { errors },
-    } = useForm<UpdateBusinessPayload>({
-        resolver: zodResolver(updateBusinessSchema),
+    } = useForm<CreateBusinessPayload>({
+        resolver: zodResolver(createBusinessSchema),
         shouldUnregister: true,
         defaultValues: {
-            name: initialData.name,
-            location: initialData.location ?? "",
-            phone: initialData.phone ?? "",
-            description: initialData.description ?? "",
-            hours: initialData.hours.map(({ day, open, close }) => ({ day, open, close })),
-            bannerImages: initialData.bannerImages,
-            timeZone: initialData.timeZone,
+            name: "",
+            location: "",
+            phone: "",
+            description: "",
+            bannerImages: [],
+            hours: [
+                { day: "Monday", open: "09:00", close: "17:00" },
+                { day: "Tuesday", open: "09:00", close: "17:00" },
+                { day: "Wednesday", open: "09:00", close: "17:00" },
+                { day: "Thursday", open: "09:00", close: "17:00" },
+                { day: "Friday", open: "09:00", close: "17:00" },
+                { day: "Saturday", open: "09:00", close: "17:00" },
+            ],
         },
     });
 
     const { fields, append, remove } = useFieldArray({ control, name: "hours" });
 
-    const { mutateAsync: updateBusiness, isPending: isUpdating } = useUpdateBusiness();
+    const { mutateAsync: createBusiness, isPending: isCreating } = useCreateBusiness();
 
     useEffect(() => {
         const bannerImages = banners.map((b) => b.previewUrl);
@@ -107,11 +109,6 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
         setBanners((prev) => prev.filter((item) => item.id !== idToRemove));
     }
 
-    function handleRemoveExistingBanner(url: string) {
-        setExistingImages((prev) => prev.filter((img) => img !== url));
-        setRemovedExistingImages((prev) => [...prev, url]);
-    }
-
     useEffect(() => {
         bannersRef.current = banners;
     }, [banners]);
@@ -124,31 +121,26 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
 
     useEffect(() => {
         return () => bannersRef.current.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl));
-    }, []);
+    }, [banners]);
 
-    const onSubmit = async (data: UpdateBusinessPayload) => {
+    const onSubmit: SubmitHandler<CreateBusinessPayload> = async (data) => {
         const formData = new FormData();
 
-        formData.append("name", data.name ?? "");
+        formData.append("name", data.name);
         formData.append("phone", data.phone ?? "");
-        formData.append("timeZone", data.timeZone ?? "");
         formData.append("location", data.location ?? "");
         formData.append("description", data.description ?? "");
 
-        formData.append("hours", JSON.stringify(data.hours ?? []));
-
-        removedExistingImages.forEach((url) => {
-            formData.append("removedBannerImages[]", url);
-        });
+        formData.append("hours", JSON.stringify(data.hours));
 
         banners.forEach((banner) => {
             formData.append("bannerImages", banner.file);
         });
 
-        const promise = updateBusiness({ id: initialData.id, business: formData });
+        const promise = createBusiness(formData);
         toast.promise(promise, {
-            loading: "Updating business...",
-            success: "Business updated successfully",
+            loading: "Creating business...",
+            success: "Business created successfully",
             error: (err) => err.message || "Something went wrong",
         });
         await promise;
@@ -224,38 +216,7 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
                                 );
                             })}
                         </div>
-                        <ErrorMessage message={errors.hours?.root?.message} />
-                    </Field>
-
-                    <Field className="gap-2">
-                        <Label>Business Timezone</Label>
-                        <Controller
-                            control={control}
-                            name="timeZone"
-                            render={({ field: { value, onChange }, fieldState: { error } }) => (
-                                <>
-                                    <Combobox items={timezones} value={value} onValueChange={onChange}>
-                                        <div className="relative">
-                                            <Globe className="absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-zinc-400" />
-                                            <ComboboxInput placeholder="Search timezone..." className="h-10 rounded-xl pl-8" />
-                                        </div>
-
-                                        <ComboboxContent>
-                                            <ComboboxEmpty>No timezone found.</ComboboxEmpty>
-                                            <ComboboxList>
-                                                {(item) => (
-                                                    <ComboboxItem key={item.value} value={item.value}>
-                                                        {item.label}
-                                                    </ComboboxItem>
-                                                )}
-                                            </ComboboxList>
-                                        </ComboboxContent>
-                                    </Combobox>
-
-                                    <ErrorMessage message={error?.message} />
-                                </>
-                            )}
-                        />
+                        <ErrorMessage message={getHoursError(errors.hours)} />
                     </Field>
                 </FieldGroup>
             </div>
@@ -273,29 +234,14 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
                     <Field>
                         <Label>Storefront Banner</Label>
 
-                        {existingImages.length > 0 && (
-                            <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
-                                {existingImages.map((url) => (
-                                    <div key={url} className="relative aspect-video overflow-hidden rounded-xl border">
-                                        <Image src={url} alt="Current" fill className="object-cover" />
-
-                                        <button type="button" onClick={() => handleRemoveExistingBanner(url)} className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white">
-                                            <Plus className="size-3 rotate-45" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
                         {banners.length > 0 && (
-                            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                            <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
                                 {banners.map(({ id, previewUrl }) => (
                                     <div key={id} className="relative aspect-video overflow-hidden rounded-xl border">
                                         <Image src={previewUrl} alt="Preview" width={1080} height={400} className="h-full w-full object-cover" />
                                         <button onClick={() => handleRemoveNewBanner(id, previewUrl)} title="Remove Banner Image" type="button" className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black">
                                             <Plus className="size-3 rotate-45" />
                                         </button>
-                                        <div className="bg-primary absolute top-1 left-1 rounded px-1.5 text-[10px] text-white">NEW</div>
                                     </div>
                                 ))}
                             </div>
@@ -326,15 +272,15 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
                     Discard
                 </Button>
 
-                <Button disabled={isUpdating} type="submit" size={"cta"} className="sm:w-auto">
-                    Update Business
+                <Button disabled={isCreating} type="submit" size={"cta"} className="sm:w-auto">
+                    Register Business
                 </Button>
             </div>
         </form>
     );
 }
 
-function Tag({ text }: { text: string }) {
+export function Tag({ text }: { text: string }) {
     return (
         <div className="flex items-center gap-2">
             <div className="bg-foreground h-4 w-1 rounded-full" />
@@ -344,5 +290,14 @@ function Tag({ text }: { text: string }) {
 }
 
 function ErrorMessage({ message }: { message?: string }) {
-    return message ? <p className="mt-1 text-xs font-medium text-red-500">{message}</p> : null;
+    return message ? <p className="text-destructive mt-1 text-xs font-medium">{message}</p> : null;
+}
+
+function getHoursError(errors: unknown): string | undefined {
+    if (!errors) return;
+    if (Array.isArray(errors)) {
+        const itemErrors = errors.map((e) => e?.root?.message).filter(Boolean);
+        return itemErrors.length > 0 ? itemErrors.join(", ") : undefined;
+    }
+    return (errors as { message?: string })?.message;
 }

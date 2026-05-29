@@ -1,5 +1,5 @@
 "use client";
-import BusinessSettings from "@/components/business/detail/business-settings";
+import BusinessSettings from "@/app/business/_components/business/business-settings";
 import { BusinessBaseSkeleton } from "@/components/shared/skeletons";
 import { getOwnerBusinessQueryOptions, getOwnerBusinessServicesQueryOptions, syncUserQueryOptions } from "@/hooks/tan stack/query-options";
 import { useQueries } from "@tanstack/react-query";

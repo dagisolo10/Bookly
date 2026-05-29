@@ -1,20 +1,23 @@
 "use client";
+import BookingSheet from "@/app/customer/_components/booking/booking-sheet";
 import EmptyState from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { FullService, Service } from "@/types/models";
 import { Layers, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import CategoryCarousel from "../detail/category-carousel";
+import CategoryCarousel from "../../../app/business/_components/services/category-carousel";
+import ServiceDialog from "../../../app/business/_components/services/owner-service-dialog";
 import ServiceCard from "./service-card";
-import ServiceDialog from "./service-dialog";
 
 interface ServiceListProps {
     businessId: string;
     services: FullService[];
+    linkPath: "/business/list" | "/customer/businesses";
 }
 
-export default function ServiceList({ businessId, services }: ServiceListProps) {
+export default function ServiceList({ linkPath, businessId, services }: ServiceListProps) {
+    const businessMode = linkPath === "/business/list";
     const categories = useMemo(() => {
         return [...new Set(services.map((s) => s.category))];
     }, [services]);
@@ -23,6 +26,8 @@ export default function ServiceList({ businessId, services }: ServiceListProps) 
     const [open, setOpen] = useState(false);
     const [targetService, setTargetService] = useState<Service | null>(null);
     const [activeCategory, setActiveCategory] = useState<string>(categories[0] ?? "");
+
+    const [selectedService, setSelectedService] = useState<FullService | null>(null);
 
     useEffect(() => {
         if (categories.length === 0) return;
@@ -73,17 +78,19 @@ export default function ServiceList({ businessId, services }: ServiceListProps) 
     };
 
     return (
-        <div className="order-2 space-y-4 lg:order-1 lg:col-span-2">
+        <div className="order-2 space-y-4 lg:order-1 lg:col-span-1">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Layers className="text-primary" />
                     <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Available Services</h2>
                 </div>
 
-                <Button onClick={() => setOpen(true)} className="shadow-lg">
-                    <Plus className="mr-1 size-4" />
-                    Add a Service
-                </Button>
+                {linkPath === "/business/list" && (
+                    <Button onClick={() => setOpen(true)} className="shadow-lg">
+                        <Plus className="mr-1 size-4" />
+                        Add a Service
+                    </Button>
+                )}
             </div>
 
             {services.length === 0 ? (
@@ -102,9 +109,13 @@ export default function ServiceList({ businessId, services }: ServiceListProps) 
                                     </h2>
 
                                     <div className="space-y-4">
-                                        {filtered.map((service) => (
-                                            <ServiceCard key={`${category}-${service.id}`} service={service} onEdit={setTargetService} />
-                                        ))}
+                                        {filtered.map((service) =>
+                                            businessMode ? (
+                                                <ServiceCard key={`${category}-${service.id}`} service={service} onEdit={setTargetService} />
+                                            ) : (
+                                                <ServiceCard key={`${category}-${service.id}`} service={service} onBook={() => setSelectedService(service)} />
+                                            ),
+                                        )}
                                     </div>
                                 </section>
                             );
@@ -112,13 +123,14 @@ export default function ServiceList({ businessId, services }: ServiceListProps) 
                     </div>
 
                     <Button variant="outline" asChild>
-                        <Link href={`/business/list/${businessId}/services`}>See All</Link>
+                        <Link href={`${linkPath}/${businessId}/services`}>See All</Link>
                     </Button>
                 </div>
             )}
 
-            <ServiceDialog businessId={businessId} open={open} setOpen={setOpen} mode="add" />
-            <ServiceDialog mode="edit" open={!!targetService} businessId={businessId} setOpen={handleCloseEditDialog} service={targetService || undefined} />
+            {businessMode && <ServiceDialog businessId={businessId} open={open} setOpen={setOpen} mode="add" />}
+            {businessMode && <ServiceDialog mode="edit" open={!!targetService} businessId={businessId} setOpen={handleCloseEditDialog} service={targetService || undefined} />}
+            <BookingSheet open={!!selectedService} service={selectedService} onOpenChange={() => setSelectedService(null)} />
         </div>
     );
 }

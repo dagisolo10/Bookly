@@ -1,20 +1,46 @@
-"use client"
-import { Sparkles } from "lucide-react";
+"use client";
 
-export default function ServicesPage() {
+import { ServicesGrid } from "@/app/customer/_components/services/services-grid";
+import ListHeader from "@/components/shared/list-header";
+import PaginationContainer from "@/components/shared/pagination-container";
+import { ServicesGridSkeleton } from "@/components/shared/skeletons";
+import { useSearchPagination } from "@/hooks/shared/use-search-pagination";
+import { getServicesQueryOptions } from "@/hooks/tan stack/query-options";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+
+const ITEMS_PER_PAGE_OPTIONS = [9, 18, 27, 36] as const;
+
+export default function CustomerServicesPage() {
+    const { query, currentPage, itemsPerPage, debouncedQuery, setCurrentPage, handleSearchChange, handleItemsPerPageChange } = useSearchPagination(9);
+
+    const { data, isPending, isFetching, isError } = useQuery(
+        getServicesQueryOptions(currentPage, itemsPerPage, debouncedQuery || undefined, {
+            placeholderData: keepPreviousData,
+        }),
+    );
+
+    const servicesData = data ?? { page: 1, total: 0, data: [], totalPages: 1, hasMore: false };
+
     return (
-        <div className="space-y-6">
-            <div className="max-w-xl">
-                <div className="text-primary mb-2 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
-                    <Sparkles size={16} className="fill-yellow-500 text-yellow-500" />
-                    <span>Premium Experiences</span>
-                </div>
+        <div className="space-y-8">
+            <ListHeader query={query} tag="Premium Experiences" title="Professional Services" isFetching={isFetching} onSearchChange={handleSearchChange} placeholder="Search services by name..." description="Find and book the perfect service. From hair and beauty to specialized consultations, our experts are ready to serve you." />
 
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Professional Services</h1>
-                    <p className="text-muted-foreground mt-1 text-sm">Find and book the perfect service. From hair and beauty to specialized consultations, our experts are ready to serve you.</p>
+            {isPending ? (
+                <ServicesGridSkeleton count={6} />
+            ) : isError ? (
+                <div className="flex min-h-[30vh] items-center justify-center">
+                    <p className="text-destructive">Failed to load services. Please try again.</p>
                 </div>
-            </div>
+            ) : servicesData.data.length === 0 ? (
+                <div className="flex min-h-[30vh] items-center justify-center">
+                    <p className="text-muted-foreground">No services found.</p>
+                </div>
+            ) : (
+                <div>
+                    <ServicesGrid services={servicesData.data} />
+                    <PaginationContainer total={servicesData.total} hasMore={servicesData.hasMore} totalPages={servicesData.totalPages} currentPage={currentPage} itemsPerPage={itemsPerPage} setCurrentPage={setCurrentPage} ITEMS_PER_PAGE_OPTIONS={ITEMS_PER_PAGE_OPTIONS} onValueChange={(val) => handleItemsPerPageChange(val)} />
+                </div>
+            )}
         </div>
     );
 }

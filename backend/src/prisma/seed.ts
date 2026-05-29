@@ -1,139 +1,295 @@
 import prisma from "@/lib/prisma";
-import { randCompanyName, randLocale, randNumber, randPhoneNumber, randText, randTimeZone } from "@ngneat/falso";
-import type { Prisma, WeekDay } from "@prisma/client";
+import { randAddress, randNumber, randPhoneNumber, randProductName, randText } from "@ngneat/falso";
+import { Prisma, WeekDay } from "@prisma/client";
 
 function generateRandomHours(): { day: WeekDay; open: string; close: string }[] {
-    const days: WeekDay[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const allDays: WeekDay[] = [WeekDay.Monday, WeekDay.Tuesday, WeekDay.Wednesday, WeekDay.Thursday, WeekDay.Friday, WeekDay.Saturday];
 
-    const openHour = Math.floor(Math.random() * 5) + 6;
-    const closeHour = Math.floor(Math.random() * 6) + 16;
+    const workingDays = allDays.slice(0, randNumber({ min: 4, max: 6 }));
 
-    const openStr = `${openHour.toString().padStart(2, "0")}:00`;
-    const closeStr = `${closeHour.toString().padStart(2, "0")}:00`;
+    return workingDays.map((day) => {
+        const openHour = randNumber({ min: 7, max: 10 });
+        const closeHour = randNumber({ min: 17, max: 22 });
 
-    return days.map((day) => ({ day, open: openStr, close: closeStr }));
+        return {
+            day,
+            open: `${openHour.toString().padStart(2, "0")}:00`,
+            close: `${closeHour.toString().padStart(2, "0")}:00`,
+        };
+    });
 }
 
 const industryBlueprints = [
     {
         type: "Grooming & Barbershop",
         pool: [
-            { name: "Executive Haircut", category: "Haircuts", thumbnail: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70", basePrice: 35 },
-            { name: "Beard Sculpting & Trim", category: "Shaves & Beard", thumbnail: "https://images.unsplash.com/photo-1621605815841-aa33c56318d1", basePrice: 20 },
-            { name: "Luxury Hot Shave", category: "Shaves & Beard", thumbnail: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1", basePrice: 45 },
-            { name: "Scalp Revitalizing Treatment", category: "Hair Treatments", thumbnail: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1", basePrice: 30 },
-            { name: "Full Color & Highlights", category: "Coloring", thumbnail: "https://images.unsplash.com/photo-1560869713-7d0a29430803", basePrice: 85 },
-            { name: "Nose & Ear Waxing", category: "Add-ons", thumbnail: "https://images.unsplash.com/photo-1515377905703-c4788e51af15", basePrice: 15 },
-            { name: "Charcoal Face Mask Peel", category: "Skin Care", thumbnail: "https://images.unsplash.com/photo-1512290923902-8a9f81dc2069", basePrice: 25 },
-            { name: "Premium Keratin Straightening", category: "Hair Treatments", thumbnail: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e", basePrice: 120 },
+            {
+                name: "Executive Haircut",
+                category: "Haircuts",
+                thumbnail: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 35,
+            },
+            {
+                name: "Beard Sculpting",
+                category: "Beard Care",
+                thumbnail: "https://images.unsplash.com/photo-1517832606299-7ae9b720a186?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 20,
+            },
+            {
+                name: "Luxury Hot Towel Shave",
+                category: "Shaves",
+                thumbnail: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 40,
+            },
+            {
+                name: "Hair Coloring",
+                category: "Coloring",
+                thumbnail: "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 75,
+            },
+            {
+                name: "Keratin Treatment",
+                category: "Treatments",
+                thumbnail: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 110,
+            },
         ],
     },
+
     {
         type: "Health & Luxury Spa",
         pool: [
-            { name: "Deep Tissue Muscle Release", category: "Massages", thumbnail: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874", basePrice: 95 },
-            { name: "Signature Swedish Massage", category: "Massages", thumbnail: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2", basePrice: 85 },
-            { name: "Volcanic Hot Stone Therapy", category: "Therapies", thumbnail: "https://images.unsplash.com/photo-1519415510271-433ad6102628", basePrice: 110 },
-            { name: "Hydrating Botanical Facial", category: "Skin Care", thumbnail: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881", basePrice: 65 },
-            { name: "Detoxifying Dead Sea Mud Bath", category: "Therapies", thumbnail: "https://images.unsplash.com/photo-1515377905703-c4788e51af15", basePrice: 75 },
-            { name: "Zen Aromatherapy Head Spa", category: "Hair Treatments", thumbnail: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1", basePrice: 50 },
-            { name: "Anti-Aging Glow Treatment", category: "Skin Care", thumbnail: "https://images.unsplash.com/photo-1512290923902-8a9f81dc2069", basePrice: 130 },
-            { name: "Epsom Salt Floatation Therapy", category: "Therapies", thumbnail: "https://images.unsplash.com/photo-1531853121101-da94cfa6433a", basePrice: 90 },
+            {
+                name: "Swedish Massage",
+                category: "Massage",
+                thumbnail: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 90,
+            },
+            {
+                name: "Hot Stone Therapy",
+                category: "Therapy",
+                thumbnail: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 120,
+            },
+            {
+                name: "Hydrating Facial",
+                category: "Facials",
+                thumbnail: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 65,
+            },
+            {
+                name: "Body Scrub Detox",
+                category: "Body Care",
+                thumbnail: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 85,
+            },
+            {
+                name: "Aromatherapy Session",
+                category: "Relaxation",
+                thumbnail: "https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 55,
+            },
         ],
     },
+
     {
         type: "Fitness & Performance Center",
         pool: [
-            { name: "1-on-1 Personal Training Session", category: "Private Coaching", thumbnail: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b", basePrice: 60 },
-            { name: "High-Intensity Interval Circuit (HIIT)", category: "Group Classes", thumbnail: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd", basePrice: 25 },
-            { name: "Vinyasa Flow Yoga Class", category: "Mind & Body", thumbnail: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b", basePrice: 20 },
-            { name: "Sports Nutrition Consultation", category: "Consultations", thumbnail: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71", basePrice: 80 },
-            { name: "Body Composition & MetCheck", category: "Consultations", thumbnail: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd", basePrice: 40 },
-            { name: "Advanced Olympic Weightlifting", category: "Private Coaching", thumbnail: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd", basePrice: 75 },
-            { name: "Guided Power Meditation", category: "Mind & Body", thumbnail: "https://images.unsplash.com/photo-1506126613408-eca07ce68773", basePrice: 15 },
+            {
+                name: "Personal Training",
+                category: "Coaching",
+                thumbnail: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 60,
+            },
+            {
+                name: "HIIT Group Session",
+                category: "Group Classes",
+                thumbnail: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 25,
+            },
+            {
+                name: "Yoga Flow",
+                category: "Yoga",
+                thumbnail: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 18,
+            },
+            {
+                name: "Nutrition Consultation",
+                category: "Consultation",
+                thumbnail: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 70,
+            },
+            {
+                name: "Olympic Weightlifting",
+                category: "Strength",
+                thumbnail: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 80,
+            },
         ],
     },
+
     {
         type: "Automotive Care Clinic",
         pool: [
-            { name: "Full Synthetic Oil Exchange", category: "Maintenance", thumbnail: "https://images.unsplash.com/photo-1486006920555-c77dce18193b", basePrice: 45 },
-            { name: "Ceramic Coating Paint Shield", category: "Detailing", thumbnail: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7", basePrice: 250 },
-            { name: "Advanced Brake Pad Replacement", category: "Repairs", thumbnail: "https://images.unsplash.com/photo-1486006920555-c77dce18193b", basePrice: 120 },
-            { name: "4-Wheel Computerized Alignment", category: "Maintenance", thumbnail: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e", basePrice: 89 },
-            { name: "Interior Deep Steam Clean", category: "Detailing", thumbnail: "https://images.unsplash.com/photo-1563720223185-11003d516935", basePrice: 75 },
-            { name: "Engine OBD-II Diagnostic Scan", category: "Repairs", thumbnail: "https://images.unsplash.com/photo-1507136566006-cfc505b114fc", basePrice: 50 },
+            {
+                name: "Oil Change",
+                category: "Maintenance",
+                thumbnail: "https://images.unsplash.com/photo-1486006920555-c77dce18193b?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 45,
+            },
+            {
+                name: "Ceramic Coating",
+                category: "Detailing",
+                thumbnail: "https://images.unsplash.com/photo-1607861716497-e65ab29fc7ac?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 250,
+            },
+            {
+                name: "Brake Replacement",
+                category: "Repair",
+                thumbnail: "https://images.unsplash.com/photo-1613214150384-a24ebf8d8fdf?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 130,
+            },
+            {
+                name: "Interior Deep Cleaning",
+                category: "Detailing",
+                thumbnail: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 75,
+            },
+            {
+                name: "Engine Diagnostics",
+                category: "Diagnostics",
+                thumbnail: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=1200&auto=format&fit=crop",
+                basePrice: 55,
+            },
         ],
     },
 ];
+
+const bannerPools: Record<string, string[]> = {
+    "Grooming & Barbershop": [
+        "https://images.unsplash.com/photo-1512690459411-b0fd1c86b8a8?q=80&w=1400&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?q=80&w=1400&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?q=80&w=1400&auto=format&fit=crop",
+    ],
+
+    "Health & Luxury Spa": [
+        "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?q=80&w=1400&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1400&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1552693673-1bf958298935?q=80&w=1400&auto=format&fit=crop",
+    ],
+
+    "Fitness & Performance Center": [
+        "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1400&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?q=80&w=1400&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1400&auto=format&fit=crop",
+    ],
+
+    "Automotive Care Clinic": [
+        "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1400&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1400&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=1400&auto=format&fit=crop",
+    ],
+};
 
 const ownerId = "user_3E5W2yM0VRFJDehasNi1tVti2a2";
 const TOTAL_BUSINESSES = 24;
 
 async function main() {
     if (process.env["ALLOW_DESTRUCTIVE_SEED"] !== "true") {
-        throw new Error("Refusing destructive seed. Set ALLOW_DESTRUCTIVE_SEED=true to continue.");
+        throw new Error("Set ALLOW_DESTRUCTIVE_SEED=true before seeding.");
     }
-    console.log("🧹 Flushing existing collection pipelines...");
+
+    console.log("🧹 Clearing database...");
+
+    await prisma.booking.deleteMany({});
     await prisma.service.deleteMany({});
+    await prisma.businessHour.deleteMany({});
     await prisma.business.deleteMany({});
 
-    console.log(`🌱 Seeding ${TOTAL_BUSINESSES} cross-industry businesses...`);
-    const createdBusinesses = [];
+    console.log("👤 Creating owner...");
+
+    await prisma.user.upsert({
+        where: { id: ownerId },
+        update: {},
+        create: {
+            id: ownerId,
+            name: "Seed Business Owner",
+            phone: "+251911234567",
+            roles: ["Business"],
+        },
+    });
+
+    console.log(`🌱 Creating ${TOTAL_BUSINESSES} businesses...`);
+
+    const createdBusinesses: {
+        id: string;
+        industryIndex: number;
+    }[] = [];
 
     for (let i = 0; i < TOTAL_BUSINESSES; i++) {
-        const blueprint = industryBlueprints[i % industryBlueprints.length]!;
+        const blueprint = industryBlueprints[i % industryBlueprints.length];
 
-        const biz = await prisma.business.create({
+        if (!blueprint) continue;
+
+        const business = await prisma.business.create({
             data: {
                 ownerId,
-                location: randLocale(),
-
-                name: `${randCompanyName()} (${blueprint.type})`,
-                description: randText(),
+                name: `${randProductName()} ${blueprint.type}`,
+                description: randText({ charCount: 180 }),
+                location: randAddress().street,
                 phone: randPhoneNumber(),
-                timeZone: randTimeZone(),
+                bannerImages: bannerPools[blueprint.type] ?? [],
                 hours: {
                     create: generateRandomHours(),
                 },
             },
         });
 
-        createdBusinesses.push({ id: biz.id, industryIndex: i % industryBlueprints.length });
-    }
-
-    console.log(`✅ Successfully established ${createdBusinesses.length} operational business fronts.`);
-    console.log("🌱 Injecting high-density category services for each node...");
-
-    const allServicesToCreate: Prisma.ServiceCreateManyInput[] = [];
-
-    for (const item of createdBusinesses) {
-        const blueprint = industryBlueprints[item.industryIndex]!;
-
-        blueprint.pool.forEach((service) => {
-            allServicesToCreate.push({
-                name: service.name,
-                category: service.category,
-                thumbnail: service.thumbnail,
-                businessId: item.id,
-                durationInMinutes: randNumber({ min: 30, max: 120, precision: 15 }),
-                price: service.basePrice + randNumber({ min: -5, max: 20 }),
-            });
+        createdBusinesses.push({
+            id: business.id,
+            industryIndex: i % industryBlueprints.length,
         });
     }
 
+    console.log("⚡ Creating services...");
+
+    const services: Prisma.ServiceCreateManyInput[] = [];
+
+    for (const business of createdBusinesses) {
+        const blueprint = industryBlueprints[business.industryIndex];
+
+        if (!blueprint) continue;
+
+        for (const service of blueprint.pool) {
+            services.push({
+                businessId: business.id,
+                name: service.name,
+                category: service.category,
+                thumbnail: service.thumbnail,
+                durationInMinutes: randNumber({
+                    min: 30,
+                    max: 120,
+                    precision: 15,
+                }),
+                price: service.basePrice + randNumber({ min: 0, max: 30 }),
+            });
+        }
+    }
+
     await prisma.service.createMany({
-        data: allServicesToCreate,
-        skipDuplicates: true,
+        data: services,
     });
 
-    console.log(`\n🎉 Seed Execution Finished!`);
-    console.log(`⚡ Inserted Businesses: ${createdBusinesses.length}`);
-    console.log(`⚡ Total Services Distributed: ${allServicesToCreate.length}`);
+    console.log("✅ Seed complete");
+    console.log(`🏢 Businesses: ${createdBusinesses.length}`);
+    console.log(`🛠 Services: ${services.length}`);
 }
 
 main()
-    .catch((e) => {
-        console.error("🔴 Seeding failed with error:", e);
-        process.exitCode = 1;
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
     })
-    .finally(async () => await prisma.$disconnect());
+    .finally(async () => {
+        await prisma.$disconnect();
+    });

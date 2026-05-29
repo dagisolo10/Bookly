@@ -25,7 +25,7 @@ export async function getMyBusinesses(page: number, limit: number, query: string
             ...(query && {
                 OR: [{ name: { contains: query, mode: Prisma.QueryMode.insensitive } }, { location: { contains: query, mode: Prisma.QueryMode.insensitive } }],
             }),
-        };
+        } satisfies Prisma.BusinessWhereInput;
 
         const [total, businesses] = await Promise.all([
             prisma.business.count({ where: queryWhere }),

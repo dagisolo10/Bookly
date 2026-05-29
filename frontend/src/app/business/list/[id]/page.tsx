@@ -1,14 +1,15 @@
 "use client";
-import Description from "@/components/business/detail/business-description";
-import BusinessHeader from "@/components/business/detail/business-header";
-import BusinessHours from "@/components/business/detail/business-hour";
-import ServiceList from "@/components/business/services/service-list";
+import BusinessHeader from "@/components/shared/business/business-header";
+import BusinessHours from "@/components/shared/business/business-hour";
+import ServiceList from "@/components/shared/service/service-list";
 import { BusinessBaseSkeleton, ServiceListSkeleton } from "@/components/shared/skeletons";
+import { Card, CardContent } from "@/components/ui/card";
 import { getOwnerBusinessQueryOptions, getOwnerBusinessServicesQueryOptions, syncUserQueryOptions } from "@/hooks/tan stack/query-options";
 import { useQueries } from "@tanstack/react-query";
+import { Info } from "lucide-react";
 import { useParams } from "next/navigation";
 
-export default function BusinessPage() {
+export default function OwnerBusinessPage() {
     const { id } = useParams<{ id: string }>();
 
     const [userQuery, businessQuery, servicesQuery] = useQueries({
@@ -54,15 +55,24 @@ export default function BusinessPage() {
 
     return (
         <div className="screen">
-            <BusinessHeader business={business} show={user?.roles.includes("Business")} />
+            <BusinessHeader business={business} showSettings={user?.roles.includes("Business")} />
 
             <div className="py-8">
-                <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
-                    {serviceListPending ? <ServiceListSkeleton /> : <ServiceList businessId={business.id} services={serviceData?.data ?? []} />}
+                <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[0.6fr_0.4fr]">
+                    {serviceListPending ? <ServiceListSkeleton /> : <ServiceList linkPath="/business/list" businessId={business.id} services={serviceData?.data ?? []} />}
 
                     <aside className="top-20 order-1 space-y-6 sm:sticky lg:order-2">
-                        <BusinessHours timezone={business.timeZone} hours={business.hours} />
-                        <Description description={business.description ?? "No Description"} />
+                        <BusinessHours hours={business.hours} />
+                        <Card className="border-none p-0 shadow-sm">
+                            <CardContent className="space-y-4 p-6">
+                                <h3 className="flex items-center gap-2 text-lg font-bold text-zinc-400">
+                                    <Info className="size-4" /> Our Story
+                                </h3>
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    {business.description || "This business hasn't shared their story yet, but they're ready to serve you!"}
+                                </p>
+                            </CardContent>
+                        </Card>
                     </aside>
                 </div>
             </div>

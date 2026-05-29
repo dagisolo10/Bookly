@@ -24,7 +24,7 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
             return { error: "This business is currently not accepting bookings.", code: 400 };
         }
 
-        const isOpen = isBusinessOpen(startsAt, business.hours, business.timeZone);
+        const isOpen = isBusinessOpen(startsAt, business.hours, );
 
         if (!isOpen) {
             return { error: `This business is closed during the selected time. Please pick another slot.`, code: 400 };
@@ -36,7 +36,7 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
             return { error: "The selected service couldn't be found.", code: 404 };
         }
 
-        const enoughTime = hasEnoughTime(startsAt, business.hours, service.durationInMinutes, business.timeZone);
+        const enoughTime = hasEnoughTime(startsAt, business.hours, service.durationInMinutes, );
 
         if (!enoughTime) {
             return { error: "The selected time doesn't leave enough time before closing. Please choose an earlier slot.", code: 400 };
