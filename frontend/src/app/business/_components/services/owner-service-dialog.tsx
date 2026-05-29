@@ -36,7 +36,7 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
         return () => {
             if (bannersRef.current) URL.revokeObjectURL(bannersRef.current.previewUrl);
         };
-    }, [banner]);
+    }, []);
 
     useEffect(() => {
         bannersRef.current = banner;

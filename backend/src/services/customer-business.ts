@@ -5,10 +5,9 @@ import { Prisma } from "@prisma/client";
 
 export async function getBusinesses(page: number, limit: number, query: string): ServiceResult<PaginatedData<FullBusiness>> {
     try {
-        console.log("here...");
         const queryWhere = {
+            status: "Active",
             ...(query && {
-                status: "Active",
                 OR: [{ name: { contains: query, mode: Prisma.QueryMode.insensitive } }, { location: { contains: query, mode: Prisma.QueryMode.insensitive } }],
             }),
         } satisfies Prisma.BusinessWhereInput;

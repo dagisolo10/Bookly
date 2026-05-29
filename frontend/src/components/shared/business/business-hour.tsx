@@ -3,6 +3,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BusinessHour } from "@/types/models";
 import { Clock } from "lucide-react";
 
+const getFullTime = (time: string) => {
+    const [hour, min] = time.split(":");
+    const hourInNumber = Number(hour);
+    const period = hourInNumber >= 12 ? "PM" : "AM";
+    const displayHour = hourInNumber % 12 === 0 ? 12 : hourInNumber % 12;
+    return `${displayHour.toString().padStart(2, "0")}:${min} ${period}`;
+};
+
 export default function BusinessHours({ hours }: { hours: BusinessHour[] }) {
     const dayOrder = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
 
@@ -19,7 +27,13 @@ export default function BusinessHours({ hours }: { hours: BusinessHour[] }) {
     };
 
     const todayHours = hours.find((h) => h.day === currentDay);
-    const isOpen = !!todayHours && currentTotalMinutes >= toMinutes(todayHours.open) && currentTotalMinutes <= toMinutes(todayHours.close);
+    const isOpen =
+        !!todayHours &&
+        (() => {
+            const open = toMinutes(todayHours.open);
+            const close = toMinutes(todayHours.close);
+            return close >= open ? currentTotalMinutes >= open && currentTotalMinutes <= close : currentTotalMinutes >= open || currentTotalMinutes <= close;
+        })();
 
     return (
         <Card className="border-none shadow-sm">
@@ -46,20 +60,12 @@ export default function BusinessHours({ hours }: { hours: BusinessHour[] }) {
                 <div className="space-y-2 text-sm">
                     {sortedHours.map(([day, time]) => {
                         const isToday = day === currentDay;
-                        const getFullTime = (time: string) => {
-                            const [hour, min] = time.split(":");
-                            const hourInNumber = Number(hour);
-                            const period = hourInNumber > 12 ? "PM" : "AM";
-                            return `${(hourInNumber > 12 ? hourInNumber - 12 : hourInNumber).toString().padStart(2, "0")}:${min} ${period}`;
-                        };
+
                         const open = time ? getFullTime(time.open) : "";
                         const close = time ? getFullTime(time.close) : "";
 
                         return (
-                            <div
-                                key={day}
-                                className={`flex items-center justify-between gap-2 border-b pb-1.5 capitalize last:border-b-0 ${isToday ? "font-bold text-zinc-950" : "font-medium text-zinc-600"}`}
-                            >
+                            <div key={day} className={`flex items-center justify-between gap-2 border-b pb-1.5 capitalize last:border-b-0 ${isToday ? "font-bold text-zinc-950" : "font-medium text-zinc-600"}`}>
                                 {time ? (
                                     <>
                                         <span className="text-center">

@@ -12,6 +12,7 @@ import { CreateBusinessPayload } from "@/types/payload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -23,8 +24,9 @@ type BannerUpload = {
 };
 
 export default function BusinessForm() {
-    const [banners, setBanners] = useState<BannerUpload[]>([]);
+    const router = useRouter();
 
+    const [banners, setBanners] = useState<BannerUpload[]>([]);
     const weekDays: WeekDay[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
     const bannersRef = useRef<BannerUpload[]>([]);
@@ -268,7 +270,7 @@ export default function BusinessForm() {
             </div>
 
             <div className="flex items-center justify-end gap-4">
-                <Button size={"cta"} variant="ghost" type="button">
+                <Button onClick={() => router.back()} size={"cta"} variant="ghost" type="button">
                     Discard
                 </Button>
 

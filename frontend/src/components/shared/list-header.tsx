@@ -56,7 +56,7 @@ export default function ListHeader({ owner, title, description, tag, query, onSe
             <div className="flex items-center gap-4">
                 <div className="relative max-w-sm flex-1">
                     <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                    <Input value={query} className="pl-9" placeholder={placeholder} onChange={(e) => onSearchChange(e.target.value)} />
+                    <Input type="search" value={query} aria-label={placeholder} className="pl-9" placeholder={placeholder} onChange={(e) => onSearchChange(e.target.value)} />
                 </div>
                 {isFetching && <Spinner className="size-4" />}
             </div>

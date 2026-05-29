@@ -12,11 +12,14 @@ import { UpdateBusinessPayload } from "@/types/payload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function BusinessSettingsForm({ initialData }: { initialData: FullBusiness }) {
+    const router = useRouter();
+
     const [banners, setBanners] = useState<BannerUpload[]>([]);
     const [existingImages, setExistingImages] = useState<string[]>(initialData.bannerImages);
     const [removedExistingImages, setRemovedExistingImages] = useState<string[]>([]);
@@ -214,7 +217,7 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
                                 );
                             })}
                         </div>
-                        <ErrorMessage message={errors.hours?.root?.message} />
+                        <ErrorMessage message={errors.hours?.[0]?.message} />
                     </Field>
                 </FieldGroup>
             </div>
@@ -281,7 +284,7 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
             </div>
 
             <div className="flex items-center justify-end gap-4">
-                <Button size={"cta"} variant="ghost" type="button">
+                <Button onClick={() => router.back()} size={"cta"} variant="ghost" type="button">
                     Discard
                 </Button>
 
