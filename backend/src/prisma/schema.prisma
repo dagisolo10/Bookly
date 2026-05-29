@@ -20,7 +20,6 @@ model User {
 model Business {
     id           String         @id @default(cuid())
     name         String
-    timeZone     String
     description  String?
     location     String?
     phone        String?

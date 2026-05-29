@@ -1,5 +1,5 @@
 import { handler } from "@/lib/handler";
-import { bookingIdSchema, createBookingSchema } from "@/lib/validators";
+import { bookingIdSchema, createBookingSchema, paginationQuerySchema, querySearchSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
 import { validate } from "@/middlewares/validation";
 import { createBooking, getBookingById, getMyBookings } from "@/services/customer-booking";
@@ -19,7 +19,14 @@ router.get(
     "/",
     requireAuth,
     requireUserProfile,
-    handler(() => getMyBookings()),
+    validate(querySearchSchema, "query"),
+    validate(paginationQuerySchema, "query"),
+    handler((req: Request) => {
+        const page = parseInt(req.query["page"] as string, 10) || 1;
+        const limit = parseInt(req.query["limit"] as string, 10) || 10;
+        const query = req.query["query"] as string;
+        return getMyBookings(page, limit, query);
+    }),
 );
 
 router.get(

@@ -1,17 +1,37 @@
 import prisma from "@/lib/prisma";
 import { fullBusinessInclude, type FullBusiness } from "@/types/populated";
-import type { ServiceResult } from "@/types/response";
+import type { PaginatedData, ServiceResult } from "@/types/response";
+import { Prisma } from "@prisma/client";
 
-export async function getBusinesses(): ServiceResult<FullBusiness[]> {
+export async function getBusinesses(page: number, limit: number, query: string): ServiceResult<PaginatedData<FullBusiness>> {
     try {
-        const businesses = await prisma.business.findMany({
-            where: {
-                status: "Active",
-            },
-            include: fullBusinessInclude,
-        });
+        const queryWhere = {
+            status: "Active",
+            ...(query && {
+                OR: [{ name: { contains: query, mode: Prisma.QueryMode.insensitive } }, { location: { contains: query, mode: Prisma.QueryMode.insensitive } }],
+            }),
+        } satisfies Prisma.BusinessWhereInput;
 
-        return businesses;
+        const [total, businesses] = await Promise.all([
+            prisma.business.count({ where: queryWhere }),
+            prisma.business.findMany({
+                where: queryWhere,
+                take: limit,
+                skip: (page - 1) * limit,
+                include: fullBusinessInclude,
+                orderBy: { createdAt: "desc" },
+            }),
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+        const hasMore = page < totalPages;
+
+        return {
+            total,
+            hasMore,
+            totalPages: totalPages || 1,
+            data: businesses,
+        };
     } catch (error) {
         console.error("Error in getBusinesses:", error);
         return { error: "Internal server error", code: 500 };

@@ -1,17 +1,19 @@
 "use client";
-import BusinessSettings from "@/components/business/detail/business-settings";
+import BusinessSettings from "@/app/business/_components/business/business-settings";
+import ErrorScreen from "@/components/shared/error-screen";
+import NotFound from "@/components/shared/not-found";
 import { BusinessBaseSkeleton } from "@/components/shared/skeletons";
-import { getOwnerBusinessByIdQueryOptions, getOwnerBusinessServicesQueryOptions, syncUserQueryOptions } from "@/hooks/tan stack/query-options";
+import { getOwnerBusinessQueryOptions, syncUserQueryOptions } from "@/hooks/tan stack/query-options";
 import { useQueries } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 
 export default function SettingsPage() {
     const { id } = useParams<{ id: string }>();
 
-    const [userQuery, businessQuery, servicesQuery] = useQueries({ queries: [syncUserQueryOptions(), getOwnerBusinessByIdQueryOptions(id), getOwnerBusinessServicesQueryOptions(id, 1, 5)] });
+    const [userQuery, businessQuery] = useQueries({ queries: [syncUserQueryOptions(), getOwnerBusinessQueryOptions(id)] });
 
     const isPending = userQuery.isPending || businessQuery.isPending;
-    const hasError = [userQuery, businessQuery, servicesQuery].some((q) => q.isError);
+    const hasError = [userQuery, businessQuery].some((q) => q.isError);
 
     const user = userQuery.data;
     const business = businessQuery.data;
@@ -21,27 +23,15 @@ export default function SettingsPage() {
     }
 
     if (hasError) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Failed to load business data. Please try again.</p>
-            </div>
-        );
+        return <ErrorScreen message="Failed to load business data. Please try again." />;
     }
 
     if (!business) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Business not found</p>
-            </div>
-        );
+        return <NotFound message="Business not found" />;
     }
 
     if (!user) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Login</p>
-            </div>
-        );
+        return <NotFound message="Please sign in to continue." />;
     }
 
     return <BusinessSettings initialData={business} />;

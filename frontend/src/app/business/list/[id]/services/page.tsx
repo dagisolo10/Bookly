@@ -1,17 +1,18 @@
 "use client";
 
-import { useBusinessServices } from "@/hooks/service/use-business-services";
+import { useBusinessServices } from "@/hooks/owner/service/use-business-services";
 
-import ServiceDialog from "@/components/business/services/service-dialog";
+import ServiceDialog from "@/app/business/_components/services/owner-service-dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 
-import ServicesTable from "@/components/business/services/services-table";
-import ListPageHeader from "@/components/business/shared/list-page-header";
-import PaginationContainer from "@/components/business/shared/pagination-container";
+import ServicesTable from "@/app/business/_components/services/owner-services-table";
+import ErrorScreen from "@/components/shared/error-screen";
+import ListHeader from "@/components/shared/list-header";
+import PaginationContainer from "@/components/shared/pagination-container";
 import { ServicesTableSkeleton } from "@/components/shared/skeletons";
 
-export default function BusinessServicesPage() {
+export default function OwnerServicesList() {
     const ubs = useBusinessServices();
 
     if (ubs.isPending && !ubs.servicesData.data) {
@@ -19,16 +20,12 @@ export default function BusinessServicesPage() {
     }
 
     if (ubs.error) {
-        return (
-            <div className="flex min-h-[60vh] items-center justify-center">
-                <p className="text-destructive">Failed to load services. Please try again.</p>
-            </div>
-        );
+        return <ErrorScreen message="Failed to load services. Please try again." />;
     }
 
     return (
         <div className="screen space-y-6">
-            <ListPageHeader title="Services" description="Manage your business service offerings" query={ubs.query} onSearchChange={ubs.handleSearchChange} isFetching={ubs.isFetching} placeholder="Search services..." buttonLabel="Add Service" onAdd={ubs.handleAdd} />
+            <ListHeader owner title="Services" description="Manage your business service offerings" query={ubs.query} onSearchChange={ubs.handleSearchChange} isFetching={ubs.isFetching} placeholder="Search services..." buttonLabel="Add Service" onAdd={ubs.handleAdd} />
 
             <div className="rounded-xl border">
                 <ServicesTable handleAdd={ubs.handleAdd} handleEdit={ubs.handleEdit} reset={() => ubs.setQuery("")} services={ubs.servicesData.data} hasServices={ubs.hasAnyServices} noSearchResult={ubs.showEmptySearch} setToggleTarget={ubs.setToggleTarget} />

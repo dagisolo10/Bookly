@@ -1,4 +1,4 @@
-import BusinessForm from "@/components/business/detail/business-form";
+import BusinessForm from "@/app/business/_components/business/business-form";
 import { ArrowLeft, CheckCircle2, Rocket, Store } from "lucide-react";
 import Link from "next/link";
 
@@ -39,7 +39,7 @@ export default function CreateBusiness() {
                         </div>
                         <div>
                             <p className="text-sm font-semibold">Smart Scheduling</p>
-                            <p className="text-xs text-zinc-500">Automate your client appointments.</p>
+                            <p className="text-xs text-zinc-500">Automate your customer appointments.</p>
                         </div>
                     </div>
                 </div>

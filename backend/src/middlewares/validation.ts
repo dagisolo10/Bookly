@@ -17,9 +17,7 @@ export function validate<T extends z.ZodTypeAny>(schema: T, target: Target) {
             });
         }
 
-        const current = req[target] as Record<string, unknown>;
-        Object.keys(current).forEach((key) => delete current[key]);
-        Object.assign(current, parsed.data as Record<string, unknown>);
+        Object.assign(req[target] as Record<string, unknown>, parsed.data as Record<string, unknown>);
         return next();
     };
 }

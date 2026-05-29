@@ -12,9 +12,9 @@ const ROUTE_MAP = {
     Admin: [{ label: "Admin Console", path: "/admin/dashboard" }],
     Business: [{ label: "My Businesses", path: "/business/list" }],
     Customer: [
-        // { label: "My Bookings", path: "/customer/bookings" },
-        { label: "Find Services", path: "/customer/" },
-        // { label: "Browse Businesses", path: "/customer/businesses" },
+        { label: "Browse Businesses", path: "/customer/businesses" },
+        { label: "Find Services", path: "/customer/services" },
+        { label: "My Bookings", path: "/customer/bookings" },
     ],
     Visitor: [
         { label: "About", path: "/about" },
@@ -34,8 +34,7 @@ export default function Navbar() {
 
     const currentSection = pathname.startsWith("/admin") ? "Admin" : pathname.startsWith("/business") ? "Business" : pathname.startsWith("/customer") ? "Customer" : "Visitor";
 
-    // const routes = ROUTE_MAP[currentSection];
-    const routes = [...ROUTE_MAP.Business, ...ROUTE_MAP.Customer, ...ROUTE_MAP.Visitor];
+    const routes = ROUTE_MAP[currentSection];
 
     const hasAdminRole = user?.roles.includes("Admin");
     const hasBusinessRole = user?.roles.includes("Business");

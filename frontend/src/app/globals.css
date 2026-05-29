@@ -160,7 +160,7 @@
     }
 
     .screen {
-        max-width: 72rem;
+        width: clamp(92vw, 72rem, 98vw);
         margin-inline: auto;
         padding-block: 3rem;
     }

@@ -1,9 +1,9 @@
 import { requestApi } from "../api-error";
 
 import api from "@/lib/axios";
-import { FullBusiness } from "@/types/models";
 import { BusinessHoursSchema } from "@/lib/validation";
-import { MessageResponse, OwnerBusinessResponse, PaginationResponse } from "@/types/response";
+import { FullBusiness } from "@/types/models";
+import { BusinessResponse, MessageResponse, PaginationResponse } from "@/types/response";
 
 export const ownerBusinessApi = {
     getMyBusinesses: async (page: number, limit: number, query?: string) => {
@@ -15,7 +15,7 @@ export const ownerBusinessApi = {
     },
 
     getMyBusinessById: async (id: string) => {
-        const data = await requestApi(() => api.get<OwnerBusinessResponse>(`/owner/business/my/${id}`));
+        const data = await requestApi(() => api.get<BusinessResponse>(`/owner/business/my/${id}`));
 
         BusinessHoursSchema.array().parse(data.hours);
 
@@ -23,7 +23,7 @@ export const ownerBusinessApi = {
     },
 
     createBusiness: async (business: FormData) => {
-        const data = await requestApi(() => api.post<OwnerBusinessResponse>("/owner/business", business));
+        const data = await requestApi(() => api.post<BusinessResponse>("/owner/business", business));
 
         BusinessHoursSchema.array().parse(data.hours);
 
@@ -31,7 +31,7 @@ export const ownerBusinessApi = {
     },
 
     updateBusiness: async (id: string, business: FormData) => {
-        const data = await requestApi(() => api.patch<OwnerBusinessResponse>(`/owner/business/${id}`, business));
+        const data = await requestApi(() => api.patch<BusinessResponse>(`/owner/business/${id}`, business));
 
         BusinessHoursSchema.array().parse(data.hours);
 

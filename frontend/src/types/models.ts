@@ -5,6 +5,12 @@ import z from "zod";
  * Base Models
  */
 
+export type BannerUpload = {
+    id: string;
+    file: File;
+    previewUrl: string;
+};
+
 export type BusinessHour = z.infer<typeof BusinessHoursSchema>;
 
 export type User = {
@@ -19,7 +25,6 @@ export type User = {
 export type Business = {
     id: string;
     name: string;
-    timeZone: string;
     description: string | null;
     location: string | null;
     phone: string | null;

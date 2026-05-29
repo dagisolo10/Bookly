@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,10 +10,11 @@ import { createBusinessSchema } from "@/lib/validation";
 import { WeekDay } from "@/types/models";
 import { CreateBusinessPayload } from "@/types/payload";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Globe, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Controller, SubmitHandler, useFieldArray, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 type BannerUpload = {
@@ -24,10 +24,10 @@ type BannerUpload = {
 };
 
 export default function BusinessForm() {
-    const [banners, setBanners] = useState<BannerUpload[]>([]);
+    const router = useRouter();
 
+    const [banners, setBanners] = useState<BannerUpload[]>([]);
     const weekDays: WeekDay[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const timezones = useMemo(() => Intl.supportedValuesOf("timeZone").map((tz) => ({ label: tz.replace(/_/g, " "), value: tz })), []);
 
     const bannersRef = useRef<BannerUpload[]>([]);
     const hoursSectionRef = useRef<HTMLDivElement>(null);
@@ -47,7 +47,6 @@ export default function BusinessForm() {
             phone: "",
             description: "",
             bannerImages: [],
-            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             hours: [
                 { day: "Monday", open: "09:00", close: "17:00" },
                 { day: "Tuesday", open: "09:00", close: "17:00" },
@@ -131,7 +130,6 @@ export default function BusinessForm() {
 
         formData.append("name", data.name);
         formData.append("phone", data.phone ?? "");
-        formData.append("timeZone", data.timeZone);
         formData.append("location", data.location ?? "");
         formData.append("description", data.description ?? "");
 
@@ -222,37 +220,6 @@ export default function BusinessForm() {
                         </div>
                         <ErrorMessage message={getHoursError(errors.hours)} />
                     </Field>
-
-                    <Field className="gap-2">
-                        <Label>Business Timezone</Label>
-                        <Controller
-                            control={control}
-                            name="timeZone"
-                            render={({ field: { value, onChange }, fieldState: { error } }) => (
-                                <>
-                                    <Combobox items={timezones} value={value} onValueChange={onChange}>
-                                        <div className="relative">
-                                            <Globe className="absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-zinc-400" />
-                                            <ComboboxInput placeholder="Search timezone..." className="h-10 rounded-xl pl-8" />
-                                        </div>
-
-                                        <ComboboxContent>
-                                            <ComboboxEmpty>No timezone found.</ComboboxEmpty>
-                                            <ComboboxList>
-                                                {(item) => (
-                                                    <ComboboxItem key={item.value} value={item.value}>
-                                                        {item.label}
-                                                    </ComboboxItem>
-                                                )}
-                                            </ComboboxList>
-                                        </ComboboxContent>
-                                    </Combobox>
-
-                                    <ErrorMessage message={error?.message} />
-                                </>
-                            )}
-                        />
-                    </Field>
                 </FieldGroup>
             </div>
 
@@ -303,7 +270,7 @@ export default function BusinessForm() {
             </div>
 
             <div className="flex items-center justify-end gap-4">
-                <Button size={"cta"} variant="ghost" type="button">
+                <Button onClick={() => router.back()} size={"cta"} variant="ghost" type="button">
                     Discard
                 </Button>
 
@@ -325,10 +292,10 @@ export function Tag({ text }: { text: string }) {
 }
 
 function ErrorMessage({ message }: { message?: string }) {
-    return message ? <p className="mt-1 text-xs font-medium text-destructive">{message}</p> : null;
+    return message ? <p className="text-destructive mt-1 text-xs font-medium">{message}</p> : null;
 }
 
-function getHoursError(errors: unknown): string | undefined {
+export function getHoursError(errors: unknown): string | undefined {
     if (!errors) return;
     if (Array.isArray(errors)) {
         const itemErrors = errors.map((e) => e?.root?.message).filter(Boolean);

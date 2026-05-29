@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,28 +7,25 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateBusiness } from "@/hooks/tan stack/use-owner-business";
 import { updateBusinessSchema } from "@/lib/validation";
-import { FullBusiness, WeekDay } from "@/types/models";
+import { BannerUpload, FullBusiness, WeekDay } from "@/types/models";
 import { UpdateBusinessPayload } from "@/types/payload";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Globe, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-
-type BannerUpload = {
-    id: string;
-    file: File;
-    previewUrl: string;
-};
+import { getHoursError } from "./business-form";
 
 export default function BusinessSettingsForm({ initialData }: { initialData: FullBusiness }) {
+    const router = useRouter();
+
     const [banners, setBanners] = useState<BannerUpload[]>([]);
     const [existingImages, setExistingImages] = useState<string[]>(initialData.bannerImages);
     const [removedExistingImages, setRemovedExistingImages] = useState<string[]>([]);
 
     const weekDays: WeekDay[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const timezones = useMemo(() => Intl.supportedValuesOf("timeZone").map((tz) => ({ label: tz.replace(/_/g, " "), value: tz })), []);
 
     const bannersRef = useRef<BannerUpload[]>([]);
     const hoursSectionRef = useRef<HTMLDivElement>(null);
@@ -50,7 +46,6 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
             description: initialData.description ?? "",
             hours: initialData.hours.map(({ day, open, close }) => ({ day, open, close })),
             bannerImages: initialData.bannerImages,
-            timeZone: initialData.timeZone,
         },
     });
 
@@ -131,7 +126,6 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
 
         formData.append("name", data.name ?? "");
         formData.append("phone", data.phone ?? "");
-        formData.append("timeZone", data.timeZone ?? "");
         formData.append("location", data.location ?? "");
         formData.append("description", data.description ?? "");
 
@@ -224,38 +218,7 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
                                 );
                             })}
                         </div>
-                        <ErrorMessage message={errors.hours?.root?.message} />
-                    </Field>
-
-                    <Field className="gap-2">
-                        <Label>Business Timezone</Label>
-                        <Controller
-                            control={control}
-                            name="timeZone"
-                            render={({ field: { value, onChange }, fieldState: { error } }) => (
-                                <>
-                                    <Combobox items={timezones} value={value} onValueChange={onChange}>
-                                        <div className="relative">
-                                            <Globe className="absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-zinc-400" />
-                                            <ComboboxInput placeholder="Search timezone..." className="h-10 rounded-xl pl-8" />
-                                        </div>
-
-                                        <ComboboxContent>
-                                            <ComboboxEmpty>No timezone found.</ComboboxEmpty>
-                                            <ComboboxList>
-                                                {(item) => (
-                                                    <ComboboxItem key={item.value} value={item.value}>
-                                                        {item.label}
-                                                    </ComboboxItem>
-                                                )}
-                                            </ComboboxList>
-                                        </ComboboxContent>
-                                    </Combobox>
-
-                                    <ErrorMessage message={error?.message} />
-                                </>
-                            )}
-                        />
+                        <ErrorMessage message={getHoursError(errors.hours)} />
                     </Field>
                 </FieldGroup>
             </div>
@@ -322,7 +285,7 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
             </div>
 
             <div className="flex items-center justify-end gap-4">
-                <Button size={"cta"} variant="ghost" type="button">
+                <Button onClick={() => router.back()} size={"cta"} variant="ghost" type="button">
                     Discard
                 </Button>
 

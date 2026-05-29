@@ -1,17 +1,17 @@
-import Link from "next/link";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { FullBusiness } from "@/types/models";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { FullBusiness } from "@/types/models";
 import { MapPin, Phone, Settings } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 interface BusinessHeaderProps {
-    show: boolean;
+    showSettings: boolean;
     business: FullBusiness;
 }
 
-export default function BusinessHeader({ business, show }: BusinessHeaderProps) {
+export default function BusinessHeader({ business, showSettings: show }: BusinessHeaderProps) {
     return (
         <>
             <div className="group relative min-h-[40vh] w-full overflow-hidden rounded-3xl bg-zinc-900">

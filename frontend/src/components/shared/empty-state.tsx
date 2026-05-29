@@ -5,10 +5,10 @@ import { Layers, LucideIcon, Plus } from "lucide-react";
 
 interface EmptyProps {
     title: string;
-    button: string;
+    button?: string;
     icon?: LucideIcon;
     description: string;
-    onClick: () => void;
+    onClick?: () => void;
 }
 
 export default function EmptyState({ button, title, icon: Icon, description, onClick }: EmptyProps) {
@@ -23,10 +23,12 @@ export default function EmptyState({ button, title, icon: Icon, description, onC
                 <EmptyDescription>{description}</EmptyDescription>
             </EmptyHeader>
 
-            <Button onClick={onClick}>
-                {Icon ? <Icon className="size-4" /> : <Plus className="size-4" />}
-                {button}
-            </Button>
+            {button && (
+                <Button onClick={onClick}>
+                    {Icon ? <Icon className="size-4" /> : <Plus className="size-4" />}
+                    {button}
+                </Button>
+            )}
         </Empty>
     );
 }

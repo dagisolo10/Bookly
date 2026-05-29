@@ -16,16 +16,15 @@ export function isScheduleValid(newStart: string, newDuration: number, existingI
     });
 }
 
-function getLocalizedTimeParts(dateStr: string, timeZone: string) {
+function getLocalizedTimeParts(dateStr: string) {
     const date = new Date(dateStr);
 
-    const weekday = new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone }).format(date);
+    const weekday = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
 
     const formatter = new Intl.DateTimeFormat("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
-        timeZone,
     });
 
     const parts = formatter.formatToParts(date);
@@ -35,8 +34,8 @@ function getLocalizedTimeParts(dateStr: string, timeZone: string) {
     return { weekday, hour: Number(hour), minute: Number(minute) };
 }
 
-export function isBusinessOpen(date: string, hours: BusinessHour[], timeZone: string): boolean {
-    const { weekday, hour, minute } = getLocalizedTimeParts(date, timeZone);
+export function isBusinessOpen(date: string, hours: BusinessHour[]): boolean {
+    const { weekday, hour, minute } = getLocalizedTimeParts(date);
 
     const day = hours.find((hour) => hour.day === weekday);
 
@@ -47,8 +46,8 @@ export function isBusinessOpen(date: string, hours: BusinessHour[], timeZone: st
     return bookingTime >= day.open && bookingTime < day.close;
 }
 
-export function hasEnoughTime(date: string, hours: BusinessHour[], duration: number, timeZone: string): boolean {
-    const { weekday, hour, minute } = getLocalizedTimeParts(date, timeZone);
+export function hasEnoughTime(date: string, hours: BusinessHour[], duration: number): boolean {
+    const { weekday, hour, minute } = getLocalizedTimeParts(date);
 
     const day = hours.find((hour) => hour.day === weekday);
 

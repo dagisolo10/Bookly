@@ -161,6 +161,76 @@ export function ServiceListSkeleton() {
     );
 }
 
+export function ServiceCardSkeleton() {
+    return (
+        <div className="bg-card ring-foreground/10 flex animate-pulse flex-col overflow-hidden rounded-xl shadow-xs ring-1 sm:flex-row">
+            <div className="bg-muted aspect-3/2 w-full sm:aspect-square sm:w-44" />
+            <div className="flex flex-1 flex-col gap-3 p-5">
+                <div className="space-y-2">
+                    <div className="bg-muted h-5 w-3/4 rounded-md" />
+                    <div className="flex gap-2">
+                        <div className="bg-muted h-4 w-20 rounded-full" />
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="bg-muted h-4 w-16 rounded-md" />
+                    <div className="bg-muted h-3 w-px" />
+                    <div className="bg-muted h-4 w-14 rounded-md" />
+                </div>
+                <div className="mt-auto pt-1">
+                    <div className="bg-muted h-8 w-28 rounded-md" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function ServicesGridSkeleton({ count = 6 }: { count?: number }) {
+    return (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {Array.from({ length: count }).map((_, i) => (
+                <ServiceCardSkeleton key={i} />
+            ))}
+        </div>
+    );
+}
+
+export function BookingCardSkeleton() {
+    return (
+        <div className="bg-card ring-foreground/10 flex animate-pulse flex-col overflow-hidden rounded-xl shadow-xs ring-1 sm:flex-row">
+            <div className="bg-muted aspect-3/2 w-full sm:aspect-square sm:w-28" />
+            <div className="flex flex-1 flex-col gap-3 p-4">
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <div className="bg-muted h-3 w-16 rounded-full" />
+                        <div className="bg-muted h-4 w-14 rounded-full" />
+                    </div>
+                    <div className="bg-muted h-5 w-3/4 rounded-md" />
+                    <div className="bg-muted h-3 w-48 rounded-md" />
+                </div>
+                <div className="mt-auto flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2">
+                        <div className="bg-muted h-5 w-14 rounded-md" />
+                        <div className="bg-muted h-3 w-1" />
+                        <div className="bg-muted h-3 w-10 rounded-md" />
+                    </div>
+                    <div className="bg-muted h-3 w-20 rounded-md" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function BookingsGridSkeleton({ count = 4 }: { count?: number }) {
+    return (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {Array.from({ length: count }).map((_, i) => (
+                <BookingCardSkeleton key={i} />
+            ))}
+        </div>
+    );
+}
+
 export function ServicesTableSkeleton() {
     return (
         <div className="screen space-y-6">

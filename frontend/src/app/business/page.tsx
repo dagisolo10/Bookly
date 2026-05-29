@@ -36,7 +36,7 @@ export default function BusinessLanding() {
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                     <FeatureCard icon={LayoutDashboard} title="Smart Dashboard" text="Monitor your daily schedule, active bookings, and total completions at a single glance." />
                     <FeatureCard icon={BarChart3} title="Revenue Tracking" text="Detailed analytics on your most popular services and monthly earnings reports." />
-                    <FeatureCard icon={Users} title="Client Management" text="Maintain a digital database of your customers, their history, and verified reviews." />
+                    <FeatureCard icon={Users} title="Customer Management" text="Maintain a digital database of your customers, their history, and verified reviews." />
                 </div>
             </section>
 

@@ -25,7 +25,6 @@ export const createBusinessSchema = z.object({
     phone: z.string().nullish(),
     location: z.string().nullish(),
     description: z.string().nullish(),
-    timeZone: z.string().min(1, "Timezone is required"),
     bannerImages: z.array(z.string().url("Invalid banner image URL")),
     hours: z.array(DayHoursSchema).min(1, "At least one open day is required"),
 });
@@ -35,7 +34,6 @@ export const updateBusinessSchema = z.object({
     phone: z.string().nullish(),
     location: z.string().nullish(),
     description: z.string().nullish(),
-    timeZone: z.string().min(1, "Timezone is required").optional(),
     bannerImages: z.array(z.string().url("Invalid banner image URL")).optional(),
     hours: z.array(DayHoursSchema).min(1, "At least one open day is required"),
 });
@@ -55,4 +53,9 @@ export const updateServiceSchema = z.object({
     price: z.number().positive("Price must be positive").optional(),
     thumbnail: z.string().nullish(),
     category: z.string().optional(),
+});
+
+export const createBookingSchema = z.object({
+    startsAt: z.iso.datetime({ message: "Invalid date format" }),
+    serviceId: z.string().cuid(),
 });
