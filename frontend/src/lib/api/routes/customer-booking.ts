@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 import { CreateBookingPayload } from "@/types/payload";
-import { BookingListResponse, BookingResponse } from "@/types/response";
+import { FullBooking } from "@/types/models";
+import { BookingResponse, PaginationResponse } from "@/types/response";
 import { requestApi } from "../api-error";
 
 export const customerBookingApi = {
@@ -8,8 +9,8 @@ export const customerBookingApi = {
         return requestApi(() => api.post<BookingResponse>("/customer/bookings", booking));
     },
 
-    getMyBookings: async () => {
-        return requestApi(() => api.get<BookingListResponse>("/customer/bookings"));
+    getMyBookings: async (page: number, limit: number, query?: string) => {
+        return requestApi(() => api.get<PaginationResponse<FullBooking>>("/customer/bookings", { params: { page, limit, query } }));
     },
 
     getBookingById: async (id: string) => {

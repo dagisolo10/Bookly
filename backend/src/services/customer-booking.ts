@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import type { CreateBookingPayload } from "@/types/payload";
 import { fullBookingIncludes, type FullBooking } from "@/types/populated";
-import type { ServiceResult } from "@/types/response";
+import type { PaginatedData, ServiceResult } from "@/types/response";
 import { hasEnoughTime, isBusinessOpen, isScheduleValid } from "@/utils/date-validator";
 import { Prisma } from "@prisma/client";
 
@@ -84,19 +84,39 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
     }
 }
 
-export async function getMyBookings(): ServiceResult<FullBooking[]> {
+export async function getMyBookings(page: number, limit: number, query?: string): ServiceResult<PaginatedData<FullBooking>> {
     try {
         const userId = getUserId();
 
-        const bookings = await prisma.booking.findMany({
-            where: { userId },
-            include: fullBookingIncludes,
-            orderBy: {
-                startsAt: "asc",
-            },
-        });
+        const where = {
+            userId,
+            ...(query && {
+                service: {
+                    name: { contains: query, mode: Prisma.QueryMode.insensitive },
+                },
+            }),
+        } satisfies Prisma.BookingWhereInput;
 
-        return bookings;
+        const [total, bookings] = await Promise.all([
+            prisma.booking.count({ where }),
+            prisma.booking.findMany({
+                where,
+                take: limit,
+                skip: (page - 1) * limit,
+                include: fullBookingIncludes,
+                orderBy: { startsAt: "asc" },
+            }),
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+        const hasMore = page < totalPages;
+
+        return {
+            total,
+            hasMore,
+            totalPages: totalPages || 1,
+            data: bookings,
+        };
     } catch (error) {
         console.error("Error in getMyBookings:", error);
         return { error: "Internal server error", code: 500 };

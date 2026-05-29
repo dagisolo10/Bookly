@@ -82,11 +82,11 @@ export function getBusinessQueryOptions<TData = FullBusiness, TError = Error>(id
     });
 }
 
-export function getMyBookingsQueryOptions<TData = FullBooking[], TError = Error>(options?: QueryOptions<FullBooking[], TData, TError>) {
+export function getMyBookingsQueryOptions<TData = PaginatedData<FullBooking>, TError = Error>(page: number, limit: number, query?: string, options?: QueryOptions<PaginatedData<FullBooking>, TData, TError>) {
     return queryOptions({
         ...options,
-        queryKey: ["customer", "booking", "list"],
-        queryFn: customerBookingApi.getMyBookings,
+        queryKey: ["customer", "booking", "list", page, limit, query],
+        queryFn: () => customerBookingApi.getMyBookings(page, limit, query),
     });
 }
 

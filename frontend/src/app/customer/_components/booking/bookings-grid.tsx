@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { formatDate } from "@/lib/helpers/formatters";
+import { formatDate, formatDateTime } from "@/lib/helpers/formatters";
 import { cn } from "@/lib/utils";
 import type { FullBooking } from "@/types/models";
 import { CalendarDays, Clock, ImageIcon, SearchX } from "lucide-react";
@@ -52,7 +52,7 @@ export function BookingsGrid({ bookings }: BookingsGridProps) {
                         <div>
                             <div className="flex items-center justify-between gap-2">
                                 <span className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">{booking.service.category || "General"}</span>
-                                <Badge variant="outline" className={cn("text-[10px] font-semibold tracking-wide uppercase", statusStyles[booking.status])}>
+                                <Badge variant="outline" className={cn("text-[10px] font-semibold tracking-wide uppercase", statusStyles[booking.status] ?? "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400")}>
                                     {booking.status}
                                 </Badge>
                             </div>
@@ -61,7 +61,7 @@ export function BookingsGrid({ bookings }: BookingsGridProps) {
 
                             <div className="text-muted-foreground mt-1 flex items-center gap-1.5 text-xs">
                                 <CalendarDays className="size-3 stroke-[1.5]" />
-                                <span>{new Date(booking.startsAt).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}</span>
+                                <span>{formatDateTime(booking.startsAt)}</span>
                             </div>
                         </div>
 

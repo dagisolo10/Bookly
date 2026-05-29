@@ -27,13 +27,24 @@ export default function BusinessHours({ hours }: { hours: BusinessHour[] }) {
     };
 
     const todayHours = hours.find((h) => h.day === currentDay);
-    const isOpen =
-        !!todayHours &&
-        (() => {
+    const previousDay = dayOrder[(now.getDay() + 6) % 7];
+    const previousDayHours = hours.find((h) => h.day === previousDay);
+    const isOpen = (() => {
+        if (todayHours) {
             const open = toMinutes(todayHours.open);
             const close = toMinutes(todayHours.close);
-            return close >= open ? currentTotalMinutes >= open && currentTotalMinutes <= close : currentTotalMinutes >= open || currentTotalMinutes <= close;
-        })();
+            if (close >= open) return currentTotalMinutes >= open && currentTotalMinutes <= close;
+            if (currentTotalMinutes >= open) return true;
+        }
+
+        if (previousDayHours) {
+            const open = toMinutes(previousDayHours.open);
+            const close = toMinutes(previousDayHours.close);
+            if (close < open && currentTotalMinutes <= close) return true;
+        }
+
+        return false;
+    })();
 
     return (
         <Card className="border-none shadow-sm">

@@ -30,6 +30,18 @@ export default function CustomerBusinessServices() {
 
     const hasError = [businessQuery, servicesQuery].some((q) => q.isError);
 
+    if (isPending) {
+        return <ServicesGridSkeleton count={6} />;
+    }
+
+    if (businessQuery.isError) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <p className="text-destructive">Failed to load business data. Please try again.</p>
+            </div>
+        );
+    }
+
     if (!businessQuery.data) {
         return (
             <div className="flex min-h-screen items-center justify-center">

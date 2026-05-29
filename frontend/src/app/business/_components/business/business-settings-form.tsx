@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { getHoursError } from "./business-form";
 
 export default function BusinessSettingsForm({ initialData }: { initialData: FullBusiness }) {
     const router = useRouter();
@@ -217,7 +218,7 @@ export default function BusinessSettingsForm({ initialData }: { initialData: Ful
                                 );
                             })}
                         </div>
-                        <ErrorMessage message={errors.hours?.[0]?.message} />
+                        <ErrorMessage message={getHoursError(errors.hours)} />
                     </Field>
                 </FieldGroup>
             </div>

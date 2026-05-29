@@ -28,6 +28,7 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
     const editBtn = "Save Changes";
 
     const [banner, setBanner] = useState<BannerUpload | null>(null);
+    const [removeExistingThumbnail, setRemoveExistingThumbnail] = useState(false);
     const bannersRef = useRef<BannerUpload | null>(null);
 
     const existingThumbnailUrl = mode === "edit" && service?.thumbnail ? service.thumbnail : null;
@@ -50,6 +51,7 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
 
         if (file.size > MAX_BYTES) {
             toast.error("The image exceeds 5MB limit");
+            return;
         }
 
         const newEntries: BannerUpload = {
@@ -71,6 +73,8 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
         if (banner) URL.revokeObjectURL(banner.previewUrl);
         setBanner(null);
     };
+
+    const removeExisting = () => setRemoveExistingThumbnail(true);
 
     const { mutate: createService } = useCreateService();
     const { mutate: updateService } = useUpdateService();
@@ -109,7 +113,8 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
         if (mode === "add") {
             createService(data, { onSuccess: () => setOpen(false) });
         } else if (mode === "edit" && service) {
-            updateService({ id: service.id, service: data }, { onSuccess: () => setOpen(false) });
+            const updatePayload = removeExistingThumbnail ? { ...data, thumbnail: null } : data;
+            updateService({ id: service.id, service: updatePayload }, { onSuccess: () => setOpen(false) });
         }
     }
 
@@ -119,10 +124,11 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
             onOpenChange={(v) => {
                 setOpen(v);
                 if (!v) setErrors({});
+                if (v) setRemoveExistingThumbnail(false);
             }}
         >
             <DialogContent className="sm:max-w-125">
-                <form onSubmit={handleSubmitForm}>
+                <form key={service?.id ?? "add"} onSubmit={handleSubmitForm}>
                     <DialogHeader className="mb-4">
                         <DialogTitle>{mode === "add" ? "Add" : "Edit"} Service</DialogTitle>
                         <DialogDescription>{mode === "add" ? addDesc : editDesc}</DialogDescription>
@@ -158,27 +164,36 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
                         </div>
 
                         <Field>
-                            <Label htmlFor="service-thumbnail">Thumbnail Image</Label>
-                            <div className="relative">
-                                <Input id="service-thumbnail" type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer text-transparent file:cursor-pointer file:font-semibold" />
-                                <span className="pointer-events-none absolute top-1/2 left-32 -translate-y-1/2 text-sm text-zinc-500">{banner ? banner.file.name : "No file selected"}</span>
+                            <Label>Thumbnail Image</Label>
+                            <div className="flex items-center gap-3">
+                                <Input id="service-thumbnail" type="file" accept="image/*" onChange={handleFileChange} className="sr-only" aria-describedby="service-thumbnail-name" />
+                                <Label htmlFor="service-thumbnail" className="cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted">
+                                    Choose File
+                                </Label>
+                                <span id="service-thumbnail-name" aria-live="polite" className="text-sm text-zinc-500">{banner ? banner.file.name : "No file selected"}</span>
                             </div>
 
                             {banner && (
-                                <div className="relative aspect-video h-24 overflow-hidden rounded-xl border">
-                                    <Image src={banner.previewUrl} alt="Preview" fill className="object-contain" />
-                                    <button onClick={clearImage} title="Remove Thumbnail Image" type="button" className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black">
-                                        <Plus className="size-3 rotate-45" />
-                                    </button>
+                                <div>
+                                    <span className="mb-1 block text-[11px] font-medium text-zinc-500">New thumbnail (unsaved)</span>
+                                    <div className="relative aspect-video h-24 overflow-hidden rounded-xl border">
+                                        <Image src={banner.previewUrl} alt="New thumbnail preview" fill className="object-contain" />
+                                        <button onClick={clearImage} title="Remove new thumbnail" type="button" className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black">
+                                            <Plus className="size-3 rotate-45" />
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
-                            {existingThumbnailUrl && (
-                                <div className="relative aspect-video h-24 overflow-hidden rounded-xl border">
-                                    <Image src={existingThumbnailUrl} alt="Preview" fill className="object-contain" />
-                                    <button onClick={clearImage} title="Remove Thumbnail Image" type="button" className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black">
-                                        <Plus className="size-3 rotate-45" />
-                                    </button>
+                            {!banner && existingThumbnailUrl && !removeExistingThumbnail && (
+                                <div>
+                                    <span className="mb-1 block text-[11px] font-medium text-zinc-500">Current thumbnail</span>
+                                    <div className="relative aspect-video h-24 overflow-hidden rounded-xl border">
+                                        <Image src={existingThumbnailUrl} alt="Current thumbnail" fill className="object-contain" />
+                                        <button onClick={removeExisting} title="Remove current thumbnail" type="button" className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black">
+                                            <Plus className="size-3 rotate-45" />
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </Field>

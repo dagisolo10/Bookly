@@ -44,7 +44,8 @@ function generateTimeSlots(open: string, close: string, duration: number, step: 
 }
 
 export default function BookingSheet({ open, onOpenChange, service }: BookingSheetProps) {
-    const { data: business } = useQuery(getBusinessQueryOptions(service?.businessId ?? ""));
+    const { data: business } = useQuery(getBusinessQueryOptions(service?.businessId ?? "", { enabled: Boolean(service?.businessId) }));
+
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
@@ -65,7 +66,19 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
         const dayHours = openHours.find((h) => h.day === weekday);
         if (!dayHours) return [];
 
-        return generateTimeSlots(dayHours.open, dayHours.close, service.durationInMinutes, 30);
+        const slots = generateTimeSlots(dayHours.open, dayHours.close, service.durationInMinutes, 30);
+
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+
+        if (!isToday) return slots;
+
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+        return slots.filter((s) => {
+            const [h, m] = s.split(":").map(Number);
+            return (h ?? 0) * 60 + (m ?? 0) > nowMinutes;
+        });
     }, [service, date, weekday, openHours]);
 
     function handleDateSelect(d: Date | undefined) {
@@ -99,9 +112,7 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
         );
     }
 
-    const formattedSelectedDate = date
-        ? date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
-        : null;
+    const formattedSelectedDate = date ? date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : null;
 
     function isPastDate(d: Date): boolean {
         const today = new Date();
@@ -152,30 +163,14 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
                         <Label className="text-xs">1. Select Date</Label>
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className={cn(
-                                        "w-full justify-start gap-2 rounded-xl text-left text-xs font-normal shadow-2xs transition-all",
-                                        date && "border-primary/40 ring-primary/10 bg-primary/1 ring-1",
-                                    )}
-                                >
+                                <Button variant="outline" className={cn("w-full justify-start gap-2 rounded-xl text-left text-xs font-normal shadow-2xs transition-all", date && "border-primary/40 ring-primary/10 bg-primary/1 ring-1")}>
                                     <CalendarIcon className="text-muted-foreground size-3.5 stroke-[1.5]" />
-                                    {formattedSelectedDate ? (
-                                        <span className="font-medium">{formattedSelectedDate}</span>
-                                    ) : (
-                                        <span className="text-muted-foreground">Choose an available date...</span>
-                                    )}
+                                    {formattedSelectedDate ? <span className="font-medium">{formattedSelectedDate}</span> : <span className="text-muted-foreground">Choose an available date...</span>}
                                 </Button>
                             </PopoverTrigger>
 
                             <PopoverContent className="w-auto overflow-hidden rounded-xl p-0 shadow-xl" align="start" side="left">
-                                <Calendar
-                                    mode="single"
-                                    selected={date}
-                                    onSelect={handleDateSelect}
-                                    disabled={isPastDate}
-                                    className="p-3 text-sm"
-                                />
+                                <Calendar mode="single" selected={date} onSelect={handleDateSelect} disabled={isPastDate} className="p-3 text-sm" />
                             </PopoverContent>
                         </Popover>
                     </div>
@@ -187,14 +182,7 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
                             </div>
                             {date && (
                                 <span className="flex items-center gap-2">
-                                    <span
-                                        className={cn(
-                                            isOpenDay ? "bg-emerald-500/10 text-emerald-500" : "text-destructive bg-destructive/10",
-                                            "rounded-sm px-1.5 py-0.5 text-[10px] font-medium",
-                                        )}
-                                    >
-                                        {isOpenDay ? "Open" : "Close"}
-                                    </span>
+                                    <span className={cn(isOpenDay ? "bg-emerald-500/10 text-emerald-500" : "text-destructive bg-destructive/10", "rounded-sm px-1.5 py-0.5 text-[10px] font-medium")}>{isOpenDay ? "Open" : "Closed"}</span>
                                 </span>
                             )}
                         </Label>
@@ -209,15 +197,7 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
                                     {availableTimeSlots.map((slot) => {
                                         const isSelected = selectedTime === slot;
                                         return (
-                                            <button
-                                                key={slot}
-                                                type="button"
-                                                onClick={() => setSelectedTime(slot)}
-                                                className={cn(
-                                                    "h-8 rounded-lg border text-xs font-medium shadow-2xs outline-hidden transition-all",
-                                                    isSelected ? "bg-foreground text-background font-bold" : "text-muted-foreground",
-                                                )}
-                                            >
+                                            <button key={slot} type="button" onClick={() => setSelectedTime(slot)} className={cn("h-8 rounded-lg border text-xs font-medium shadow-2xs outline-hidden transition-all", isSelected ? "bg-foreground text-background font-bold" : "text-muted-foreground")}>
                                                 {slot}
                                             </button>
                                         );
@@ -225,9 +205,7 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
                                 </div>
                             ) : (
                                 <div className="flex h-20 flex-col items-center justify-center text-center">
-                                    <p className="text-muted-foreground text-xs font-medium">
-                                        {isOpenDay ? "No available slots for this date." : "Shop is completely closed on this day."}
-                                    </p>
+                                    <p className="text-muted-foreground text-xs font-medium">{isOpenDay ? "No available slots for this date." : "Shop is completely closed on this day."}</p>
                                 </div>
                             )}
                         </div>
@@ -240,13 +218,7 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
                             Cancel
                         </Button>
                     </DialogClose>
-                    <Button
-                        type="submit"
-                        onClick={handleBook}
-                        disabled={!date || !selectedTime || isPending}
-                        size={"lg"}
-                        className="min-w-32 gap-2 rounded-xl px-5 text-xs font-bold shadow-xs transition-all"
-                    >
+                    <Button type="submit" onClick={handleBook} disabled={!date || !selectedTime || isPending} size={"lg"} className="min-w-32 gap-2 rounded-xl px-5 text-xs font-bold shadow-xs transition-all">
                         {isPending ? (
                             <>
                                 <Loader2 className="size-3.5 animate-spin" />

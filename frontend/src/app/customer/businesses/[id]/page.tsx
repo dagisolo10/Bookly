@@ -17,7 +17,7 @@ export default function CustomerBusinessPage() {
     });
 
     const isPending = businessQuery.isPending;
-    const hasError = [businessQuery, servicesQuery].some((q) => q.isError);
+    const hasError = businessQuery.isError;
 
     const business = businessQuery.data;
     const serviceData = servicesQuery.data;
@@ -59,9 +59,7 @@ export default function CustomerBusinessPage() {
                                 <h3 className="flex items-center gap-2 text-lg font-bold text-zinc-400">
                                     <Info className="size-4" /> Our Story
                                 </h3>
-                                <p className="text-muted-foreground text-sm leading-relaxed">
-                                    {business.description || "This business hasn't shared their story yet, but they're ready to serve you!"}
-                                </p>
+                                <p className="text-muted-foreground text-sm leading-relaxed">{business.description || "This business hasn't shared their story yet, but they're ready to serve you!"}</p>
                             </CardContent>
                         </Card>
                     </aside>

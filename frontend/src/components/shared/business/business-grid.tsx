@@ -57,13 +57,22 @@ export default function BusinessGrid({ businesses, linkPath }: BusinessGridProps
                                 <CardTitle className="group-hover:text-primary line-clamp-1 text-base font-semibold tracking-tight text-zinc-900 transition-colors">{cleanName}</CardTitle>
 
                                 <div className="mt-4 flex items-center justify-between border-t pt-3">
-                                    <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                                        <span className="relative flex size-2">
-                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                                            <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-                                        </span>
-                                        <span>Open Now</span>
-                                    </div>
+                                    {business.status === "Active" ? (
+                                        <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                            <span className="relative flex size-2">
+                                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                                                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                                            </span>
+                                            <span>Open Now</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400">
+                                            <span className="relative flex size-2">
+                                                <span className="relative inline-flex size-2 rounded-full bg-zinc-300" />
+                                            </span>
+                                            <span>{business.status === "Paused" ? "Temporarily Paused" : "Closed"}</span>
+                                        </div>
+                                    )}
 
                                     <span className="text-[11px] font-medium text-zinc-400 transition-colors group-hover:text-zinc-600">View Slots &rarr;</span>
                                 </div>

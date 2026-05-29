@@ -295,7 +295,7 @@ function ErrorMessage({ message }: { message?: string }) {
     return message ? <p className="text-destructive mt-1 text-xs font-medium">{message}</p> : null;
 }
 
-function getHoursError(errors: unknown): string | undefined {
+export function getHoursError(errors: unknown): string | undefined {
     if (!errors) return;
     if (Array.isArray(errors)) {
         const itemErrors = errors.map((e) => e?.root?.message).filter(Boolean);
