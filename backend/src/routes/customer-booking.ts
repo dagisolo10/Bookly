@@ -22,8 +22,8 @@ router.get(
     validate(querySearchSchema, "query"),
     validate(paginationQuerySchema, "query"),
     handler((req: Request) => {
-        const page = (req.query["page"] as unknown as number) || 1;
-        const limit = (req.query["limit"] as unknown as number) || 10;
+        const page = parseInt(req.query["page"] as string, 10) || 1;
+        const limit = parseInt(req.query["limit"] as string, 10) || 10;
         const query = req.query["query"] as string;
         return getMyBookings(page, limit, query);
     }),
