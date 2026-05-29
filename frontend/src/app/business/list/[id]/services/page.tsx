@@ -7,6 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Spinner } from "@/components/ui/spinner";
 
 import ServicesTable from "@/app/business/_components/services/owner-services-table";
+import ErrorScreen from "@/components/shared/error-screen";
 import ListHeader from "@/components/shared/list-header";
 import PaginationContainer from "@/components/shared/pagination-container";
 import { ServicesTableSkeleton } from "@/components/shared/skeletons";
@@ -19,11 +20,7 @@ export default function OwnerServicesList() {
     }
 
     if (ubs.error) {
-        return (
-            <div className="flex min-h-[60vh] items-center justify-center">
-                <p className="text-destructive">Failed to load services. Please try again.</p>
-            </div>
-        );
+        return <ErrorScreen message="Failed to load services. Please try again." />;
     }
 
     return (

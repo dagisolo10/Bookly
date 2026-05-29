@@ -1,7 +1,9 @@
 "use client";
 
 import { ServicesGrid } from "@/app/customer/_components/services/services-grid";
+import ErrorScreen from "@/components/shared/error-screen";
 import ListHeader from "@/components/shared/list-header";
+import NotFound from "@/components/shared/not-found";
 import PaginationContainer from "@/components/shared/pagination-container";
 import { ServicesGridSkeleton } from "@/components/shared/skeletons";
 import { useSearchPagination } from "@/hooks/shared/use-search-pagination";
@@ -35,35 +37,21 @@ export default function CustomerBusinessServices() {
     }
 
     if (businessQuery.isError) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Failed to load business data. Please try again.</p>
-            </div>
-        );
+        return <ErrorScreen message="Failed to load business data. Please try again." />;
     }
 
     if (!businessQuery.data) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Business not found</p>
-            </div>
-        );
+        return <NotFound message="Business not found" />;
     }
 
     return (
         <div className="space-y-8">
             <ListHeader query={query} tag="Services for" title={businessQuery.data.name} isFetching={serviceListFetching} onSearchChange={handleSearchChange} placeholder="Search services by name..." description="Find and book the perfect service. From hair and beauty to specialized consultations, our experts are ready to serve you." />
 
-            {isPending ? (
-                <ServicesGridSkeleton count={6} />
-            ) : hasError ? (
-                <div className="flex min-h-[30vh] items-center justify-center">
-                    <p className="text-destructive">Failed to load services. Please try again.</p>
-                </div>
+            {hasError ? (
+                <ErrorScreen message="Failed to load services. Please try again." />
             ) : servicesData.data.length === 0 ? (
-                <div className="flex min-h-[30vh] items-center justify-center">
-                    <p className="text-muted-foreground">No services found.</p>
-                </div>
+                <NotFound message="No services found." />
             ) : (
                 <div>
                     <ServicesGrid services={servicesData.data} />

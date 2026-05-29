@@ -1,7 +1,9 @@
 "use client";
 
 import { BookingsGrid } from "@/app/customer/_components/booking/bookings-grid";
+import ErrorScreen from "@/components/shared/error-screen";
 import ListHeader from "@/components/shared/list-header";
+import NotFound from "@/components/shared/not-found";
 import PaginationContainer from "@/components/shared/pagination-container";
 import { BookingsGridSkeleton } from "@/components/shared/skeletons";
 import { useSearchPagination } from "@/hooks/shared/use-search-pagination";
@@ -36,13 +38,9 @@ export default function MyBookings() {
             {isPending ? (
                 <BookingsGridSkeleton count={4} />
             ) : isError ? (
-                <div className="flex min-h-[30vh] items-center justify-center">
-                    <p className="text-destructive">Failed to load bookings. Please try again.</p>
-                </div>
+                <ErrorScreen message="Failed to load bookings. Please try again." />
             ) : bookingsData.data.length === 0 ? (
-                <div className="flex min-h-[30vh] items-center justify-center">
-                    <p className="text-muted-foreground">No bookings found.</p>
-                </div>
+                <NotFound message="No bookings found." />
             ) : (
                 <div>
                     <BookingsGrid bookings={bookingsData.data} />

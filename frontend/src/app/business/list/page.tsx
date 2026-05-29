@@ -1,6 +1,7 @@
 "use client";
 import BusinessGrid from "@/components/shared/business/business-grid";
 import EmptyState from "@/components/shared/empty-state";
+import ErrorScreen from "@/components/shared/error-screen";
 import ListHeader from "@/components/shared/list-header";
 import PaginationContainer from "@/components/shared/pagination-container";
 import { BusinessListSkeleton } from "@/components/shared/skeletons";
@@ -15,11 +16,7 @@ export default function BusinessList() {
     }
 
     if (ubl.error) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Error: {ubl.error.message}</p>
-            </div>
-        );
+        return <ErrorScreen message={ubl.error.message} />;
     }
 
     return (

@@ -1,13 +1,23 @@
 "use client";
 import BusinessGrid from "@/components/shared/business/business-grid";
 import EmptyState from "@/components/shared/empty-state";
+import ErrorScreen from "@/components/shared/error-screen";
 import ListHeader from "@/components/shared/list-header";
 import PaginationContainer from "@/components/shared/pagination-container";
+import { BusinessListSkeleton } from "@/components/shared/skeletons";
 import { useCustomerBusinessList } from "@/hooks/customer/business/use-business-list";
 import { ListRestart } from "lucide-react";
 
 export default function CustomerBusinessList() {
-    const { total, hasMore, totalPages, query, isFetching, currentPage, businessData, itemsPerPage, setCurrentPage, handleResetQuery, handleSearchChange, ITEMS_PER_PAGE_OPTIONS, handleItemsPerPageChange } = useCustomerBusinessList();
+    const { total, hasMore, totalPages, query, isPending, error, isFetching, currentPage, businessData, itemsPerPage, setCurrentPage, handleResetQuery, handleSearchChange, ITEMS_PER_PAGE_OPTIONS, handleItemsPerPageChange } = useCustomerBusinessList();
+
+    if (isPending && !businessData.data) {
+        return <BusinessListSkeleton />;
+    }
+
+    if (error) {
+        return <ErrorScreen message={error.message} />;
+    }
 
     return (
         <div className="space-y-6">

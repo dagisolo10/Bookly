@@ -1,6 +1,8 @@
 "use client";
 import BusinessHeader from "@/components/shared/business/business-header";
 import BusinessHours from "@/components/shared/business/business-hour";
+import ErrorScreen from "@/components/shared/error-screen";
+import NotFound from "@/components/shared/not-found";
 import ServiceList from "@/components/shared/service/service-list";
 import { BusinessBaseSkeleton, ServiceListSkeleton } from "@/components/shared/skeletons";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,27 +32,15 @@ export default function OwnerBusinessPage() {
     }
 
     if (hasError) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Failed to load business data. Please try again.</p>
-            </div>
-        );
+        return <ErrorScreen message="Failed to load business data. Please try again." />;
     }
 
     if (!business) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Business not found</p>
-            </div>
-        );
+        return <NotFound message="Business not found" />;
     }
 
     if (!user) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-destructive">Login</p>
-            </div>
-        );
+        return <NotFound message="Please sign in to continue." />;
     }
 
     return (

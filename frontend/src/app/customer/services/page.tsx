@@ -1,7 +1,9 @@
 "use client";
 
 import { ServicesGrid } from "@/app/customer/_components/services/services-grid";
+import ErrorScreen from "@/components/shared/error-screen";
 import ListHeader from "@/components/shared/list-header";
+import NotFound from "@/components/shared/not-found";
 import PaginationContainer from "@/components/shared/pagination-container";
 import { ServicesGridSkeleton } from "@/components/shared/skeletons";
 import { useSearchPagination } from "@/hooks/shared/use-search-pagination";
@@ -28,13 +30,9 @@ export default function CustomerServicesPage() {
             {isPending ? (
                 <ServicesGridSkeleton count={6} />
             ) : isError ? (
-                <div className="flex min-h-[30vh] items-center justify-center">
-                    <p className="text-destructive">Failed to load services. Please try again.</p>
-                </div>
+                <ErrorScreen message="Failed to load services. Please try again." />
             ) : servicesData.data.length === 0 ? (
-                <div className="flex min-h-[30vh] items-center justify-center">
-                    <p className="text-muted-foreground">No services found.</p>
-                </div>
+                <NotFound message="No services found." />
             ) : (
                 <div>
                     <ServicesGrid services={servicesData.data} />
