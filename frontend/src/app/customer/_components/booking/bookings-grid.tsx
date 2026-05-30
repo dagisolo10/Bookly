@@ -2,7 +2,8 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { formatDate, formatDateTime } from "@/lib/helpers/formatters";
+import { statusStyles } from "@/constants/styles";
+import { formatDate, formatDateTime, formatDuration } from "@/lib/helpers/formatters";
 import { cn } from "@/lib/utils";
 import type { FullBooking } from "@/types/models";
 import { CalendarDays, Clock, ImageIcon, SearchX } from "lucide-react";
@@ -12,13 +13,6 @@ import { useSearchParams } from "next/navigation";
 interface BookingsGridProps {
     bookings: FullBooking[];
 }
-
-const statusStyles: Record<string, string> = {
-    Pending: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    Confirmed: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    Cancelled: "bg-destructive/10 text-destructive",
-    Completed: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-};
 
 export function BookingsGrid({ bookings }: BookingsGridProps) {
     const searchparams = useSearchParams();
@@ -79,7 +73,7 @@ export function BookingsGrid({ bookings }: BookingsGridProps) {
                                 <span className="text-lg font-bold">${booking.bookedPrice.toFixed(2)}</span>
                                 <div className="text-muted-foreground flex items-center gap-1 text-xs font-medium">
                                     <Clock className="size-3 stroke-[1.75]" />
-                                    <span>{booking.bookedDuration}m</span>
+                                    <span>{formatDuration(booking.bookedDuration)}</span>
                                 </div>
                             </div>
 

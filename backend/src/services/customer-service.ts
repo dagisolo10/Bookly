@@ -13,6 +13,7 @@ export async function getServices(page: number, limit: number, query: string): S
                 contains: query,
                 mode: Prisma.QueryMode.insensitive,
             },
+            isActive: true,
         } satisfies Prisma.ServiceWhereInput;
 
         const [total, services] = await Promise.all([
@@ -48,6 +49,7 @@ export async function getBusinessServices(businessId: string, page: number, limi
                 contains: query,
                 mode: Prisma.QueryMode.insensitive,
             },
+            isActive: true,
         } satisfies Prisma.ServiceWhereInput;
 
         const business = await prisma.business.findFirst({

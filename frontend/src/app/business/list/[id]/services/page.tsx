@@ -1,6 +1,6 @@
 "use client";
 
-import { useBusinessServices } from "@/hooks/owner/service/use-business-services";
+import { useBusinessServices } from "@/hooks/owner/use-business-services";
 
 import ServiceDialog from "@/app/business/_components/services/owner-service-dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";

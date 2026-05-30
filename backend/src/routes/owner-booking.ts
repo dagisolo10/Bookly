@@ -1,10 +1,10 @@
 import { handler } from "@/lib/handler";
-import { Router, type Request } from "express";
-import { validate } from "@/middlewares/validation";
-import { requireBusinessRole } from "@/middlewares/role";
+import { bookingBusinessIdSchema, bookingIdSchema, manageBookingSchema, paginationQuerySchema, querySearchSchema, statusSearchSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
-import { getBookingById, getBusinessBookings, manageBooking } from "@/services/owner-booking";
-import { bookingBusinessIdSchema, bookingIdSchema, manageBookingSchema } from "@/lib/validators";
+import { requireBusinessRole } from "@/middlewares/role";
+import { validate } from "@/middlewares/validation";
+import { getBookingById, getBusinessBookings, manageBooking, type BookingFilterStatus } from "@/services/owner-booking";
+import { Router, type Request } from "express";
 
 const router = Router();
 
@@ -22,8 +22,17 @@ router.get(
     requireAuth,
     requireUserProfile,
     requireBusinessRole,
+    validate(querySearchSchema, "query"),
+    validate(statusSearchSchema, "query"),
+    validate(paginationQuerySchema, "query"),
     validate(bookingBusinessIdSchema, "params"),
-    handler((req: Request) => getBusinessBookings(req.params["businessId"] as string)),
+    handler((req: Request) => {
+        const query = req.query["query"] as string;
+        const status = req.query["status"] as BookingFilterStatus;
+        const page = parseInt(req.query["page"] as string, 10) || 1;
+        const limit = parseInt(req.query["limit"] as string, 10) || 10;
+        return getBusinessBookings(req.params["businessId"] as string, page, limit, query, status);
+    }),
 );
 
 router.patch(

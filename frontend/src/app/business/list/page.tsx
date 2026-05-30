@@ -5,7 +5,7 @@ import ErrorScreen from "@/components/shared/error-screen";
 import ListHeader from "@/components/shared/list-header";
 import PaginationContainer from "@/components/shared/pagination-container";
 import { BusinessListSkeleton } from "@/components/shared/skeletons";
-import { useBusinessList } from "@/hooks/owner/business/use-business-list";
+import { useBusinessList } from "@/hooks/owner/use-business-list";
 import { ListRestart } from "lucide-react";
 
 export default function BusinessList() {

@@ -5,7 +5,7 @@ import { ownerBookingApi } from "@/lib/api/routes/owner-booking";
 import { ownerBusinessApi } from "@/lib/api/routes/owner-business";
 import { ownerServiceApi } from "@/lib/api/routes/owner-service";
 import { userApi } from "@/lib/api/routes/user";
-import { FullBooking, FullBusiness, FullService, FullUser, PaginatedData } from "@/types/models";
+import { BookingFilterStatus, FullBooking, FullBusiness, FullService, FullUser, PaginatedData } from "@/types/models";
 import { UseQueryOptions, queryOptions } from "@tanstack/react-query";
 
 type QueryOptions<TQueryFnData, TData = TQueryFnData, TError = Error> = Omit<UseQueryOptions<TQueryFnData, TError, TData>, "queryKey" | "queryFn">;
@@ -46,11 +46,11 @@ export function getOwnerBusinessServicesQueryOptions<TData = PaginatedData<FullS
     });
 }
 
-export function getOwnerBusinessBookingsQueryOptions<TData = FullBooking[], TError = Error>(businessId: string, options?: QueryOptions<FullBooking[], TData, TError>) {
+export function getOwnerBusinessBookingsQueryOptions<TData = PaginatedData<FullBooking>, TError = Error>(businessId: string, page: number, limit: number, query?: string, status?: BookingFilterStatus, options?: QueryOptions<PaginatedData<FullBooking>, TData, TError>) {
     return queryOptions({
         ...options,
-        queryKey: ["owner", "booking", "list", businessId],
-        queryFn: () => ownerBookingApi.getBusinessBookings(businessId),
+        queryKey: ["owner", "booking", "list", businessId, page, limit, query, status],
+        queryFn: () => ownerBookingApi.getBusinessBookings(businessId, page, limit, query, status),
     });
 }
 

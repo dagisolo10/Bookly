@@ -117,6 +117,7 @@ export const paginationQuerySchema = z.object({
 });
 
 export const querySearchSchema = z.object({ query: z.string().optional().default("") });
+export const statusSearchSchema = z.object({ status: z.string().optional().default("") });
 
 /**
  *  Booking Schema
