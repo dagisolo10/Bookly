@@ -185,7 +185,7 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
 
                             {banner && (
                                 <div>
-                                    <span className="text-muted-foreground mb-1 block text-[11px] font-medium">New thumbnail (unsaved)</span>
+                                    <span className="text-muted-foreground mb-1 block text-xs font-medium">New thumbnail (unsaved)</span>
                                     <div className="relative aspect-video h-24 overflow-hidden rounded-xl border">
                                         <Image src={banner.previewUrl} alt="New thumbnail preview" fill className="object-contain" />
                                         <button onClick={clearImage} title="Remove new thumbnail" type="button" className="text-background hover:bg-foreground absolute top-1 right-1 rounded-full bg-black/50 p-1">
@@ -197,7 +197,7 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
 
                             {!banner && existingThumbnailUrl && !removeExistingThumbnail && (
                                 <div className="">
-                                    <span className="text-muted-foreground mb-1 block text-[11px] font-medium">Current thumbnail</span>
+                                    <span className="text-muted-foreground mb-1 block text-xs font-medium">Current thumbnail</span>
                                     <div className="relative mx-auto aspect-video h-24 overflow-hidden rounded-xl">
                                         <Image src={existingThumbnailUrl} alt="Current thumbnail" fill className="object-contain" />
                                         <button onClick={removeExisting} title="Remove current thumbnail" type="button" className="text-background hover:bg-foreground bg-foreground/50 absolute top-0 right-1 rounded-full p-1">
