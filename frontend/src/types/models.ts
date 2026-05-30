@@ -1,5 +1,5 @@
-import { BusinessHoursSchema } from "@/lib/validation";
 import z from "zod";
+import { BusinessHoursSchema } from "@/lib/validation";
 
 /**
  * Base Models
@@ -103,3 +103,7 @@ export type PaginatedData<T> = {
     hasMore: boolean;
     totalPages: number;
 };
+
+export type BookingFilterStatus = BookingStatus | "All"
+
+export type BookingStatusCounts = Record<BookingFilterStatus, number>

@@ -2,8 +2,10 @@ import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import type { BookingStatusUpdate } from "@/types/payload";
 import { fullBookingIncludes, type FullBooking } from "@/types/populated";
-import type { ServiceResult } from "@/types/response";
-import type { BookingStatus, Prisma } from "@prisma/client";
+import type { PaginatedData, ServiceResult } from "@/types/response";
+import { Prisma, type BookingStatus } from "@prisma/client";
+
+export type BookingFilterStatus = BookingStatus | "All";
 
 const allowedTransitions: Record<BookingStatus, BookingStatus[]> = {
     Pending: ["Confirmed", "Cancelled"],
@@ -21,9 +23,36 @@ const bookingCheck = (id: string, ownerId: string): Prisma.BookingWhereInput => 
     },
 });
 
-export async function getBusinessBookings(businessId: string): ServiceResult<FullBooking[]> {
+export async function getBusinessBookings(businessId: string, page: number, limit: number, query: string, status: BookingFilterStatus): ServiceResult<PaginatedData<FullBooking>> {
     try {
         const ownerId = getUserId();
+        const queryWhere = {
+            service: {
+                business: {
+                    id: businessId,
+                    ownerId,
+                },
+            },
+            ...(status && status !== "All" && { status }),
+            ...(query && {
+                OR: [
+                    {
+                        bookedServiceName: {
+                            contains: query,
+                            mode: Prisma.QueryMode.insensitive,
+                        },
+                    },
+                    {
+                        user: {
+                            name: {
+                                contains: query,
+                                mode: Prisma.QueryMode.insensitive,
+                            },
+                        },
+                    },
+                ],
+            }),
+        } satisfies Prisma.BookingWhereInput;
 
         const business = await prisma.business.findFirst({
             where: {
@@ -36,22 +65,68 @@ export async function getBusinessBookings(businessId: string): ServiceResult<Ful
             return { error: "Business not found", code: 404 };
         }
 
-        const bookings = await prisma.booking.findMany({
-            where: {
-                service: {
-                    business: {
-                        id: businessId,
-                        ownerId,
-                    },
-                },
-            },
-            include: fullBookingIncludes,
-            orderBy: {
-                startsAt: "asc",
-            },
+        const [total, bookings] = await Promise.all([
+            prisma.booking.count({ where: queryWhere }),
+            prisma.booking.findMany({
+                where: queryWhere,
+                take: limit,
+                skip: (page - 1) * limit,
+                include: fullBookingIncludes,
+                orderBy: { startsAt: "asc" },
+            }),
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+        const hasMore = page < totalPages;
+
+        return {
+            total,
+            hasMore,
+            totalPages: totalPages || 1,
+            data: bookings,
+        };
+    } catch (error) {
+        console.error(error);
+        return { error: "Internal server error", code: 500 };
+    }
+}
+
+export async function getBookingStatusCounts(businessId: string): ServiceResult<Record<BookingFilterStatus, number>> {
+    try {
+        const ownerId = getUserId();
+
+        const business = await prisma.business.findFirst({
+            where: { id: businessId, ownerId },
         });
 
-        return bookings;
+        if (!business) {
+            return { error: "Business not found", code: 404 };
+        }
+
+        const where = {
+            service: {
+                business: {
+                    id: businessId,
+                    ownerId,
+                },
+            },
+        } satisfies Prisma.BookingWhereInput;
+
+        const [total, pending, confirmed, cancelled, completed] = await Promise.all([
+            prisma.booking.count({ where }),
+            prisma.booking.count({ where: { ...where, status: "Pending" } }),
+            prisma.booking.count({ where: { ...where, status: "Confirmed" } }),
+            prisma.booking.count({ where: { ...where, status: "Cancelled" } }),
+            prisma.booking.count({ where: { ...where, status: "Completed" } }),
+        ]);
+
+        return {
+            All: total,
+            Pending: pending,
+            Confirmed: confirmed,
+            Cancelled: cancelled,
+            Completed: completed,
+        };
     } catch (error) {
         console.error(error);
         return { error: "Internal server error", code: 500 };

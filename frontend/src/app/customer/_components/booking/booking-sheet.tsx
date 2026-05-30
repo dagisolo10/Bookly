@@ -52,7 +52,7 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
-    const { mutate: createBooking, isPending } = useCreateBooking();
+    const { mutateAsync: createBooking, isPending } = useCreateBooking();
 
     const openHours = useMemo(() => {
         const hours = business?.hours;
@@ -99,28 +99,24 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
 
         const startsAt = new Date(year, month, day, hours, minutes, 0).toISOString();
 
-        createBooking(
-            { startsAt, serviceId: service.id },
-            {
-                onSuccess: (booking) => {
-                    toast.success("Booked successfully 🎉", {
-                        description: "Your appointment has been confirmed.",
-                        action: {
-                            label: "View",
-                            onClick: () => {
-                                router.push(`/customer/bookings?new=${booking.id}`);
-                            },
-                        },
-                    });
-                    onOpenChange(false);
-                    setDate(undefined);
-                    setSelectedTime(null);
-                },
-                onError: (err) => {
-                    toast.error(messageFromAxiosError(err));
-                },
+        toast.promise(createBooking({ startsAt, serviceId: service.id }), {
+            loading: "Securing your appointment slot...",
+            success: (booking) => {
+                onOpenChange(false);
+                setDate(undefined);
+                setSelectedTime(null);
+
+                return {
+                    message: "Booked successfully 🎉",
+                    description: "Your appointment has been confirmed.",
+                    action: {
+                        label: "View",
+                        onClick: () => router.push(`/customer/bookings?new=${booking.id}`),
+                    },
+                };
             },
-        );
+            error: (err) => messageFromAxiosError(err) || "Failed to secure booking.",
+        });
     }
 
     const formattedSelectedDate = date ? date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : null;

@@ -1,19 +1,24 @@
 import { requestApi } from "../api-error";
 
 import api from "@/lib/axios";
+import { BookingFilterStatus, FullBooking } from "@/types/models";
 import { BookingStatusUpdate } from "@/types/payload";
-import { BookingListResponse, BookingResponse } from "@/types/response";
+import { BookingResponse, BookingStatusCountsResponse, PaginationResponse } from "@/types/response";
 
 export const ownerBookingApi = {
     getBookingById: async (id: string) => {
         return requestApi(() => api.get<BookingResponse>(`/owner/bookings/${id}`));
     },
 
-    getBusinessBookings: async (businessId: string) => {
-        return requestApi(() => api.get<BookingListResponse>(`/owner/bookings/business/${businessId}`));
+    getBusinessBookings: async (businessId: string, page: number, limit: number, query?: string, status?: BookingFilterStatus) => {
+        return requestApi(() => api.get<PaginationResponse<FullBooking>>(`/owner/bookings/business/${businessId}`, { params: { page, limit, query, status } }));
+    },
+
+    getBookingStatusCounts: async (businessId: string) => {
+        return requestApi(() => api.get<BookingStatusCountsResponse>(`/owner/bookings/business/${businessId}/status-counts`));
     },
 
     manageBooking: async (id: string, newStatus: BookingStatusUpdate) => {
-        return requestApi(() => api.patch<BookingResponse>(`/owner/bookings/${id}/manage`, newStatus));
+        return requestApi(() => api.patch<BookingResponse>(`/owner/bookings/${id}/manage`, { newStatus }));
     },
 };

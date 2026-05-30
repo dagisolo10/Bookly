@@ -1,7 +1,6 @@
 import { ownerBusinessApi } from "@/lib/api/routes/owner-business";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export const useCreateBusiness = () => {
     const router = useRouter();
@@ -36,10 +35,9 @@ export const useToggleBusiness = () => {
 
     return useMutation({
         mutationFn: (id: string) => ownerBusinessApi.toggleBusiness(id),
-        onSuccess: ({ message }, id) => {
+        onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ["owner", "business", "list"] });
             queryClient.invalidateQueries({ queryKey: ["owner", "business", id] });
-            toast.success(message);
         },
     });
 };
@@ -50,10 +48,9 @@ export const useCloseBusiness = () => {
 
     return useMutation({
         mutationFn: (id: string) => ownerBusinessApi.closeBusiness(id),
-        onSuccess: ({ message }, id) => {
+        onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ["owner", "business", "list"] });
             queryClient.invalidateQueries({ queryKey: ["owner", "business", id] });
-            toast.success(message);
             router.push("/business/list");
         },
     });

@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FullBusiness } from "@/types/models";
-import { MapPin, Phone, Settings } from "lucide-react";
+import { CalendarCheck, MapPin, Phone, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -21,9 +21,9 @@ export default function BusinessHeader({ business, showSettings: show }: Busines
                     <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
                 )}
 
-                <div className="absolute inset-0 flex items-center justify-center p-6 text-zinc-50 md:p-16">
+                <div className="text-background absolute inset-0 flex items-center justify-center p-6 md:p-16">
                     <div className="container mx-auto">
-                        <Badge className="mb-2 border-none bg-white/20 backdrop-blur-md hover:bg-white/30">Official Storefront</Badge>
+                        <Badge className="bg-background/20 hover:bg-background/30 mb-2 border-none backdrop-blur-md">Official Storefront</Badge>
                         <h1 className="text-3xl font-bold sm:text-4xl md:text-5xl">{business.name}</h1>
 
                         <div className="mt-4 flex flex-col flex-wrap gap-2 sm:flex-row sm:items-center sm:gap-6">
@@ -43,8 +43,15 @@ export default function BusinessHeader({ business, showSettings: show }: Busines
                 </div>
 
                 {show && business.status !== "Closed" && (
-                    <div className="absolute top-6 right-6">
-                        <Button asChild variant="secondary" className="cursor-pointer rounded-full border-none bg-white/20 text-white backdrop-blur-md hover:bg-white/40">
+                    <div className="absolute right-6 bottom-6 flex gap-4">
+                        <Button asChild variant="secondary" className="bg-background/20 text-background hover:bg-background/40 rounded-full border-none backdrop-blur-md">
+                            <Link href={`/business/list/${business.id}/bookings`}>
+                                <CalendarCheck className="size-4" />
+                                Bookings
+                            </Link>
+                        </Button>
+
+                        <Button asChild variant="secondary" className="bg-background/20 text-background hover:bg-background/40 rounded-full border-none backdrop-blur-md">
                             <Link href={`/business/list/${business.id}/settings`}>
                                 <Settings className="size-4" />
                                 Business Settings

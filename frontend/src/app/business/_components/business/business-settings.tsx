@@ -7,6 +7,7 @@ import { FullBusiness } from "@/types/models";
 import { motion } from "framer-motion";
 import { ChevronRight, Clock, Info, LayoutDashboard } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import BusinessSettingsForm from "./business-settings-form";
 
 export default function BusinessSettings({ initialData }: { initialData: FullBusiness }) {
@@ -97,17 +98,20 @@ function DangerZone({ business }: { business: FullBusiness }) {
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
     const [method, setMethod] = useState<Method>(null);
 
-    const { mutate: toggleBusiness } = useToggleBusiness();
-    const { mutate: closeBusiness } = useCloseBusiness();
+    const { mutateAsync: toggleBusiness } = useToggleBusiness();
+    const { mutateAsync: closeBusiness } = useCloseBusiness();
 
-    function onConfirm() {
-        if (method === "close") {
-            closeBusiness(business.id);
-        } else {
-            toggleBusiness(business.id);
-        }
+    async function onConfirm() {
+        const actionPromise = method === "close" ? closeBusiness(business.id) : toggleBusiness(business.id);
 
-        setShowConfirm(false);
+        toast.promise(actionPromise, {
+            loading: method === "close" ? "Permanently closing business..." : "Updating visibility status...",
+            success: (message) => {
+                setShowConfirm(false);
+                return message;
+            },
+            error: (err) => err?.message || "An unexpected error occurred.",
+        });
     }
 
     return (

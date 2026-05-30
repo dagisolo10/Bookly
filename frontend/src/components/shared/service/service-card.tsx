@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Service } from "@/types/models";
 import { CalendarDays, Clock, EyeOff, ImageIcon } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 interface ServiceCardProps {
     service: Service;
@@ -16,22 +17,35 @@ interface ServiceCardProps {
 }
 
 export default function ServiceCard({ service, onEdit, onBook }: ServiceCardProps) {
-    const { mutate: toggleService, isPending: isToggling } = useToggleService();
+    const { mutateAsync: toggleService, isPending: isToggling } = useToggleService();
     const isActive = service.isActive;
     const businessMode = !!onEdit;
+
+    async function handleToggleStatus() {
+        const targetStatusText = isActive ? "Deactivating" : "Activating";
+
+        const actionPromise = toggleService({
+            serviceId: service.id,
+            businessId: service.businessId,
+        });
+
+        toast.promise(actionPromise, {
+            loading: `${targetStatusText} ${service.name}...`,
+            success: () => {
+                return isActive ? `${service.name} hidden from clients.` : `${service.name} is now publicly bookable! 🚀`;
+            },
+            error: (err) => {
+                return err?.message || `Failed to change availability status.`;
+            },
+        });
+    }
 
     return (
         <Card className={cn("group relative overflow-hidden p-0 transition-all duration-200", isActive ? "hover:bg-muted/40 hover:shadow-sm" : "bg-muted/30 border-muted-foreground/30 border-dashed")}>
             <CardContent className="flex flex-col items-center gap-4 p-3 sm:flex-row">
                 <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg sm:aspect-square sm:w-28">
                     {service.thumbnail ? (
-                        <Image
-                            src={service.thumbnail}
-                            alt={service.name}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
-                            sizes="(max-width: 640px) 100vw, 112px"
-                        />
+                        <Image src={service.thumbnail} alt={service.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 100vw, 112px" />
                     ) : (
                         <div className="flex size-full items-center justify-center text-zinc-400 dark:text-zinc-600">
                             <ImageIcon className="size-6 stroke-[1.5]" />
@@ -62,11 +76,7 @@ export default function ServiceCard({ service, onEdit, onBook }: ServiceCardProp
                                 {service.durationInMinutes} min
                             </span>
                             <span>•</span>
-                            {service.category ? (
-                                <span className="bg-muted/60 rounded text-[11px] font-medium">{service.category}</span>
-                            ) : (
-                                <span className="text-muted-foreground/40 italic">No category</span>
-                            )}
+                            {service.category ? <span className="bg-muted/60 rounded text-[11px] font-medium">{service.category}</span> : <span className="text-muted-foreground/40 italic">No category</span>}
                         </div>
 
                         <p className={cn("text-sm font-semibold", isActive ? "text-foreground" : "text-muted-foreground/70")}>${service.price.toFixed(2)}</p>
@@ -79,29 +89,12 @@ export default function ServiceCard({ service, onEdit, onBook }: ServiceCardProp
                                     Edit
                                 </Button>
 
-                                <Button
-                                    variant={isActive ? "outline" : "default"}
-                                    disabled={isToggling}
-                                    onClick={() => toggleService({ serviceId: service.id, businessId: service.businessId })}
-                                    size="sm"
-                                    className={cn(
-                                        "min-w-[84px] gap-1.5 text-xs font-medium",
-                                        isActive ? "text-destructive hover:bg-destructive/10 hover:text-destructive border-muted" : "bg-primary text-primary-foreground",
-                                    )}
-                                >
+                                <Button variant={isActive ? "outline" : "default"} disabled={isToggling} onClick={handleToggleStatus} size="sm" className={cn("min-w-21 gap-1.5 text-xs font-medium", isActive ? "text-destructive hover:bg-destructive/10 hover:text-destructive border-muted" : "bg-primary text-primary-foreground")}>
                                     {isToggling ? <Spinner className="size-3" /> : isActive ? "Deactivate" : "Activate"}
                                 </Button>
                             </>
                         ) : (
-                            <Button
-                                onClick={onBook}
-                                size="sm"
-                                className={cn(
-                                    "gap-1.5 self-end rounded-lg px-3.5 text-xs font-medium shadow-xs transition-all",
-                                    "bg-zinc-900 text-zinc-50 hover:bg-zinc-800",
-                                    "dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200",
-                                )}
-                            >
+                            <Button onClick={onBook} size="sm" className={cn("gap-1.5 self-end rounded-lg px-3.5 text-xs font-medium shadow-xs transition-all", "bg-zinc-900 text-zinc-50 hover:bg-zinc-800", "dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200")}>
                                 <CalendarDays className="size-3.25" />
                                 <span>Book Slot</span>
                             </Button>
