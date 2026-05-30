@@ -10,10 +10,10 @@ import { useSearchPagination } from "@/hooks/shared/use-search-pagination";
 import { getMyBookingsQueryOptions } from "@/hooks/tan stack/query-options";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 30] as const;
+const ITEMS_PER_PAGE_OPTIONS = [6, 12, 18, 24] as const;
 
 export default function MyBookings() {
-    const { query, currentPage, itemsPerPage, debouncedQuery, setCurrentPage, handleSearchChange, handleItemsPerPageChange } = useSearchPagination(10);
+    const { query, currentPage, itemsPerPage, debouncedQuery, setCurrentPage, handleSearchChange, handleItemsPerPageChange } = useSearchPagination(6);
 
     const { data, isPending, isFetching, isError } = useQuery(
         getMyBookingsQueryOptions(currentPage, itemsPerPage, debouncedQuery || undefined, {
@@ -25,15 +25,7 @@ export default function MyBookings() {
 
     return (
         <div className="space-y-8">
-            <ListHeader
-                query={query}
-                tag="My Appointments"
-                title="My Bookings"
-                isFetching={isFetching}
-                onSearchChange={handleSearchChange}
-                placeholder="Search bookings by service name..."
-                description="Manage your upcoming and past appointments. View details or cancel if needed."
-            />
+            <ListHeader query={query} tag="My Appointments" title="My Bookings" isFetching={isFetching} onSearchChange={handleSearchChange} placeholder="Search bookings by service name..." description="Manage your upcoming and past appointments. View details or cancel if needed." />
 
             {isPending ? (
                 <BookingsGridSkeleton count={4} />

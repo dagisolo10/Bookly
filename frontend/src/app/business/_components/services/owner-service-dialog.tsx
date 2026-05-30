@@ -136,49 +136,59 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
 
                     <FieldGroup className="gap-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <Field>
-                                <Label htmlFor="service-name">Service Name</Label>
+                            <Field className="gap-1">
+                                <Label className="text-xs" htmlFor="service-name">
+                                    Service Name
+                                </Label>
                                 <Input name="name" defaultValue={mode === "edit" ? service?.name : undefined} id="service-name" placeholder="e.g. Men's Haircut" />
                                 {errors.name && <p className="text-destructive mt-1 text-xs">{errors.name}</p>}
                             </Field>
 
-                            <Field>
-                                <Label htmlFor="service-price">Price ($)</Label>
+                            <Field className="gap-1">
+                                <Label className="text-xs" htmlFor="service-price">
+                                    Price ($)
+                                </Label>
                                 <Input name="price" min={0} step={0.01} defaultValue={mode === "edit" ? service?.price : undefined} id="service-price" type="number" placeholder="0.00" />
                                 {errors.price && <p className="text-destructive mt-1 text-xs">{errors.price}</p>}
                             </Field>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <Field>
-                                <Label htmlFor="service-duration">Duration (min)</Label>
+                            <Field className="gap-1">
+                                <Label className="text-xs" htmlFor="service-duration">
+                                    Duration (min)
+                                </Label>
                                 <Input name="durationInMinutes" defaultValue={mode === "edit" ? service?.durationInMinutes : undefined} id="service-duration" type="number" placeholder="30" />
                                 {errors.durationInMinutes && <p className="text-destructive mt-1 text-xs">{errors.durationInMinutes}</p>}
                             </Field>
 
-                            <Field>
-                                <Label htmlFor="service-category">Category</Label>
+                            <Field className="gap-1">
+                                <Label className="text-xs" htmlFor="service-category">
+                                    Category
+                                </Label>
                                 <Input name="category" defaultValue={mode === "edit" ? service?.category : undefined} id="service-category" placeholder="e.g. Hair" />
                                 {errors.category && <p className="text-destructive mt-1 text-xs">{errors.category}</p>}
                             </Field>
                         </div>
 
-                        <Field>
-                            <Label>Thumbnail Image</Label>
+                        <Field className="gap-2">
+                            <Label className="text-xs">Thumbnail Image</Label>
                             <div className="flex items-center gap-3">
                                 <Input id="service-thumbnail" type="file" accept="image/*" onChange={handleFileChange} className="sr-only" aria-describedby="service-thumbnail-name" />
-                                <Label htmlFor="service-thumbnail" className="cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted">
+                                <Label htmlFor="service-thumbnail" className="hover:bg-muted cursor-pointer rounded-lg border px-4 py-2 text-xs font-medium transition-colors">
                                     Choose File
                                 </Label>
-                                <span id="service-thumbnail-name" aria-live="polite" className="text-sm text-zinc-500">{banner ? banner.file.name : "No file selected"}</span>
+                                <span id="service-thumbnail-name" aria-live="polite" className="text-muted-foreground text-xs">
+                                    {banner ? banner.file.name : "No file selected"}
+                                </span>
                             </div>
 
                             {banner && (
                                 <div>
-                                    <span className="mb-1 block text-[11px] font-medium text-zinc-500">New thumbnail (unsaved)</span>
+                                    <span className="text-muted-foreground mb-1 block text-[11px] font-medium">New thumbnail (unsaved)</span>
                                     <div className="relative aspect-video h-24 overflow-hidden rounded-xl border">
                                         <Image src={banner.previewUrl} alt="New thumbnail preview" fill className="object-contain" />
-                                        <button onClick={clearImage} title="Remove new thumbnail" type="button" className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black">
+                                        <button onClick={clearImage} title="Remove new thumbnail" type="button" className="text-background hover:bg-foreground absolute top-1 right-1 rounded-full bg-black/50 p-1">
                                             <Plus className="size-3 rotate-45" />
                                         </button>
                                     </div>
@@ -186,11 +196,11 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
                             )}
 
                             {!banner && existingThumbnailUrl && !removeExistingThumbnail && (
-                                <div>
-                                    <span className="mb-1 block text-[11px] font-medium text-zinc-500">Current thumbnail</span>
-                                    <div className="relative aspect-video h-24 overflow-hidden rounded-xl border">
+                                <div className="">
+                                    <span className="text-muted-foreground mb-1 block text-[11px] font-medium">Current thumbnail</span>
+                                    <div className="relative mx-auto aspect-video h-24 overflow-hidden rounded-xl">
                                         <Image src={existingThumbnailUrl} alt="Current thumbnail" fill className="object-contain" />
-                                        <button onClick={removeExisting} title="Remove current thumbnail" type="button" className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black">
+                                        <button onClick={removeExisting} title="Remove current thumbnail" type="button" className="text-background hover:bg-foreground bg-foreground/50 absolute top-0 right-1 rounded-full p-1">
                                             <Plus className="size-3 rotate-45" />
                                         </button>
                                     </div>
@@ -201,12 +211,14 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
 
                     <DialogFooter className="mt-8">
                         <DialogClose asChild>
-                            <Button variant="outline" type="button">
+                            <Button variant="outline" className="text-xs" type="button">
                                 Cancel
                             </Button>
                         </DialogClose>
 
-                        <Button type="submit">{mode === "add" ? addBtn : editBtn}</Button>
+                        <Button className="text-xs" type="submit">
+                            {mode === "add" ? addBtn : editBtn}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

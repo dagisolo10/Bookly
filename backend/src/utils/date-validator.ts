@@ -1,15 +1,13 @@
 import type { BusinessHour } from "@prisma/client";
 
-export function isScheduleValid(newStart: string, newDuration: number, existingIntervals: { startsAt: Date; durationInMinutes: number }[]): boolean {
-    const endsAt = (date: Date) => date.getTime() + newDuration * 60 * 1000;
-
+export function isScheduleValid(newStart: string, newDuration: number, existingIntervals: { startsAt: Date; endsAt: Date }[]): boolean {
     const newSchedule = new Date(newStart);
     const newStartMs = newSchedule.getTime();
-    const newEndMs = endsAt(newSchedule);
+    const newEndMs = newStartMs + newDuration * 60 * 1000;
 
-    return existingIntervals.every(({ durationInMinutes, startsAt }) => {
+    return existingIntervals.every(({ startsAt, endsAt }) => {
+        const activeEndMs = endsAt.getTime();
         const activeStartMs = startsAt.getTime();
-        const activeEndMs = activeStartMs + durationInMinutes * 60 * 1000;
 
         const hasOverlap = newEndMs > activeStartMs && newStartMs < activeEndMs;
         return !hasOverlap;

@@ -53,6 +53,12 @@ export type Service = {
 export type Booking = {
     id: string;
     startsAt: string;
+    endsAt: string;
+    bookedPrice: number;
+    bookedDuration: number;
+    bookedCategory: string;
+    bookedServiceName: string;
+    bookedThumbnail: string | null;
     createdAt: string;
     updatedAt: string;
     status: BookingStatus;

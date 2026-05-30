@@ -24,7 +24,7 @@ interface ListHeaderProps {
 
 export default function ListHeader({ owner, title, description, tag, query, onSearchChange, isFetching, placeholder, buttonLabel, onAdd, addHref }: ListHeaderProps) {
     return (
-        <>
+        <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div className="max-w-xl">
                     {tag && (
@@ -60,6 +60,6 @@ export default function ListHeader({ owner, title, description, tag, query, onSe
                 </div>
                 {isFetching && <Spinner className="size-4" />}
             </div>
-        </>
+        </div>
     );
 }
