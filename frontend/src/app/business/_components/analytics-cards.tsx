@@ -2,11 +2,11 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { BookingStatus, FullBooking } from "@/types/models";
+import type { BookingStatus, BookingStatusCounts } from "@/types/models";
 import { CalendarCheck, CalendarX, Clock, Loader2, Sparkles } from "lucide-react";
 
 interface AnalyticsCardsProps {
-    bookings: FullBooking[];
+    counts: BookingStatusCounts;
     isPending: boolean;
 }
 
@@ -23,15 +23,15 @@ const cards: {
     { label: "Cancelled", key: "Cancelled", icon: <CalendarX className="size-4" />, color: "text-destructive bg-destructive/10" },
 ];
 
-export default function AnalyticsCards({ bookings, isPending }: AnalyticsCardsProps) {
-    const counts = cards.map((c) => ({
-        ...c,
-        count: c.key === "All" ? bookings.length : bookings.filter((b) => b.status === c.key).length,
+export default function AnalyticsCards({ counts, isPending }: AnalyticsCardsProps) {
+    const items = cards.map((card) => ({
+        ...card,
+        count: counts[card.key],
     }));
 
     return (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {counts.map((c) => (
+            {items.map((c) => (
                 <Card key={c.key} size="sm" className="shadow-xs">
                     <CardContent className="space-y-2 p-4">
                         <div className="flex items-center justify-between">

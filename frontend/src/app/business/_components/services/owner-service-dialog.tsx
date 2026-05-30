@@ -76,8 +76,8 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
 
     const removeExisting = () => setRemoveExistingThumbnail(true);
 
-    const { mutate: createService } = useCreateService();
-    const { mutate: updateService } = useUpdateService();
+    const { mutateAsync: createService } = useCreateService();
+    const { mutateAsync: updateService } = useUpdateService();
 
     const [errors, setErrors] = useState<Partial<Record<"name" | "price" | "category" | "durationInMinutes", string>>>({});
 
@@ -110,12 +110,22 @@ export default function ServiceDialog({ open, setOpen, mode = "add", service, bu
 
         const data = { name: trimmedName, price: parsedPrice, category: trimmedCategory, durationInMinutes: parsedDuration, businessId };
 
-        if (mode === "add") {
-            createService(data, { onSuccess: () => setOpen(false) });
-        } else if (mode === "edit" && service) {
-            const updatePayload = removeExistingThumbnail ? { ...data, thumbnail: null } : data;
-            updateService({ id: service.id, service: updatePayload }, { onSuccess: () => setOpen(false) });
-        }
+        const actionPromise =
+            mode === "add"
+                ? createService(data)
+                : updateService({
+                      id: service!.id,
+                      service: removeExistingThumbnail ? { ...data, thumbnail: null } : data,
+                  });
+
+        toast.promise(actionPromise, {
+            loading: mode === "add" ? "Creating your new service..." : "Saving service modifications...",
+            success: () => {
+                setOpen(false);
+                return mode === "add" ? `${trimmedName} added successfully! 🎉` : "Service changes saved successfully.";
+            },
+            error: (err) => err?.response?.data?.message || err?.message || "Could not save service updates.",
+        });
     }
 
     return (

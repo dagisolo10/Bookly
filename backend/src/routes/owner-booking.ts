@@ -3,7 +3,7 @@ import { bookingBusinessIdSchema, bookingIdSchema, manageBookingSchema, paginati
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
 import { requireBusinessRole } from "@/middlewares/role";
 import { validate } from "@/middlewares/validation";
-import { getBookingById, getBusinessBookings, manageBooking, type BookingFilterStatus } from "@/services/owner-booking";
+import { getBookingById, getBookingStatusCounts, getBusinessBookings, manageBooking, type BookingFilterStatus } from "@/services/owner-booking";
 import { Router, type Request } from "express";
 
 const router = Router();
@@ -33,6 +33,15 @@ router.get(
         const limit = parseInt(req.query["limit"] as string, 10) || 10;
         return getBusinessBookings(req.params["businessId"] as string, page, limit, query, status);
     }),
+);
+
+router.get(
+    "/business/:businessId/status-counts",
+    requireAuth,
+    requireUserProfile,
+    requireBusinessRole,
+    validate(bookingBusinessIdSchema, "params"),
+    handler((req: Request) => getBookingStatusCounts(req.params["businessId"] as string)),
 );
 
 router.patch(

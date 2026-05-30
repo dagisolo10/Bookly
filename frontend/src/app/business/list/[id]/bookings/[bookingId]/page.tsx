@@ -44,22 +44,52 @@ const actionButton: Record<Action, ActionButton> = {
 const actionConfig: Record<Action, { icon: LucideIcon; className: string }> = {
     Confirmed: {
         icon: CheckCircle2,
-        className: "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark: dark:hover:bg-zinc-200",
+        className: "bg-zinc-900 text-white hover:bg-zinc-800",
     },
     Cancelled: {
         icon: XCircle,
-        className: "border-zinc-200 text-zinc-700 hover:bg-destructive/5 hover:text-destructive hover:border-destructive/30 dark:border-zinc-800 dark:text-zinc-300",
+        className: "border-zinc-200 text-zinc-700 hover:bg-destructive/5 hover:text-destructive hover:border-destructive/30",
     },
     Completed: {
         icon: Check,
-        className: "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600",
+        className: "bg-emerald-600 text-white hover:bg-emerald-700",
+    },
+};
+
+const loadingMessages: Record<Action, string> = {
+    Confirmed: "Accepting booking...",
+    Cancelled: "Cancelling booking...",
+    Completed: "Marking booking as complete...",
+};
+
+const errorMessages: Record<Action, string> = {
+    Confirmed: "accept",
+    Cancelled: "cancel",
+    Completed: "marking booking as complete",
+};
+
+const dialogContent: Record<BookingStatusUpdate, { title: string; description: string; action: string }> = {
+    Confirmed: {
+        title: "Accept Booking?",
+        description: "This will confirm the booking and notify the customer.",
+        action: "Accept",
+    },
+    Cancelled: {
+        title: "Reject Booking?",
+        description: "This will cancel the booking and notify the customer. This action cannot be undone.",
+        action: "Reject",
+    },
+    Completed: {
+        title: "Complete Booking?",
+        description: "Mark this booking as completed. This action cannot be undone.",
+        action: "Complete",
     },
 };
 
 export default function OwnerBookingDetailPage() {
     const { id, bookingId } = useParams<{ id: string; bookingId: string }>();
     const bookingQuery = useQuery(getOwnerBookingQueryOptions(bookingId));
-    const { mutate: manage } = useManageBooking();
+    const { mutateAsync: manage } = useManageBooking();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [pendingStatus, setPendingStatus] = useState<BookingStatusUpdate | null>(null);
 
@@ -73,10 +103,15 @@ export default function OwnerBookingDetailPage() {
 
     const handleConfirm = () => {
         if (pendingStatus) {
-            manage({ id: booking.id, newStatus: pendingStatus }, { onSuccess: () => toast.success(`Booking ${pendingStatus.toLowerCase()} successfully`) });
+            toast.promise(manage({ id: booking.id, newStatus: pendingStatus }), {
+                loading: loadingMessages[pendingStatus] || "Updating booking...",
+                success: `Booking ${pendingStatus.toLowerCase()} successfully`,
+                error: (error) => `Failed to ${errorMessages[pendingStatus]} booking: ${error.message}`,
+            });
+        } else {
+            setDialogOpen(false);
+            setPendingStatus(null);
         }
-        setDialogOpen(false);
-        setPendingStatus(null);
     };
 
     const actions = allowedTransitions[booking.status];
@@ -124,7 +159,7 @@ export default function OwnerBookingDetailPage() {
                                             className={cn("h-9 gap-1.5 rounded-xl px-4 text-xs font-semibold shadow-2xs transition-all", config.className)}
                                         >
                                             <Icon className="size-3.5" />
-                                            {actionButton[action as Action]}
+                                            {actionButton[actionKey]}
                                         </Button>
                                     );
                                 })}
@@ -207,13 +242,13 @@ export default function OwnerBookingDetailPage() {
             <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <AlertDialogContent size="sm">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>{pendingStatus === "Confirmed" ? "Accept Booking?" : pendingStatus === "Cancelled" ? "Reject Booking?" : "Complete Booking?"}</AlertDialogTitle>
-                        <AlertDialogDescription>{pendingStatus === "Confirmed" ? "This will confirm the booking and notify the customer." : pendingStatus === "Cancelled" ? "This will cancel the booking and notify the customer. This action cannot be undone." : "Mark this booking as completed. This action cannot be undone."}</AlertDialogDescription>
+                        <AlertDialogTitle>{pendingStatus && dialogContent[pendingStatus].title}</AlertDialogTitle>
+                        <AlertDialogDescription>{pendingStatus && dialogContent[pendingStatus].description}</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleConfirm} variant={pendingStatus === "Cancelled" ? "destructive" : "default"}>
-                            {pendingStatus === "Confirmed" ? "Accept" : pendingStatus === "Cancelled" ? "Reject" : "Complete"}
+                            {pendingStatus && dialogContent[pendingStatus].action}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

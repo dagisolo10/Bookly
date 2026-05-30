@@ -1,10 +1,10 @@
 import { useSearchPagination } from "../shared/use-search-pagination";
 import { getOwnerBusinessBookingsQueryOptions } from "../tan stack/query-options";
 
+import { useState } from "react";
+import { useParams } from "next/navigation";
 import { BookingFilterStatus } from "@/types/models";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { useState } from "react";
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50] as const;
 
@@ -23,6 +23,11 @@ export default function useBusinessBookings() {
 
     const bookingsData = data ?? { page: 1, total: 0, data: [], totalPages: 1, hasMore: false };
 
+    const handleStatusFilterChange = (status: BookingFilterStatus) => {
+        setStatusFilter(status);
+        setCurrentPage(1);
+    };
+
     return {
         error,
         query,
@@ -39,5 +44,6 @@ export default function useBusinessBookings() {
         handleSearchChange,
         ITEMS_PER_PAGE_OPTIONS,
         handleItemsPerPageChange,
+        handleStatusFilterChange,
     } as const;
 }

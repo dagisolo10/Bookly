@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma";
 import { getUserId } from "@/lib/request-context";
 import type { BookingStatusUpdate } from "@/types/payload";
-import { Prisma, type BookingStatus } from "@prisma/client";
-import type { PaginatedData, ServiceResult } from "@/types/response";
 import { fullBookingIncludes, type FullBooking } from "@/types/populated";
+import type { PaginatedData, ServiceResult } from "@/types/response";
+import { Prisma, type BookingStatus } from "@prisma/client";
 
 export type BookingFilterStatus = BookingStatus | "All";
 
@@ -84,6 +84,48 @@ export async function getBusinessBookings(businessId: string, page: number, limi
             hasMore,
             totalPages: totalPages || 1,
             data: bookings,
+        };
+    } catch (error) {
+        console.error(error);
+        return { error: "Internal server error", code: 500 };
+    }
+}
+
+export async function getBookingStatusCounts(businessId: string): ServiceResult<Record<BookingFilterStatus, number>> {
+    try {
+        const ownerId = getUserId();
+
+        const business = await prisma.business.findFirst({
+            where: { id: businessId, ownerId },
+        });
+
+        if (!business) {
+            return { error: "Business not found", code: 404 };
+        }
+
+        const where = {
+            service: {
+                business: {
+                    id: businessId,
+                    ownerId,
+                },
+            },
+        } satisfies Prisma.BookingWhereInput;
+
+        const [total, pending, confirmed, cancelled, completed] = await Promise.all([
+            prisma.booking.count({ where }),
+            prisma.booking.count({ where: { ...where, status: "Pending" } }),
+            prisma.booking.count({ where: { ...where, status: "Confirmed" } }),
+            prisma.booking.count({ where: { ...where, status: "Cancelled" } }),
+            prisma.booking.count({ where: { ...where, status: "Completed" } }),
+        ]);
+
+        return {
+            All: total,
+            Pending: pending,
+            Confirmed: confirmed,
+            Cancelled: cancelled,
+            Completed: completed,
         };
     } catch (error) {
         console.error(error);

@@ -13,13 +13,15 @@ const dummyNotifications = [
     { id: "4", title: "Payment confirmed", timestamp: "1 day ago", unread: false },
 ];
 
+const unreadCount = dummyNotifications.filter((n) => n.unread).length;
+
 export default function NotificationPopover() {
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="relative size-9 rounded-full">
+                <Button variant="outline" size="icon" aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} className="relative size-9 rounded-full">
                     <Bell className="size-4" />
-                    <span className="bg-destructive text-background absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full text-[8px] font-bold">2</span>
+                    {unreadCount > 0 && <span className="bg-destructive text-background absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full text-[8px] font-bold">{unreadCount}</span>}
                 </Button>
             </PopoverTrigger>
 

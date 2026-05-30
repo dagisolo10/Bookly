@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Search, SearchX } from "lucide-react";
 import Link from "next/link";
 
@@ -14,15 +15,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { statusStyles } from "@/constants/styles";
+import { getOwnerBookingStatusCountsQueryOptions } from "@/hooks/tan stack/query-options";
 import useBusinessBookings from "@/hooks/owner/use-business-bookings";
 import { formatDateTime, formatDuration } from "@/lib/helpers/formatters";
 import { cn } from "@/lib/utils";
-import type { BookingFilterStatus } from "@/types/models";
+import type { BookingFilterStatus, BookingStatusCounts } from "@/types/models";
 
+const defaultCounts: BookingStatusCounts = { All: 0, Pending: 0, Confirmed: 0, Cancelled: 0, Completed: 0 };
 const statuses: BookingFilterStatus[] = ["All", "Pending", "Confirmed", "Cancelled", "Completed"];
 
 export default function OwnerBusinessBookings() {
     const ubb = useBusinessBookings();
+    const countsQuery = useQuery(getOwnerBookingStatusCountsQueryOptions(ubb.businessId));
 
     return (
         <div className="screen space-y-4">
@@ -31,7 +35,7 @@ export default function OwnerBusinessBookings() {
                 <p className="text-muted-foreground mt-1 text-sm">Manage all incoming bookings for your business.</p>
             </div>
 
-            <AnalyticsCards bookings={ubb.bookingsData.data} isPending={ubb.isPending} />
+            <AnalyticsCards counts={countsQuery.data ?? defaultCounts} isPending={countsQuery.isPending} />
 
             {ubb.error ? (
                 <ErrorScreen message="Failed to load bookings. Please try again." />
@@ -47,9 +51,9 @@ export default function OwnerBusinessBookings() {
                         </div>
 
                         <div className="flex flex-wrap gap-1.5">
-                            {statuses.map((s) => (
-                                <button key={s} type="button" onClick={() => ubb.setStatusFilter(s)} className={cn("cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors", ubb.statusFilter === s ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted bg-transparent")}>
-                                    {s === "All" ? "All" : s}
+                            {statuses.map((status: BookingFilterStatus) => (
+                                <button key={status} type="button" onClick={() => ubb.handleStatusFilterChange(status)} className={cn("cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors", ubb.statusFilter === status ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted bg-transparent")}>
+                                    {status === "All" ? "All" : status}
                                 </button>
                             ))}
                         </div>

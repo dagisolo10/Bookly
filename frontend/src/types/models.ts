@@ -105,3 +105,5 @@ export type PaginatedData<T> = {
 };
 
 export type BookingFilterStatus = BookingStatus | "All"
+
+export type BookingStatusCounts = Record<BookingFilterStatus, number>
