@@ -13,6 +13,7 @@ import type { FullService } from "@/types/models";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarIcon, Clock, Loader2, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -45,6 +46,8 @@ function generateTimeSlots(open: string, close: string, duration: number, step: 
 
 export default function BookingSheet({ open, onOpenChange, service }: BookingSheetProps) {
     const { data: business } = useQuery(getBusinessQueryOptions(service?.businessId ?? "", { enabled: Boolean(service?.businessId) }));
+
+    const router = useRouter();
 
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -99,8 +102,16 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
         createBooking(
             { startsAt, serviceId: service.id },
             {
-                onSuccess: () => {
-                    toast.success("Appointment successfully locked in!");
+                onSuccess: (booking) => {
+                    toast.success("Booked successfully 🎉", {
+                        description: "Your appointment has been confirmed.",
+                        action: {
+                            label: "View",
+                            onClick: () => {
+                                router.push(`/customer/bookings?new=${booking.id}`);
+                            },
+                        },
+                    });
                     onOpenChange(false);
                     setDate(undefined);
                     setSelectedTime(null);
@@ -120,8 +131,17 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
         return d < today;
     }
 
+    function handleOpenChange(isOpen: boolean) {
+        onOpenChange(isOpen);
+
+        if (!isOpen) {
+            setDate(undefined);
+            setSelectedTime(null);
+        }
+    }
+
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl sm:max-w-lg">
                 <div className="relative px-4 pt-4">
                     <DialogHeader className="flex flex-col items-start gap-4 space-y-0 sm:flex-row sm:items-end">

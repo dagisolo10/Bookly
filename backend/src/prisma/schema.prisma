@@ -54,7 +54,7 @@ model Service {
     price             Float
     thumbnail         String?
     isActive          Boolean  @default(true)
-    category          String?  @default("Other")
+    category          String   @default("Other")
     createdAt         DateTime @default(now())
     updatedAt         DateTime @updatedAt
 
@@ -66,11 +66,17 @@ model Service {
 }
 
 model Booking {
-    id        String        @id @default(cuid())
-    startsAt  DateTime
-    status    BookingStatus @default(Pending)
-    createdAt DateTime      @default(now())
-    updatedAt DateTime      @updatedAt
+    id                String        @id @default(cuid())
+    startsAt          DateTime
+    endsAt            DateTime
+    status            BookingStatus @default(Pending)
+    bookedPrice       Float
+    bookedDuration    Int
+    bookedThumbnail   String?
+    bookedCategory    String
+    bookedServiceName String
+    createdAt         DateTime      @default(now())
+    updatedAt         DateTime      @updatedAt
 
     serviceId String
     userId    String

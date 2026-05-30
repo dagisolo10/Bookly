@@ -24,7 +24,7 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
             return { error: "This business is currently not accepting bookings.", code: 400 };
         }
 
-        const isOpen = isBusinessOpen(startsAt, business.hours, );
+        const isOpen = isBusinessOpen(startsAt, business.hours);
 
         if (!isOpen) {
             return { error: `This business is closed during the selected time. Please pick another slot.`, code: 400 };
@@ -36,7 +36,7 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
             return { error: "The selected service couldn't be found.", code: 404 };
         }
 
-        const enoughTime = hasEnoughTime(startsAt, business.hours, service.durationInMinutes, );
+        const enoughTime = hasEnoughTime(startsAt, business.hours, service.durationInMinutes);
 
         if (!enoughTime) {
             return { error: "The selected time doesn't leave enough time before closing. Please choose an earlier slot.", code: 400 };
@@ -45,31 +45,35 @@ export async function createBooking(data: CreateBookingPayload): ServiceResult<F
         const activeBookings = await prisma.booking.findMany({
             where: { userId, status: { not: "Cancelled" } },
             select: {
+                endsAt: true,
                 startsAt: true,
-                service: {
-                    select: { durationInMinutes: true },
-                },
             },
         });
 
         const isValid = isScheduleValid(
             startsAt,
             service.durationInMinutes,
-            activeBookings.map((b) => ({
-                startsAt: b.startsAt,
-                durationInMinutes: b.service.durationInMinutes,
-            })),
+            activeBookings.map((b) => ({ startsAt: b.startsAt, endsAt: b.endsAt })),
         );
 
         if (!isValid) {
             return { error: "You have overlapping booking. Select another time", code: 400 };
         }
 
+        const endsAtInMs = new Date(startsAt).getTime() + service.durationInMinutes * 60 * 1000;
+        const endsAt = new Date(endsAtInMs);
+
         const booking = await prisma.booking.create({
             data: {
                 userId,
+                endsAt,
                 startsAt,
                 serviceId,
+                bookedPrice: service.price,
+                bookedServiceName: service.name,
+                bookedCategory: service.category,
+                bookedThumbnail: service.thumbnail,
+                bookedDuration: service.durationInMinutes,
             },
             include: fullBookingIncludes,
         });
