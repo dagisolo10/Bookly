@@ -65,7 +65,7 @@ const loadingMessages: Record<Action, string> = {
 const errorMessages: Record<Action, string> = {
     Confirmed: "accept",
     Cancelled: "cancel",
-    Completed: "marking booking as complete",
+    Completed: "complete",
 };
 
 const dialogContent: Record<BookingStatusUpdate, { title: string; description: string; action: string }> = {
