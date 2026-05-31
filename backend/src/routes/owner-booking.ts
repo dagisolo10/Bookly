@@ -3,7 +3,7 @@ import { bookingBusinessIdSchema, bookingIdSchema, manageBookingSchema, ownerRes
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
 import { requireBusinessRole } from "@/middlewares/role";
 import { validate } from "@/middlewares/validation";
-import { getBookingById, getBookingStatusCounts, getBusinessBookings, manageBooking, rescheduleBooking, type BookingFilterStatus } from "@/services/owner-booking";
+import { acceptRescheduleBooking, declineRescheduleBooking, getBookingById, getBookingStatusCounts, getBusinessBookings, manageBooking, rescheduleBooking, type BookingFilterStatus } from "@/services/owner-booking";
 import { Router, type Request } from "express";
 
 const router = Router();
@@ -62,6 +62,24 @@ router.patch(
     validate(bookingIdSchema, "params"),
     validate(ownerRescheduleBookingSchema, "body"),
     handler((req: Request) => rescheduleBooking(req.params["id"] as string, req.body)),
+);
+
+router.patch(
+    "/:id/accept-reschedule",
+    requireAuth,
+    requireUserProfile,
+    requireBusinessRole,
+    validate(bookingIdSchema, "params"),
+    handler((req: Request) => acceptRescheduleBooking(req.params["id"] as string)),
+);
+
+router.patch(
+    "/:id/decline-reschedule",
+    requireAuth,
+    requireUserProfile,
+    requireBusinessRole,
+    validate(bookingIdSchema, "params"),
+    handler((req: Request) => declineRescheduleBooking(req.params["id"] as string)),
 );
 
 export default router;
