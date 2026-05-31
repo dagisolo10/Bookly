@@ -226,10 +226,10 @@ export default function CustomerBookingDetailPage() {
                                     <TimeFieldCard label="Schedule Start Time" icon={CalendarDays} value={formatDateTime(booking.startsAt)} variant="emerald" />
                                     <TimeFieldCard label="Estimated End Time" icon={Clock} value={formatDateTime(booking.endsAt)} variant="amber" />
                                 </div>
-                                {hasPendingReschedule && (
+                                {booking.suggestedStartsAt && booking.suggestedEndsAt && (
                                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                        <TimeFieldCard label="Proposed New Time" icon={CalendarDays} value={formatDateTime(booking.suggestedStartsAt!)} variant="amber" />
-                                        <TimeFieldCard label="Proposed New End" icon={Clock} value={formatDateTime(booking.suggestedEndsAt!)} variant="amber" />
+                                        <TimeFieldCard label="Proposed New Time" icon={CalendarDays} value={formatDateTime(booking.suggestedStartsAt)} variant="amber" />
+                                        <TimeFieldCard label="Proposed New End" icon={Clock} value={formatDateTime(booking.suggestedEndsAt)} variant="amber" />
                                     </div>
                                 )}
                             </div>

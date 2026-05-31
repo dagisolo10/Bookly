@@ -378,6 +378,10 @@ export async function acceptRescheduleBooking(id: string): ServiceResult<FullBoo
             return { error: "No reschedule request is pending for this booking.", code: 400 };
         }
 
+        if (booking.suggestedBy !== "Customer") {
+            return { error: "You can only accept a reschedule requested by the customer.", code: 400 };
+        }
+
         if (booking.status === "Cancelled" || booking.status === "Completed") {
             return { error: "This booking can no longer be rescheduled.", code: 400 };
         }
