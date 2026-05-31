@@ -1,4 +1,6 @@
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export function BusinessBaseSkeleton() {
     return (
@@ -271,6 +273,85 @@ export function ServicesTableSkeleton() {
                         <Skeleton className="h-8 w-20 rounded" />
                     </div>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+export function BookingDetailSkeleton() {
+    return (
+        <div className="screen space-y-6">
+            <Skeleton className="h-8 w-36 rounded-xl" />
+            <Skeleton className="h-28 w-full rounded-2xl" />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
+                <div className="space-y-6">
+                    <Card>
+                        <CardContent className="space-y-6 p-8">
+                            <div className="space-y-4">
+                                <Skeleton className="h-5 w-48" />
+                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <Skeleton className="h-16 rounded-xl" />
+                                    <Skeleton className="h-16 rounded-xl" />
+                                </div>
+                            </div>
+                            <Separator />
+                            <div className="space-y-4">
+                                <Skeleton className="h-5 w-40" />
+                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <Skeleton className="h-16 rounded-xl" />
+                                    <Skeleton className="h-16 rounded-xl" />
+                                </div>
+                                <Skeleton className="h-6 w-24 rounded-full" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="p-8">
+                            <Skeleton className="h-5 w-36" />
+                            <div className="mt-6 space-y-4">
+                                <Skeleton className="h-8 w-full" />
+                                <Skeleton className="h-8 w-full" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+                <div>
+                    <Card className="gap-4 overflow-hidden">
+                        <CardHeader>
+                            <Skeleton className="aspect-video w-full rounded-xl" />
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-6 w-48" />
+                            <Separator />
+                            <div className="space-y-2.5">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-full" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function OwnerBookingDetailSkeleton() {
+    return (
+        <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
+            <Skeleton className="h-8 w-36 rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-2xl" />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+                <div className="space-y-6">
+                    <Card>
+                        <CardContent className="space-y-6 p-6">
+                            <Skeleton className="h-40 w-full rounded-xl" />
+                            <Skeleton className="h-24 w-full rounded-xl" />
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <Skeleton className="h-64 w-full rounded-2xl" />
             </div>
         </div>
     );

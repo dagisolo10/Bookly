@@ -5,6 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import useAvailableTimeSlots from "@/hooks/custom/use-available-slots";
 import { getBusinessQueryOptions } from "@/hooks/tan stack/query-options";
 import { useCreateBooking } from "@/hooks/tan stack/use-customer-booking";
 import { messageFromAxiosError } from "@/lib/api/api-error";
@@ -14,34 +15,13 @@ import { useQuery } from "@tanstack/react-query";
 import { CalendarIcon, Clock, Loader2, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 interface BookingSheetProps {
     service: FullService | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
-}
-
-const dayOrder = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
-
-function generateTimeSlots(open: string, close: string, duration: number, step: number): string[] {
-    const toMinutes = (t: string) => {
-        const [h, m] = t.split(":").map(Number);
-        return (h ?? 0) * 60 + (m ?? 0);
-    };
-
-    const openMin = toMinutes(open);
-    const closeMin = toMinutes(close);
-    const slots: string[] = [];
-
-    for (let start = openMin; start + duration <= closeMin; start += step) {
-        const h = Math.floor(start / 60);
-        const m = start % 60;
-        slots.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
-    }
-
-    return slots;
 }
 
 export default function BookingSheet({ open, onOpenChange, service }: BookingSheetProps) {
@@ -54,35 +34,7 @@ export default function BookingSheet({ open, onOpenChange, service }: BookingShe
 
     const { mutateAsync: createBooking, isPending } = useCreateBooking();
 
-    const openHours = useMemo(() => {
-        const hours = business?.hours;
-        if (!hours) return [];
-        return hours.map(({ open, close, day }) => ({ day, open, close }));
-    }, [business?.hours]);
-
-    const weekday = date ? dayOrder[date.getDay()] : null;
-    const isOpenDay = weekday ? openHours.some((h) => h.day === weekday) : false;
-
-    const availableTimeSlots = useMemo(() => {
-        if (!service || !date || !weekday) return [];
-
-        const dayHours = openHours.find((h) => h.day === weekday);
-        if (!dayHours) return [];
-
-        const slots = generateTimeSlots(dayHours.open, dayHours.close, service.durationInMinutes, 30);
-
-        const now = new Date();
-        const isToday = date.toDateString() === now.toDateString();
-
-        if (!isToday) return slots;
-
-        const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
-        return slots.filter((s) => {
-            const [h, m] = s.split(":").map(Number);
-            return (h ?? 0) * 60 + (m ?? 0) > nowMinutes;
-        });
-    }, [service, date, weekday, openHours]);
+    const { isOpenDay, availableTimeSlots } = useAvailableTimeSlots({ date, duration: service?.durationInMinutes, hours: business?.hours });
 
     function handleDateSelect(d: Date | undefined) {
         setDate(d);

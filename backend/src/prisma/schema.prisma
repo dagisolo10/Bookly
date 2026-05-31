@@ -69,6 +69,10 @@ model Booking {
     id                String        @id @default(cuid())
     startsAt          DateTime
     endsAt            DateTime
+    suggestedStartsAt DateTime?
+    suggestedEndsAt   DateTime?
+    rescheduleReason  String?
+    suggestedBy       SuggestedBy?
     status            BookingStatus @default(Pending)
     bookedPrice       Float
     bookedDuration    Int
@@ -113,4 +117,9 @@ enum WeekDay {
     Friday
     Saturday
     Sunday
+}
+
+enum SuggestedBy {
+    Owner
+    Customer
 }

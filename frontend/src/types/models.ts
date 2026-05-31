@@ -54,6 +54,10 @@ export type Booking = {
     id: string;
     startsAt: string;
     endsAt: string;
+    suggestedStartsAt: string | null;
+    suggestedEndsAt: string | null;
+    rescheduleReason: string | null;
+    suggestedBy: SuggestedBy | null;
     bookedPrice: number;
     bookedDuration: number;
     bookedCategory: string;
@@ -89,6 +93,8 @@ export type FullBooking = Booking & {
     service: Service;
 };
 
+export type SuggestedBy = "Owner" | "Customer";
+
 export type Role = "Customer" | "Business" | "Admin";
 
 export type BusinessStatus = "Active" | "Paused" | "Closed";
@@ -104,6 +110,6 @@ export type PaginatedData<T> = {
     totalPages: number;
 };
 
-export type BookingFilterStatus = BookingStatus | "All"
+export type BookingFilterStatus = BookingStatus | "All";
 
-export type BookingStatusCounts = Record<BookingFilterStatus, number>
+export type BookingStatusCounts = Record<BookingFilterStatus, number>;

@@ -1,9 +1,9 @@
 import { handler } from "@/lib/handler";
-import { bookingIdSchema, createBookingSchema, paginationQuerySchema, querySearchSchema } from "@/lib/validators";
-import { requireAuth, requireUserProfile } from "@/middlewares/auth";
-import { validate } from "@/middlewares/validation";
-import { createBooking, getBookingById, getMyBookings } from "@/services/customer-booking";
 import { Router, type Request } from "express";
+import { validate } from "@/middlewares/validation";
+import { requireAuth, requireUserProfile } from "@/middlewares/auth";
+import { acceptRescheduleBooking, cancelBooking, createBooking, declineRescheduleBooking, getBookingById, getMyBookings, rescheduleBooking } from "@/services/customer-booking";
+import { bookingIdSchema, createBookingSchema, paginationQuerySchema, querySearchSchema, rescheduleBookingSchema } from "@/lib/validators";
 
 const router = Router();
 
@@ -35,6 +35,39 @@ router.get(
     requireUserProfile,
     validate(bookingIdSchema, "params"),
     handler((req: Request) => getBookingById(req.params["id"] as string)),
+);
+
+router.patch(
+    "/:id/reschedule",
+    requireAuth,
+    requireUserProfile,
+    validate(bookingIdSchema, "params"),
+    validate(rescheduleBookingSchema, "body"),
+    handler((req: Request) => rescheduleBooking(req.params["id"] as string, req.body)),
+);
+
+router.patch(
+    "/:id/cancel",
+    requireAuth,
+    requireUserProfile,
+    validate(bookingIdSchema, "params"),
+    handler((req: Request) => cancelBooking(req.params["id"] as string)),
+);
+
+router.patch(
+    "/:id/accept-reschedule",
+    requireAuth,
+    requireUserProfile,
+    validate(bookingIdSchema, "params"),
+    handler((req: Request) => acceptRescheduleBooking(req.params["id"] as string)),
+);
+
+router.patch(
+    "/:id/decline-reschedule",
+    requireAuth,
+    requireUserProfile,
+    validate(bookingIdSchema, "params"),
+    handler((req: Request) => declineRescheduleBooking(req.params["id"] as string)),
 );
 
 export default router;

@@ -58,13 +58,13 @@ export function ServicesGrid({ services, businessName }: ServicesGridProps) {
                                 {businessName && (
                                     <>
                                         <span className="size-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-                                        <span className="text-muted-foreground max-w-[150px] truncate text-[11px] font-medium">{businessName}</span>
+                                        <span className="text-muted-foreground max-w-37.5 truncate text-[11px] font-medium">{businessName}</span>
                                     </>
                                 )}
                             </div>
 
                             <h3 className="group-hover:text-primary line-clamp-1 text-base font-semibold tracking-tight transition-colors">{service.name}</h3>
-                            <div className="text-muted-foreground flex items-center gap-2 text-xs sm:hidden">{businessName && <span className="max-w-[180px] truncate font-medium">{businessName}</span>}</div>
+                            <div className="text-muted-foreground flex items-center gap-2 text-xs sm:hidden">{businessName && <span className="max-w-45 truncate font-medium">{businessName}</span>}</div>
                         </div>
 
                         <div className="flex items-baseline gap-2">

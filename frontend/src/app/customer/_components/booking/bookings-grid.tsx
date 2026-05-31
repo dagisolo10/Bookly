@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { FullBooking } from "@/types/models";
 import { CalendarDays, Clock, ImageIcon, SearchX } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 interface BookingsGridProps {
@@ -35,7 +36,7 @@ export function BookingsGrid({ bookings }: BookingsGridProps) {
     return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {bookings.map((booking) => (
-                <div key={booking.id} className={cn("group relative flex flex-col items-stretch gap-4 overflow-hidden rounded-xl sm:flex-row", "text-card-foreground p-3 shadow-sm transition-all duration-300 hover:shadow-md")}>
+                <Link href={`/customer/bookings/${booking.id}`} key={booking.id} className={cn("group relative flex flex-col items-stretch gap-4 overflow-hidden rounded-xl sm:flex-row", "text-card-foreground p-3 shadow-sm transition-all duration-300 hover:shadow-md")}>
                     <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg sm:aspect-square sm:w-28">
                         {booking.bookedThumbnail ? (
                             <Image src={booking.bookedThumbnail} alt={booking.bookedServiceName} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 100vw, 112px" />
@@ -80,7 +81,7 @@ export function BookingsGrid({ bookings }: BookingsGridProps) {
                             <span className="text-muted-foreground text-[10px]">Booked {formatDate(booking.createdAt)}</span>
                         </div>
                     </div>
-                </div>
+                </Link>
             ))}
         </div>
     );

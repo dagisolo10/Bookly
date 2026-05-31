@@ -29,7 +29,7 @@ export async function getBusinesses(page: number, limit: number, query: string):
         return {
             total,
             hasMore,
-            totalPages: totalPages || 1,
+            totalPages,
             data: businesses,
         };
     } catch (error) {
