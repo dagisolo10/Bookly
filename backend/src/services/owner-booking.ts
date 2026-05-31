@@ -1,9 +1,11 @@
 import prisma from "@/lib/prisma";
+import { BookingError } from "@/types/error";
 import { getUserId } from "@/lib/request-context";
 import type { BookingStatusUpdate } from "@/types/payload";
-import { fullBookingIncludes, type FullBooking } from "@/types/populated";
-import type { PaginatedData, ServiceResult } from "@/types/response";
 import { Prisma, type BookingStatus } from "@prisma/client";
+import type { PaginatedData, ServiceResult } from "@/types/response";
+import { fullBookingIncludes, type FullBooking } from "@/types/populated";
+import { hasEnoughTime, isBusinessOpen, isScheduleValid } from "@/utils/date-validator";
 
 export type BookingFilterStatus = BookingStatus | "All";
 
@@ -82,7 +84,7 @@ export async function getBusinessBookings(businessId: string, page: number, limi
         return {
             total,
             hasMore,
-            totalPages: totalPages || 1,
+            totalPages,
             data: bookings,
         };
     } catch (error) {
@@ -187,6 +189,140 @@ export async function manageBooking(id: string, newStatus: BookingStatusUpdate):
         return updatedBooking;
     } catch (error) {
         console.error(error);
+        return { error: "Internal server error", code: 500 };
+    }
+}
+
+export async function rescheduleBooking(id: string, data: { suggestedStartsAt: string; rescheduleReason?: string }): ServiceResult<FullBooking> {
+    try {
+        const ownerId = getUserId();
+        const { suggestedStartsAt, rescheduleReason } = data;
+
+        const booking = await prisma.booking.findFirst({
+            where: bookingCheck(id, ownerId),
+            include: {
+                service: {
+                    include: {
+                        business: {
+                            include: {
+                                hours: true,
+                            },
+                        },
+                    },
+                },
+                user: true,
+            },
+        });
+
+        if (!booking) {
+            return { error: "Booking not found", code: 404 };
+        }
+
+        if (booking.status === "Cancelled" || booking.status === "Completed") {
+            return { error: "This booking can no longer be rescheduled.", code: 400 };
+        }
+
+        const now = new Date();
+        const starts = new Date(suggestedStartsAt);
+
+        if (booking.startsAt < now) {
+            return { error: "You can't reschedule a past booking.", code: 400 };
+        }
+
+        if (starts < now) {
+            return { error: "You can't choose a past time.", code: 400 };
+        }
+
+        const business = booking.service.business;
+
+        if (business.status !== "Active") {
+            return { error: "This business is currently not accepting bookings.", code: 400 };
+        }
+
+        const isOpen = isBusinessOpen(suggestedStartsAt, business.hours);
+
+        if (!isOpen) {
+            return { error: `This business is closed during the selected time. Please pick another slot.`, code: 400 };
+        }
+
+        const enoughTime = hasEnoughTime(suggestedStartsAt, business.hours, booking.bookedDuration);
+
+        if (!enoughTime) {
+            return { error: "The selected time doesn't leave enough time before closing. Please choose an earlier slot.", code: 400 };
+        }
+
+        if (!booking.service.isActive) {
+            return { error: "This service is no longer available.", code: 400 };
+        }
+
+        const suggestedEndsAtInMs = starts.getTime() + booking.bookedDuration * 60 * 1000;
+        const suggestedEndsAt = new Date(suggestedEndsAtInMs);
+
+        const updatedBooking = await prisma.$transaction(async (tx) => {
+            const businessBookings = await tx.booking.findMany({
+                where: {
+                    service: {
+                        businessId: booking.service.businessId,
+                    },
+                    status: {
+                        in: ["Pending", "Confirmed"],
+                    },
+                    NOT: { id: booking.id },
+                },
+                select: {
+                    startsAt: true,
+                    endsAt: true,
+                },
+            });
+
+            const isBusinessBookingValid = isScheduleValid(
+                suggestedStartsAt,
+                booking.bookedDuration,
+                businessBookings.map((b) => ({ startsAt: b.startsAt, endsAt: b.endsAt })),
+            );
+
+            if (!isBusinessBookingValid) {
+                throw new BookingError("You have overlapping booking. Select another time", 409);
+            }
+
+            const customerBookings = await tx.booking.findMany({
+                where: {
+                    userId: booking.userId,
+                    status: {
+                        in: ["Pending", "Confirmed"],
+                    },
+                    NOT: { id: booking.id },
+                },
+            });
+
+            const isCustomerBookingValid = isScheduleValid(
+                suggestedStartsAt,
+                booking.bookedDuration,
+                customerBookings.map((b) => ({ startsAt: b.startsAt, endsAt: b.endsAt })),
+            );
+
+            if (!isCustomerBookingValid) {
+                throw new BookingError("Customer has overlapping booking. Select another time", 409);
+            }
+
+            return tx.booking.update({
+                where: { id: booking.id },
+                data: {
+                    suggestedEndsAt,
+                    suggestedStartsAt: starts,
+                    rescheduleReason,
+                    status: "Pending",
+                },
+                include: fullBookingIncludes,
+            });
+        });
+
+        return updatedBooking;
+    } catch (error) {
+        if (error instanceof BookingError) {
+            return { error: error.message, code: error.code };
+        }
+        console.error("Error in rescheduleBooking:", error);
         return { error: "Internal server error", code: 500 };
     }
 }

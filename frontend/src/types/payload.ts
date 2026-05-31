@@ -1,5 +1,5 @@
-import { createBookingSchema, createBusinessSchema, createServiceSchema, updateBusinessSchema, updateServiceSchema } from "@/lib/validation";
 import z from "zod";
+import { createBookingSchema, createBusinessSchema, createServiceSchema, rescheduleBookingSchema, updateBusinessSchema, updateServiceSchema } from "@/lib/validation";
 
 export type UserPayload = { name: string; phone?: string | null };
 
@@ -10,4 +10,6 @@ export type CreateServicePayload = z.infer<typeof createServiceSchema>;
 export type UpdateServicePayload = z.infer<typeof updateServiceSchema>;
 
 export type CreateBookingPayload = z.infer<typeof createBookingSchema>;
+export type RescheduleBookingPayload = z.infer<typeof rescheduleBookingSchema>;
+
 export type BookingStatusUpdate = "Confirmed" | "Cancelled" | "Completed";

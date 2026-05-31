@@ -1,9 +1,9 @@
 import { handler } from "@/lib/handler";
-import { bookingBusinessIdSchema, bookingIdSchema, manageBookingSchema, paginationQuerySchema, querySearchSchema, statusSearchSchema } from "@/lib/validators";
+import { bookingBusinessIdSchema, bookingIdSchema, manageBookingSchema, ownerRescheduleBookingSchema, paginationQuerySchema, querySearchSchema, statusSearchSchema } from "@/lib/validators";
 import { requireAuth, requireUserProfile } from "@/middlewares/auth";
 import { requireBusinessRole } from "@/middlewares/role";
 import { validate } from "@/middlewares/validation";
-import { getBookingById, getBookingStatusCounts, getBusinessBookings, manageBooking, type BookingFilterStatus } from "@/services/owner-booking";
+import { getBookingById, getBookingStatusCounts, getBusinessBookings, manageBooking, rescheduleBooking, type BookingFilterStatus } from "@/services/owner-booking";
 import { Router, type Request } from "express";
 
 const router = Router();
@@ -52,6 +52,16 @@ router.patch(
     validate(bookingIdSchema, "params"),
     validate(manageBookingSchema, "body"),
     handler((req: Request) => manageBooking(req.params["id"] as string, req.body.newStatus)),
+);
+
+router.patch(
+    "/:id/reschedule",
+    requireAuth,
+    requireUserProfile,
+    requireBusinessRole,
+    validate(bookingIdSchema, "params"),
+    validate(ownerRescheduleBookingSchema, "body"),
+    handler((req: Request) => rescheduleBooking(req.params["id"] as string, req.body)),
 );
 
 export default router;

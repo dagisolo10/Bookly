@@ -53,7 +53,7 @@ export async function getBusinessServices(businessId: string, page: number, limi
             total,
             hasMore,
             data: services,
-            totalPages: totalPages || 1,
+            totalPages,
         };
     } catch (error) {
         console.error(error);

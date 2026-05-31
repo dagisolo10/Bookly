@@ -59,3 +59,7 @@ export const createBookingSchema = z.object({
     startsAt: z.iso.datetime({ message: "Invalid date format" }),
     serviceId: z.string().cuid(),
 });
+
+export const rescheduleBookingSchema = z.object({
+    startsAt: z.iso.datetime({ message: "Invalid date format" }),
+});

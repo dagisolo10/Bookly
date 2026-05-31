@@ -32,7 +32,7 @@ export async function getServices(page: number, limit: number, query: string): S
         return {
             total,
             hasMore,
-            totalPages: totalPages || 1,
+            totalPages,
             data: services,
         };
     } catch (error) {
@@ -82,7 +82,7 @@ export async function getBusinessServices(businessId: string, page: number, limi
         return {
             total,
             hasMore,
-            totalPages: totalPages || 1,
+            totalPages,
             data: services,
         };
     } catch (error) {
